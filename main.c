@@ -2,91 +2,9 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-#include <math.h>
+#include "gmath.h"
+#include "render.h"
 
-const double DEG2RAD = 3.141592655358979323846/180.;
-
-void normalize(float *v)
-{
-	float m;
-	m = sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
-	if (m==0)
-		return;
-	v[0]/=m;
-	v[1]/=m;
-	v[2]/=m;
-}
-
-void cross(float *result, float *v1, float *v2)
-{
-	result[0] = v1[1]*v2[2] - v1[2]*v2[1];                                      
-	result[1] = v1[2]*v2[0] - v1[0]*v2[2];                                      
-	result[2] = v1[0]*v2[1] - v1[1]*v2[0];     
-}
-
-// not working, falling back to glu for now
-void draw_position_camera(float x, float y, float z, float xto, float yto, float zto)
-{
-	GLfloat m[4][4] = {
-		{1.,0.,0.,0.},
-		{0.,1.,0.,0.},
-		{0.,0.,1.,0.},
-		{0.,0.,0.,1.}
-	};
-
-	float forward[3],side[3],up[3];
-
-	forward[0] = xto - x;
-	forward[1] = yto - y;
-	forward[2] = zto - z;
-
-	up[0] = 0.;
-	up[1] = 0.;
-	up[2] = 1.;
-
-	normalize(forward);
-	// right = f x u
-	cross(side,forward,up);
-	normalize(side);
-
-	// up = r x f
-	cross(up,side,forward);
-
-	m[0][0] = side[0];
-	m[1][0] = side[1];
-	m[2][0] = side[2];
-
-	m[0][1] = up[0];
-	m[1][1] = up[1];
-	m[2][1] = up[2];
-
-	m[0][2] = -forward[0];
-	m[1][2] = -forward[1];
-	m[2][2] = -forward[2];
-
-	//glMultMatrixf(&m[0][0]);
-	glLoadMatrixf(&m[0][0]);
-	glTranslated(-x,-y,-z);
-}
-
-float lengthdir_x(float len, float dir)
-{
-	return len*cos(DEG2RAD*dir);
-}
-
-float lengthdir_y(float len, float dir)
-{
-	return len*sin(DEG2RAD*dir);
-}
-
-void draw_set_frustum(float fov, float ar,float znear, float zfar)
-{
-	float t = tan(fov/2 * DEG2RAD);
-	float height = znear * t;
-	float width = height * ar;
-
-	glFrustum(-width,width,-height,height,znear,zfar);
-}
 
 int main()
 {

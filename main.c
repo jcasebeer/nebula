@@ -3,35 +3,38 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <math.h>
-#include <GL/glu.h>
 
-void normalize(float *vec)
+const double DEG2RAD = 3.141592655358979323846/180.;
+
+void normalize(float *v)
 {
-	float m = 1.0/sqrtf(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]);
-	vec[0]/=m;
-	vec[1]/=m;
-	vec[2]/=m;
+	float m;
+	m = sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+	if (m==0)
+		return;
+	v[0]/=m;
+	v[1]/=m;
+	v[2]/=m;
 }
 
-void cross(float *where, float *a, float *b)
+void cross(float *result, float *v1, float *v2)
 {
-	where[0] = a[1]*b[2] - a[2]*b[1];
-	where[1] = a[2]*b[0] - a[0]*b[2];
-	where[2] = a[0]*b[1] - a[1]*b[0];
+	result[0] = v1[1]*v2[2] - v1[2]*v2[1];                                      
+	result[1] = v1[2]*v2[0] - v1[0]*v2[2];                                      
+	result[2] = v1[0]*v2[1] - v1[1]*v2[0];     
 }
 
 // not working, falling back to glu for now
 void draw_position_camera(float x, float y, float z, float xto, float yto, float zto)
 {
-	float m[4][4] = {
-		{1,0,0,0},
-		{0,1,0,0},
-		{0,0,1,0},
-		{0,0,0,1}
+	GLfloat m[4][4] = {
+		{1.,0.,0.,0.},
+		{0.,1.,0.,0.},
+		{0.,0.,1.,0.},
+		{0.,0.,0.,1.}
 	};
 
-	glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat *)m);
-	float up[3], right[3], forward[3];
+	float forward[3],side[3],up[3];
 
 	forward[0] = xto - x;
 	forward[1] = yto - y;
@@ -42,14 +45,16 @@ void draw_position_camera(float x, float y, float z, float xto, float yto, float
 	up[2] = 1.;
 
 	normalize(forward);
-	cross(right,forward,up);
-	normalize(right);
+	// right = f x u
+	cross(side,forward,up);
+	normalize(side);
 
-	cross(up,right,forward);
+	// up = r x f
+	cross(up,side,forward);
 
-	m[0][0] = right[0];
-	m[1][0] = right[1];
-	m[2][0] = right[2];
+	m[0][0] = side[0];
+	m[1][0] = side[1];
+	m[2][0] = side[2];
 
 	m[0][1] = up[0];
 	m[1][1] = up[1];
@@ -66,20 +71,16 @@ void draw_position_camera(float x, float y, float z, float xto, float yto, float
 
 float lengthdir_x(float len, float dir)
 {
-	const float DEG2RAD = 3.14159265/180;
 	return len*cos(DEG2RAD*dir);
 }
 
 float lengthdir_y(float len, float dir)
 {
-	const float DEG2RAD = 3.14159265/180;
 	return len*sin(DEG2RAD*dir);
 }
 
 void draw_set_frustum(float fov, float ar,float znear, float zfar)
 {
-	const float DEG2RAD = 3.14159265/180;
-
 	float t = tan(fov/2 * DEG2RAD);
 	float height = znear * t;
 	float width = height * ar;
@@ -160,27 +161,18 @@ int main()
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		draw_set_frustum(120.,16./9.,1.,32000.);
-		//draw_set_frustum(90,16/9,1,32000);
+		draw_set_frustum(90.,16./9.,1.,32000.);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		gluLookAt(
-			x,
-			y,
-			z+8,
-			x+lengthdir_x(lengthdir_x(1,zdir),dir),
-            y+lengthdir_y(lengthdir_x(1,zdir),dir),
-            z+8+lengthdir_y(1,zdir),
-            0.,0.,1.
-		);
-		/*draw_position_camera(
+		
+		draw_position_camera(
 			x,
             y,
             z+8,
             x+lengthdir_x(lengthdir_x(1,zdir),dir),
-            y+lengthdir_y(lengthdir_y(1,zdir),dir),
+            y+lengthdir_y(lengthdir_x(1,zdir),dir),
             z+8+lengthdir_y(1,zdir)
-		);*/
+		);
 
 		glBegin(GL_TRIANGLE_FAN);
 		glColor3f(1.f,0.f,0.f);

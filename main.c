@@ -6,9 +6,40 @@
 #include "render.h"
 #include "state.h"
 
+int object_create(game_state *state, float x, float y,float z)
+{
+	int obj = entity_create(state);
+
+	entity_component_add(state,obj,c_position);
+	v3 *pos = &(state->position[obj]);
+	pos->x = x;
+	pos->y = y;
+	pos->z = z;
+
+	return obj;
+}
+
+int object_create_2(game_state *state)
+{
+	int obj = entity_create(state);
+	entity_component_add(state,obj,c_velocity);
+	return obj;
+}
+
 int main()
 {
 	game_state *state = game_state_create();
+	int i;
+	for (i=0; i<10; i++)
+		object_create(state,i,i,i);
+	game_state_print(state);
+
+	int *positions = get_ec_set(state,c_position);
+	for(i=0;iterate_ec_set(positions,i);i++)
+	{
+		v3 *pos = &(state->position[i]);
+		printf("object %d x:%f y:%f z:%f\n",i,pos->x,pos->y,pos->z);
+	}
 	
 	SDL_Window *window = SDL_CreateWindow(
 		"Nebula",

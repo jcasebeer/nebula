@@ -5,7 +5,7 @@
 
 typedef struct game_state
 {
-	#define ENTITY_MAX 512 // max number of entitys
+	#define ENTITY_MAX 10 // max number of entitys
 	/* running total number of entitys*/
 	int entity_count;
 
@@ -39,12 +39,12 @@ void game_state_clear(game_state *state);
 
 // create and destroy entitys
 int entity_create(game_state *state);
-void entity_destroy(game_state *state);
+void entity_destroy(game_state *state, int id);
 
 // manage entity components
 int entity_has_component(game_state *state, int id, component_flag flag);
-int entity_component_add(game_state *state, int id, component_flag flag);
-int entity_component_remove(game_state *state, int id, component_flag flag);
+void entity_component_add(game_state *state, int id, component_flag flag);
+void entity_component_remove(game_state *state, int id, component_flag flag);
 
 // get array of entitys with a certain component
 int *get_ec_set(game_state *state, component_flag component);

@@ -4,10 +4,12 @@
 #include <SDL2/SDL_opengl.h>
 #include "gmath.h"
 #include "render.h"
-
+#include "state.h"
 
 int main()
 {
+	game_state *state = game_state_create();
+	
 	SDL_Window *window = SDL_CreateWindow(
 		"Nebula",
 		SDL_WINDOWPOS_UNDEFINED,
@@ -110,6 +112,7 @@ int main()
 			SDL_Delay(sleeptime - timespent);
 	}
 
+	game_state_destroy(state);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

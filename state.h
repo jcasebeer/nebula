@@ -5,7 +5,7 @@
 
 typedef struct game_state
 {
-	#define ENTITY_MAX 10 // max number of entitys
+	#define ENTITY_MAX 512 // max number of entitys
 	/* running total number of entitys*/
 	int entity_count;
 
@@ -52,5 +52,11 @@ int *get_ec_set(game_state *state, component_flag component);
 // use to iterate over set of entitys
 int iterate_ec_set(int *set,int id);
 
+/****** LEVEL STUFF **************/
+void level_gen(game_state *state);
+int point_getx(int block);
+int point_gety(int block);
+int point_getz(int block);
+int point_create(int x, int y, int z);
 
 #endif

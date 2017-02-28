@@ -1,6 +1,9 @@
 #include <SDL2/SDL_opengl.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "render.h"
 #include "gmath.h"
+#include "state.h"
 
 void draw_position_camera(float x, float y, float z, float xto, float yto, float zto)
 {
@@ -53,4 +56,32 @@ void draw_set_frustum(float fov, float ar,float znear, float zfar)
 	float width = height * ar;
 
 	glFrustum(-width,width,-height,height,znear,zfar);
+}
+
+GLuint level_model_build(game_state *state)
+{
+	GLuint list = glGenLists(1);
+	glNewList(list,GL_COMPILE);
+	glBegin(GL_POINTS);
+	int x,y,z;
+	for(int i = 1; i<state->block_count;i++)
+	{
+		x = point_getx(state->block_list[i]) << 5;
+		y = point_gety(state->block_list[i]) << 5;
+		z = point_getz(state->block_list[i]) << 5;
+		glVertex3i(x,y,z);
+	}
+	glEnd();
+	glEndList();
+	return list;
+}
+
+void model_draw(GLuint model)
+{
+	glCallList(model);
+}
+
+void model_destroy(GLuint model)
+{
+	glDeleteLists(model,1);
 }

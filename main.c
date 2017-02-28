@@ -28,19 +28,9 @@ int object_create_2(game_state *state)
 
 int main()
 {
+	time_seed_rng();
 	game_state *state = game_state_create();
-	int i;
-	for (i=0; i<10; i++)
-		object_create(state,i,i,i);
-	game_state_print(state);
 
-	int *positions = get_ec_set(state,c_position);
-	for(i=0;iterate_ec_set(positions,i);i++)
-	{
-		v3 *pos = &(state->position[i]);
-		printf("object %d x:%f y:%f z:%f\n",i,pos->x,pos->y,pos->z);
-	}
-	
 	SDL_Window *window = SDL_CreateWindow(
 		"Nebula",
 		SDL_WINDOWPOS_UNDEFINED,
@@ -57,6 +47,10 @@ int main()
 
 	SDL_GL_CreateContext(window);
 
+	// test level model building
+	level_gen(state);
+	GLuint level_model = level_model_build(state);
+
 	SDL_Event event;
 	int quit = 0;
 	unsigned int time = 0;
@@ -66,9 +60,9 @@ int main()
 	const Uint8 *key_state = SDL_GetKeyboardState(NULL);
 
 	// temporary cam vars
-	float x = 0.;
-	float y = 0.;
-	float z = 0.;
+	float x = LEVEL_SIZE*BLOCK_SIZE/2.;
+	float y = x;
+	float z = x;
 
 	float dir = 0.;
 	float zdir = 0.;
@@ -125,16 +119,8 @@ int main()
             z+8+lengthdir_y(1,zdir)
 		);
 
-		glBegin(GL_TRIANGLE_FAN);
-		glColor3f(1.f,0.f,0.f);
-		glVertex3f(-100.f,-100.f,0.f);
-		glColor3f(0.f,1.f,0.f);
-		glVertex3f(100.f,-100.f,0.f);
-		glColor3f(0.f,0.f,1.f);
-		glVertex3f(100.f,100.f,0.f);
-		glColor3f(1.f,1.f,1.f);
-		glVertex3f(-100.f,100.f,0.f);
-		glEnd();
+		glPointSize(5.0);
+		model_draw(level_model);
 
 		SDL_GL_SwapWindow(window);
 		
@@ -144,6 +130,7 @@ int main()
 	}
 
 	game_state_destroy(state);
+	model_destroy(level_model);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

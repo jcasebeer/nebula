@@ -45,6 +45,8 @@ int main()
 	SDL_GL_CreateContext(window);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
 
+	GLuint texture = texture_load("tex/face.png",1024,1024);
+
 	// test level model building
 	level_gen(state);
 	GLuint level_model = level_model_build(state);
@@ -61,6 +63,10 @@ int main()
 	float x = LEVEL_SIZE*BLOCK_SIZE/2.;
 	float y = x;
 	float z = x;
+
+	float tx = x;
+	float ty = y;
+	float tz = z-10;
 
 	float dir = 0.;
 	float zdir = 0.;
@@ -121,6 +127,31 @@ int main()
 
 		glPointSize(2.0);
 		model_draw(level_model);
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D,texture);
+		glPushMatrix();
+		glTranslatef(tx,ty,tz);
+		glBegin(GL_TRIANGLE_FAN);
+
+		glTexCoord2f(0.f,0.f);
+		//glColor3f(1,0,0);
+    	glVertex3f(-8,+8,0);
+
+    	glTexCoord2f(1.f,0.f);
+    	//glColor3f(0,1,0);
+    	glVertex3f(+8,+8,0);
+
+    	glTexCoord2f(1.f,1.f);
+    	//glColor3f(0,0,1);
+    	glVertex3f(+8,-8,0);
+
+
+    	glTexCoord2f(0.f,1.f);
+    	//glColor3f(1,1,1);
+    	glVertex3f(-8,-8,0);
+		glEnd();
+		glPopMatrix();
 
 		SDL_GL_SwapWindow(window);
 		

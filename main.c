@@ -44,6 +44,7 @@ int main()
 
 	SDL_GL_CreateContext(window);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
+	SDL_GL_SetSwapInterval(1);
 
 	GLuint texture = texture_load("tex/face.png",1024,1024);
 	GLuint texture2 = texture_load("tex/face2.png",1024,1024);

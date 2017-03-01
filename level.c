@@ -31,6 +31,12 @@ void level_gen(game_state *state)
 
 		blocks--;
 	}
+	/*
+	blocks = state->block_count;
+	for(int i = 1; i<blocks;i++)
+	{
+
+	}*/
 }
 
 // 10 bits for the x,y,z position of each point

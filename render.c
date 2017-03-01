@@ -105,8 +105,13 @@ GLuint texture_load(const char *file, int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	
 
     glBindTexture(GL_TEXTURE_2D,0);
+    free(data);
     return tid;
+}
+
+void texture_destroy(GLuint tex)
+{
+	glDeleteTextures(1,&tex);
 }

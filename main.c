@@ -46,6 +46,7 @@ int main()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
 
 	GLuint texture = texture_load("tex/face.png",1024,1024);
+	GLuint texture2 = texture_load("tex/face2.png",1024,1024);
 
 	// test level model building
 	level_gen(state);
@@ -128,6 +129,9 @@ int main()
 		glPointSize(2.0);
 		model_draw(level_model);
 
+
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER,0.f);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D,texture);
 		glPushMatrix();
@@ -153,6 +157,32 @@ int main()
 		glEnd();
 		glPopMatrix();
 
+		glBindTexture(GL_TEXTURE_2D,texture2);
+		glPushMatrix();
+		glTranslatef(tx-100,ty,tz);
+		glBegin(GL_TRIANGLE_FAN);
+
+		glTexCoord2f(0.f,0.f);
+		//glColor3f(1,0,0);
+    	glVertex3f(-8,+8,0);
+
+    	glTexCoord2f(1.f,0.f);
+    	//glColor3f(0,1,0);
+    	glVertex3f(+8,+8,0);
+
+    	glTexCoord2f(1.f,1.f);
+    	//glColor3f(0,0,1);
+    	glVertex3f(+8,-8,0);
+
+
+    	glTexCoord2f(0.f,1.f);
+    	//glColor3f(1,1,1);
+    	glVertex3f(-8,-8,0);
+		glEnd();
+		glPopMatrix();
+
+		glBindTexture(GL_TEXTURE_2D,0);
+
 		SDL_GL_SwapWindow(window);
 		
 		timespent = SDL_GetTicks() - time;
@@ -160,6 +190,8 @@ int main()
 			SDL_Delay(sleeptime - timespent);
 	}
 
+	texture_destroy(texture);
+	texture_destroy(texture2);
 	game_state_destroy(state);
 	model_destroy(level_model);
 	SDL_DestroyWindow(window);

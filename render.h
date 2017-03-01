@@ -9,5 +9,5 @@ GLuint level_model_build(game_state *state);
 void model_draw(GLuint model);
 void model_destroy(GLuint model);
 GLuint texture_load(const char *file, int width, int height);
-
+void texture_destroy(GLuint texture);
 #endif

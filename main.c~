@@ -30,20 +30,22 @@ int main()
 {
 	time_seed_rng();
 	game_state *state = game_state_create();
-	int width = 1280;
-	int height = 720;
 
 	SDL_Window *window = SDL_CreateWindow(
 		"Nebula",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
-		width,height,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
-		//SDL_FULLSCREEN_DESKTOP FOR FULLSCREEN
+		640,360,
+		SDL_WINDOW_OPENGL
 	);
 
-	SDL_GL_CreateContext(window);
+	SDL_Renderer *renderer = SDL_CreateRenderer(window,-1,0);
+	SDL_RenderSetLogicalSize(renderer,640,360);
+	
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,2);
+
+	SDL_GL_CreateContext(window);
 
 	// test level model building
 	level_gen(state);
@@ -86,27 +88,25 @@ int main()
 			x+=1.;
 
 		if (key_state[SDL_SCANCODE_LEFT])
-			dir+=1.;
+			dir+=4.;
 		if (key_state[SDL_SCANCODE_RIGHT])
-			dir-=1.;
+			dir-=4.;
 		if (key_state[SDL_SCANCODE_UP])
-			zdir+=1.;
+			zdir+=4.;
 		if (key_state[SDL_SCANCODE_DOWN])
-			zdir-=1.;
+			zdir-=4.;
 
-		if (zdir>89.f)
-			zdir = 89.f;
-		if (zdir<-89.f)
-			zdir = -89.f;
+		if (zdir>89.9)
+			zdir = 89.9;
+		if (zdir<-89.9)
+			zdir = -89.9;
 
 		glClearColor(0.50f,0.125f,0.25f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		SDL_GetWindowSize(window, &width, &height);
-		glViewport(0,0,width,height);
-		draw_set_frustum(90.,(float)width/height,1.,32000.);
+		draw_set_frustum(90.,16./9.,1.,32000.);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		
@@ -119,7 +119,7 @@ int main()
             z+8+lengthdir_y(1,zdir)
 		);
 
-		glPointSize(2.0);
+		glPointSize(5.0);
 		model_draw(level_model);
 
 		SDL_GL_SwapWindow(window);
@@ -131,6 +131,7 @@ int main()
 
 	game_state_destroy(state);
 	model_destroy(level_model);
+	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;

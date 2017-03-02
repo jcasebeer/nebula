@@ -6,7 +6,85 @@
 #include "render.h"
 #include "state.h"
 
-int object_create(game_state *state, float x, float y,float z)
+int main()
+{
+	int width = 1280;
+	int height = 720;
+
+	// create our window
+	SDL_Window *window = SDL_CreateWindow(
+		"Nebula",
+		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED,
+		width,height,
+		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+	);
+
+	// create opengl context
+	SDL_GL_CreateContext(window);
+
+	// turn on double buffering and vsync
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
+	SDL_GL_SetSwapInterval(1);
+
+	// initialze some variables for the main loop
+	#define TARGET_FPS 60
+	int quit = 0;
+	unsigned int time = 0;
+	unsigned int timespent = 0;
+	unsigned int sleeptime = 1000/TARGET_FPS;
+
+	// sdl variables for handling input
+	SDL_Event event;
+	const Uint8 *key_state = SDL_GetKeyboardState(NULL);
+
+	// create and load (not yet) our texture data
+	texture_data *textures = texture_data_create();
+
+	// create our game_state
+	game_state *state = game_state_create();
+
+	// generate a level and build its model
+	level_gen(state);
+	state->level_model = level_model_build(state);
+
+	// move camera to center of level (for testing)
+	state->camx = LEVEL_SIZE*BLOCK_SIZE/2.;
+	state->camy = state->camx;
+	state->camz = state->camx;
+
+	while(!quit)
+	{
+		time = SDL_GetTicks();
+
+		while(SDL_PollEvent(&event))
+		{
+			if (event.type==SDL_QUIT)
+					quit=1;
+				if (event.type == SDL_KEYDOWN)
+					if (event.key.keysym.sym == SDLK_ESCAPE)
+						quit = 1;
+		}
+
+		game_simulate(state,key_state);
+		game_render(state,window);
+
+		SDL_GL_SwapWindow(window);
+		
+		timespent = SDL_GetTicks() - time;
+		if (timespent<sleeptime)
+			SDL_Delay(sleeptime - timespent);
+
+
+	}
+	game_state_destroy(state);
+	free(textures);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+
+}
+
+/*int object_create(game_state *state, float x, float y,float z)
 {
 	int obj = entity_create(state);
 
@@ -26,6 +104,8 @@ int object_create_2(game_state *state)
 	return obj;
 }
 
+
+
 int main()
 {
 	time_seed_rng();
@@ -39,7 +119,7 @@ int main()
 		SDL_WINDOWPOS_UNDEFINED,
 		width,height,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE 
-		//| SDL_WINDOW_FULLSCREEN_DESKTOp
+		//| SDL_WINDOW_FULLSCREEN_DESKTOP
 	);
 
 	SDL_GL_CreateContext(window);
@@ -198,4 +278,4 @@ int main()
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;
-}
+}*/

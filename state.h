@@ -1,6 +1,7 @@
 #ifndef STATE_H
 #define STATE_H
-
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 #include "comps.h"
 
 typedef struct game_state
@@ -28,6 +29,15 @@ typedef struct game_state
 	int block_grid[LEVEL_SIZE][LEVEL_SIZE][LEVEL_SIZE];
 	int block_list[MAX_BLOCKS];
 	int block_count;
+	// gl index to display list for level model
+	GLuint level_model;
+
+	/* camera vars */
+	float camx;
+	float camy;
+	float camz;
+	float camdir;
+	float camzdir;
 
 }game_state;
 
@@ -58,5 +68,12 @@ int point_getx(int block);
 int point_gety(int block);
 int point_getz(int block);
 int point_create(int x, int y, int z);
+
+int block_at(game_state *state,int x, int y, int z);
+void block_create(game_state *state, int x, int y, int z);
+int block_at_bounded(game_state *state, int x, int y, int z);
+
+/***** gameplay stuff *********/
+void game_simulate(game_state *state,const Uint8 *key_state);
 
 #endif

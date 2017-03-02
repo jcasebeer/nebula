@@ -1,3 +1,4 @@
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,6 +7,40 @@
 #include "state.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+
+
+void game_render(game_state *state, SDL_Window *window)
+{
+	glClearColor(0.50f,0.125f,0.25f,1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	int width, height;
+	SDL_GetWindowSize(window, &width, &height);
+	glViewport(0,0,width,height);
+	draw_set_frustum(90.,(float)width/height,1.,32000.);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+		
+	draw_position_camera(
+		state->camx,
+        state->camy,
+        state->camz+8,
+        state->camx+lengthdir_x(lengthdir_x(1,state->camzdir),state->camdir),
+        state->camy+lengthdir_y(lengthdir_x(1,state->camzdir),state->camdir),
+        state->camz+8+lengthdir_y(1,state->camzdir)
+	);
+
+		glPointSize(2.0);
+		model_draw(state->level_model);
+}
+
+texture_data *texture_data_create()
+{
+	return malloc(sizeof(texture_data));
+}
 
 void draw_position_camera(float x, float y, float z, float xto, float yto, float zto)
 {
@@ -105,7 +140,6 @@ GLuint texture_load(const char *file, int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-
     glBindTexture(GL_TEXTURE_2D,0);
     free(data);
     return tid;
@@ -115,3 +149,4 @@ void texture_destroy(GLuint tex)
 {
 	glDeleteTextures(1,&tex);
 }
+

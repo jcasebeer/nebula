@@ -16,5 +16,5 @@ void model_draw(GLuint model);
 void model_destroy(GLuint model);
 GLuint texture_load(const char *file, int width, int height);
 void texture_destroy(GLuint texture);
-void game_render(game_state *state, SDL_Window *window);
+void game_render(game_state *state, SDL_Window *window, texture_data *textures);
 #endif

@@ -38,8 +38,9 @@ int main()
 	SDL_Event event;
 	const Uint8 *key_state = SDL_GetKeyboardState(NULL);
 
-	// create and load (not yet) our texture data
+	// create and load our texture data
 	texture_data *textures = texture_data_create();
+	textures->sprites = texture_load("tex/face2.png",1024,1024);
 
 	// create our game_state
 	game_state *state = game_state_create();
@@ -68,7 +69,7 @@ int main()
 		}
 
 		game_simulate(state,key_state);
-		game_render(state,window);
+		game_render(state,window,textures);
 
 		SDL_GL_SwapWindow(window);
 		

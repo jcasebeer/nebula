@@ -8,9 +8,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-
-
-void game_render(game_state *state, SDL_Window *window)
+void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
 	// clear background
 	glClearColor(0.50f,0.125f,0.25f,1.0f);
@@ -40,6 +38,37 @@ void game_render(game_state *state, SDL_Window *window)
 	// draw level model
 	glPointSize(2.0);
 	model_draw(state->level_model);
+
+	glAlphaFunc(GL_GREATER,0.f);
+	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D,textures->sprites);
+	glPushMatrix();
+	glTranslatef(3072,3072,3072);
+	glBegin(GL_TRIANGLE_FAN);
+	glTexCoord2f(0.f,0.f);
+	//glColor3f(1,0,0);
+   	glVertex3f(-8,+8,0);
+
+   	glTexCoord2f(1.f,0.f);
+   	//glColor3f(0,1,0);
+   	glVertex3f(+8,+8,0);
+
+   	glTexCoord2f(1.f,1.f);
+    //glColor3f(0,0,1);
+    glVertex3f(+8,-8,0);
+
+
+    glTexCoord2f(0.f,1.f);
+    //glColor3f(1,1,1);
+    glVertex3f(-8,-8,0);
+	glEnd();
+	glPopMatrix();
+
+	glBindTexture(GL_TEXTURE_2D,0);
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
 }
 
 texture_data *texture_data_create()

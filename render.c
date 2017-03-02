@@ -12,15 +12,19 @@
 
 void game_render(game_state *state, SDL_Window *window)
 {
+	// clear background
 	glClearColor(0.50f,0.125f,0.25f,1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// set up projection matrix and window size
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
 	glViewport(0,0,width,height);
 	draw_set_frustum(90.,(float)width/height,1.,32000.);
+
+	// point camera
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 		
@@ -33,8 +37,9 @@ void game_render(game_state *state, SDL_Window *window)
         state->camz+8+lengthdir_y(1,state->camzdir)
 	);
 
-		glPointSize(2.0);
-		model_draw(state->level_model);
+	// draw level model
+	glPointSize(2.0);
+	model_draw(state->level_model);
 }
 
 texture_data *texture_data_create()

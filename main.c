@@ -53,6 +53,7 @@ int main()
 	state->camy = state->camx;
 	state->camz = state->camx;
 
+	// main game loop
 	while(!quit)
 	{
 		time = SDL_GetTicks();
@@ -81,7 +82,6 @@ int main()
 	free(textures);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-
 }
 
 /*int object_create(game_state *state, float x, float y,float z)

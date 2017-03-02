@@ -21,5 +21,4 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 			state->camzdir = 89.f;
 		if (state->camzdir<-89.f)
 			state->camzdir = -89.f;
-	return;
 }

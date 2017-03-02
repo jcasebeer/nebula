@@ -12,7 +12,7 @@ game_state *game_state_create()
 {
 	int i,w;
 	game_state *state = calloc(1,sizeof(game_state));
-	printf("size in bytes of game_state object %lu\n",sizeof(game_state));
+	printf("size in mb of game_state object: %f\n",(float)sizeof(game_state)/1000000.);
 	for(i=0;i<c_last;i++)
 		for(w=0;w<ENTITY_MAX;w++)
 		{

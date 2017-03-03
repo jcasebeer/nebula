@@ -29,6 +29,7 @@ typedef struct game_state
 	int block_grid[LEVEL_SIZE][LEVEL_SIZE][LEVEL_SIZE];
 	int block_list[MAX_BLOCKS];
 	int block_count;
+	int next_level;
 	// gl index to display list for level model
 	GLuint level_model;
 
@@ -64,6 +65,7 @@ int iterate_ec_set(int *set,int id);
 
 /****** LEVEL STUFF **************/
 void level_gen(game_state *state);
+void level_next(game_state *state);
 int point_getx(int block);
 int point_gety(int block);
 int point_getz(int block);

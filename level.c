@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "render.h"
 #include "state.h"
 #include "gmath.h"
 
@@ -61,6 +62,25 @@ void level_gen(game_state *state)
 				block_create(state,x,y,z+1);
 		}
 	}
+}
+
+void level_next(game_state *state)
+{
+	// destory level model
+	model_destroy(state->level_model);
+	// clear old game_states memory
+	game_state_clear(state);
+	// generate new level data
+	level_gen(state);
+	// build new level model
+	state->level_model = level_model_build(state);
+
+	// move camera to center of level (for testing)
+	state->camx = LEVEL_SIZE*BLOCK_SIZE/2.;
+	state->camy = state->camx;
+	state->camz = state->camx;
+	state->camdir = 0.f;
+	state->camzdir = 0.f;
 }
 
 // 10 bits for the x,y,z position of each point

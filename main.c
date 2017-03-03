@@ -69,17 +69,28 @@ int main()
 				if (event.type == SDL_KEYDOWN)
 					if (event.key.keysym.sym == SDLK_ESCAPE)
 						quit = 1;
+					if (event.key.keysym.sym == SDLK_RETURN)
+					{
+
+						state->next_level = 1;
+						break;
+					}
 		}
 
 		game_simulate(state,key_state);
 		game_render(state,window,textures);
+
+		if (state->next_level)
+		{
+			level_next(state);
+			state->next_level = 0;
+		}
 
 		SDL_GL_SwapWindow(window);
 		
 		timespent = SDL_GetTicks() - time;
 		if (timespent<sleeptime)
 			SDL_Delay(sleeptime - timespent);
-
 
 	}
 	model_destroy(state->level_model);

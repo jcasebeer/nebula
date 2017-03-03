@@ -10,15 +10,21 @@ static int entity_is_empty(game_state *state, int id);
 // create game state object
 game_state *game_state_create()
 {
-	int i,w;
-	game_state *state = calloc(1,sizeof(game_state));
+	game_state *state = malloc(sizeof(game_state));
+	game_state_clear(state);
 	printf("size in mb of game_state object: %f\n",(float)sizeof(game_state)/1000000.);
+	return state;
+}
+
+void game_state_clear(game_state *state)
+{
+	memset(state,0,sizeof(game_state));
+	int i,w;
 	for(i=0;i<c_last;i++)
 		for(w=0;w<ENTITY_MAX;w++)
 		{
 			state->ec_list[i][w] = -1;
 		}
-	return state;
 }
 
 void game_state_destroy(game_state *state)
@@ -52,12 +58,6 @@ void game_state_print(game_state *state)
 		}
 		printf("\n");
 	}
-}
-
-void game_state_clear(game_state *state)
-{
-	game_state_destroy(state);
-	state = game_state_create();
 }
 
 int entity_create(game_state *state)

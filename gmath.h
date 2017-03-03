@@ -8,6 +8,7 @@ float lengthdir_x(float len, float dir);
 float lengthdir_y(float len, float dir);
 void normalize(float *v);
 void cross(float *result, float *v1, float *v2);
+void move_to(float *x, float *y,float dir, float speed);
 
 
 void seed_rng(int seed);

@@ -45,6 +45,9 @@ int main()
 	// create our game_state
 	game_state *state = game_state_create();
 
+    // seed rng
+    time_seed_rng();
+
 	// generate a level and build its model
 	level_gen(state);
 	state->level_model = level_model_build(state);
@@ -79,7 +82,9 @@ int main()
 
 
 	}
+	model_destroy(state->level_model);
 	game_state_destroy(state);
+	texture_destroy(textures->sprites);
 	free(textures);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

@@ -43,6 +43,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_TEXTURE_2D);
 
+	// test drawing textures
 	glBindTexture(GL_TEXTURE_2D,textures->sprites);
 	glPushMatrix();
 	glTranslatef(3072,3072,3072);

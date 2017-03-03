@@ -33,6 +33,12 @@ float lengthdir_y(float len, float dir)
 	return len*sin(DEG2RAD*dir);
 }
 
+void move_to(float *x, float *y,float dir, float speed)
+{
+	*x += lengthdir_x(speed,dir);
+	*y += lengthdir_y(speed,dir);
+}
+
 void seed_rng(int seed)
 {
 	SEED = seed;

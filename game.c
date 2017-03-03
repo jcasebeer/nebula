@@ -1,12 +1,25 @@
 #include <SDL2/SDL.h>
 #include "state.h"
+#include "gmath.h"
 
 void game_simulate(game_state *state, const Uint8 *key_state)
 {
-	if (key_state[SDL_SCANCODE_D])
-			state->camx-=1.;
+	float *x,*y,dir;
+	x = &(state->camx);
+	y = &(state->camy);
+	dir = state->camdir;
+		if (key_state[SDL_SCANCODE_W])
+			move_to(x,y,dir,1.f);
+		if (key_state[SDL_SCANCODE_S])
+			move_to(x,y,dir+180.f,1.f);
+		if (key_state[SDL_SCANCODE_D])
+			move_to(x,y,dir-90.f,1.f);
 		if (key_state[SDL_SCANCODE_A])
-			state->camx+=1.;
+			move_to(x,y,dir+90.f,1.f);
+		if (key_state[SDL_SCANCODE_Q])
+			state->camz+=1.f;
+		if (key_state[SDL_SCANCODE_E])
+			state->camz+=-1.f;
 
 		if (key_state[SDL_SCANCODE_LEFT])
 			state->camdir+=1.;

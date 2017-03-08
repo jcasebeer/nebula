@@ -39,7 +39,6 @@ typedef struct game_state
 	float camz;
 	float camdir;
 	float camzdir;
-
 }game_state;
 
 // create game state object

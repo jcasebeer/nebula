@@ -25,7 +25,7 @@ int main()
 
 	// turn on double buffering and vsync
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
-	SDL_GL_SetSwapInterval(1);
+	//SDL_GL_SetSwapInterval(1);
 
 	// initialze some variables for the main loop
 	#define TARGET_FPS 60
@@ -68,14 +68,18 @@ int main()
 			if (event.type==SDL_QUIT)
 					quit=1;
 				if (event.type == SDL_KEYDOWN)
+				{
 					if (event.key.keysym.sym == SDLK_ESCAPE)
 						quit = 1;
+					
+				}
+				if (event.type == SDL_KEYUP)
+				{
 					if (event.key.keysym.sym == SDLK_RETURN)
 					{
-
 						state->next_level = 1;
-						break;
 					}
+				}
 		}
 
 		game_simulate(state,key_state);

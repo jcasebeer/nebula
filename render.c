@@ -42,9 +42,14 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	
 	glPushMatrix();
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	//glLoadIdentity();
+	
+	GLfloat AmbientGlobal[4] = {0.0f,0.0f,0.0f,1.f};
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,AmbientGlobal);
+
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.01f);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.f);
+
 	GLfloat light_pos[4];
 	light_pos[0] = state->camx;
 	light_pos[1] = state->camy;
@@ -52,7 +57,8 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	light_pos[3] = 1.f;
 	glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
 	
-	
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textures->shadow);
 	model_draw(state->level_model);

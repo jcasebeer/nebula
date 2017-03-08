@@ -11,7 +11,7 @@ void cross(float *result, float *v1, float *v2);
 void move_to(float *x, float *y,float dir, float speed);
 
 
-void seed_rng(int seed);
+void seed_rng(unsigned int seed);
 void time_seed_rng();
 float random(float range);
 int irandom(int range);

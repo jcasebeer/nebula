@@ -6,6 +6,7 @@
 typedef struct texture_data
 {
 	GLuint sprites;
+	GLuint shadow;
 }texture_data;
 
 texture_data *texture_data_create();

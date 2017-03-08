@@ -111,10 +111,7 @@ int block_at(game_state *state,int x, int y, int z)
 
 int block_at_bounded(game_state *state, int x, int y, int z)
 {
-	if (x>=LEVEL_SIZE || x<0 || y>=LEVEL_SIZE || y<0 || z>=LEVEL_SIZE || z<0)
-		return 1;
-	else
-		return state->block_grid[x][y][z]>-1;
+	return (x>=LEVEL_SIZE || x<0 || y>=LEVEL_SIZE || y<0 || z>=LEVEL_SIZE || z<0 || state->block_grid[x][y][z]>-1);
 }
 
 void block_create(game_state *state, int x, int y, int z)

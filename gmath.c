@@ -39,7 +39,7 @@ void move_to(float *x, float *y,float dir, float speed)
 	*y += lengthdir_y(speed,dir);
 }
 
-void seed_rng(int seed)
+void seed_rng(unsigned int seed)
 {
 	SEED = seed;
 	srand(seed);

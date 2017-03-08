@@ -41,6 +41,7 @@ int main()
 	// create and load our texture data
 	texture_data *textures = texture_data_create();
 	textures->sprites = texture_load("tex/face2.png",1024,1024);
+	textures->shadow = texture_load("tex/shadow.png",256,256);
 
 	// create our game_state
 	game_state *state = game_state_create();

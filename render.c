@@ -36,8 +36,33 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	);
 
 	// draw level model
-	glPointSize(2.0);
+	//glPointSize(2.0);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
+	
+	glPushMatrix();
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	//glLoadIdentity();
+	GLfloat light_pos[4];
+	light_pos[0] = state->camx;
+	light_pos[1] = state->camy;
+	light_pos[2] = state->camz;
+	light_pos[3] = 1.f;
+	glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
+	
+	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,textures->shadow);
 	model_draw(state->level_model);
+	glBindTexture(GL_TEXTURE_2D,0);
+	glDisable(GL_TEXTURE_2D);
+
+	glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHT0);
+	glPopMatrix();
+	
 
 	glAlphaFunc(GL_GREATER,0.f);
 	glEnable(GL_ALPHA_TEST);
@@ -130,23 +155,227 @@ void draw_set_frustum(float fov, float ar,float znear, float zfar)
 	glFrustum(-width,width,-height,height,znear,zfar);
 }
 
+static int offset(int amount)
+{
+	return irandom(amount) - (amount >> 1);
+}
+
+static void vertex(int x, int y, int z, float xnorm, float ynorm, float znorm, float uv_x, float uv_y)
+{
+	seed_rng(x*y-z);
+	glTexCoord2f(uv_x,uv_y);
+	glNormal3f(xnorm,ynorm,znorm);
+	glVertex3i(x+offset(6),y+offset(6),z+offset(6));
+}
+
+static void block_up(int x1, int y1, int z1, float uv)
+{
+	int x2, y2, z2;
+	x2=x1+BLOCK_SIZE;
+	y2=y1+BLOCK_SIZE;
+	z2=z1;
+
+	glBegin(GL_TRIANGLE_FAN);
+		vertex(x1,y2,z2,0.f,0.f,1.f,uv,uv);
+		vertex(x1,y1,z2,0.f,0.f,1.f,uv,uv);
+		vertex(x2,y1,z2,0.f,0.f,1.f,uv,uv);
+		vertex(x2,y2,z2,0.f,0.f,1.f,uv,uv);
+	glEnd();
+}
+
+static void block_down(int x1, int y1, int z1, float uv)
+{
+	int x2, y2, z2;
+	x2=x1+BLOCK_SIZE;
+	y2=y1+BLOCK_SIZE;
+	z2=z1;
+
+	glBegin(GL_TRIANGLE_FAN);
+		vertex(x2,y2,z2,0.f,0.f,-1.f,uv,uv);
+		vertex(x2,y1,z2,0.f,0.f,-1.f,uv,uv);
+		vertex(x1,y1,z2,0.f,0.f,-1.f,uv,uv);
+		vertex(x1,y2,z2,0.f,0.f,-1.f,uv,uv);
+	glEnd();
+}
+
+static void block_left(int x1, int y1, int z1, float uv)
+{
+	int x2, y2, z2;
+	x2=x1+BLOCK_SIZE;
+	y2=y1+BLOCK_SIZE;
+	z2=z1-BLOCK_SIZE;
+
+	glBegin(GL_TRIANGLE_FAN);
+		vertex(x1,y1,z2,-1.f,0.f,0.f,uv,uv);
+		vertex(x1,y1,z1,-1.f,0.f,0.f,uv,uv);
+		vertex(x1,y2,z1,-1.f,0.f,0.f,uv,uv);
+		vertex(x1,y2,z2,-1.f,0.f,0.f,uv,uv);
+	glEnd();
+}
+
+static void block_right(int x1, int y1, int z1, float uv)
+{
+	int x2, y2, z2;
+	x2=x1+BLOCK_SIZE;
+	y2=y1+BLOCK_SIZE;
+	z2=z1-BLOCK_SIZE;
+
+	glBegin(GL_TRIANGLE_FAN);
+		vertex(x2,y2,z2,1.f,0.f,0.f,uv,uv);
+		vertex(x2,y2,z1,1.f,0.f,0.f,uv,uv);
+		vertex(x2,y1,z1,1.f,0.f,0.f,uv,uv);
+		vertex(x2,y1,z2,1.f,0.f,0.f,uv,uv);
+	glEnd();
+}
+
+static void block_forward(int x1, int y1, int z1, int diag, int top, int bottom)
+{
+	int x2,y2,z2;
+	x2 = x1+BLOCK_SIZE;
+	y2 = y1+BLOCK_SIZE;
+	z2 = z1-BLOCK_SIZE;
+
+	int tlx,tly,trx,try,blx,bly,brx,bry;
+	tlx = 1; tly = 1;
+	trx = 1; try = 1;
+	blx = 1; bly = 1;
+	brx = 1; bry = 1;
+	if (diag || (top && bottom))
+	{
+	    tlx = 0; tly = 0;
+	    trx = 0; try = 0;
+	    blx = 0; bly = 0;
+	    brx = 0; bry = 0;
+	}
+	else
+	{
+	    if (top)
+	    {
+	        trx = 0; try = 1;
+	        tlx = 0; tly = 0;
+	        brx = 1; bry = 1;
+	        blx = 1; bly = 0;
+	    }
+	    else if (bottom)
+	    {
+	        trx = 1; try = 0;
+	        tlx = 1; tly = 1;
+	        brx = 0; bry = 0;
+	        blx = 0; bly = 1;
+	    }
+	}
+
+	glBegin(GL_TRIANGLE_FAN);
+		vertex(x1,y1,z2,0.f,-1.f,0.f,blx,bly);
+	    vertex(x2,y1,z2,0.f,-1.f,0.f,brx,bry);
+	    vertex(x2,y1,z1,0.f,-1.f,0.f,trx,try);
+	    vertex(x1,y1,z1,0.f,-1.f,0.f,tlx,tly);
+	glEnd();
+}
+
+static void block_back(int x1, int y1, int z1, int diag, int top, int bottom)
+{
+	int x2,y2,z2;
+	x2 = x1+BLOCK_SIZE;
+	y2 = y1+BLOCK_SIZE;
+	z2 = z1-BLOCK_SIZE;
+
+	int tlx,tly,trx,try,blx,bly,brx,bry;
+	tlx = 1; tly = 1;
+	trx = 1; try = 1;
+	blx = 1; bly = 1;
+	brx = 1; bry = 1;
+	if (diag || (top && bottom))
+	{
+	    tlx = 0; tly = 0;
+	    trx = 0; try = 0;
+	    blx = 0; bly = 0;
+	    brx = 0; bry = 0;
+	}
+	else
+	{
+	    if (top)
+	    {
+	        trx = 0; try = 1;
+	        tlx = 0; tly = 0;
+	        brx = 1; bry = 1;
+	        blx = 1; bly = 0;
+	    }
+	    else if (bottom)
+	    {
+	        trx = 1; try = 0;
+	        tlx = 1; tly = 1;
+	        brx = 0; bry = 0;
+	        blx = 0; bly = 1;
+	    }
+	}
+
+	glBegin(GL_TRIANGLE_FAN);
+		vertex(x2,y2,z1,0.f,1.f,0.f,blx,bly);
+	    vertex(x2,y2,z2,0.f,1.f,0.f,brx,bry);
+	    vertex(x1,y2,z2,0.f,1.f,0.f,trx,try);
+	    vertex(x1,y2,z1,0.f,1.f,0.f,tlx,tly);
+	glEnd();
+}
+
+static int block_get_lit(game_state *state,int x, int y, int z)
+{
+	while (x < LEVEL_SIZE && z < LEVEL_SIZE)
+	{
+		x++;
+		z++;
+		if (block_at(state,x,y,z) )
+			return 0;
+	}
+	return 1;
+}
+
+
 GLuint level_model_build(game_state *state)
 {
 	GLuint list = glGenLists(1);
 	glNewList(list,GL_COMPILE);
-	glBegin(GL_POINTS);
-	int x,y,z;
-	for(int i = 1; i<state->block_count;i++)
+	//glBegin(GL_POINTS);
+	int x,y,z,xb,yb,zb,lit;
+	for(int i = 0; i<state->block_count;i++)
 	{
-		x = point_getx(state->block_list[i]) << 5;
-		y = point_gety(state->block_list[i]) << 5;
-		z = point_getz(state->block_list[i]) << 5;
-		glVertex3i(x,y,z);
+		x = point_getx(state->block_list[i]);
+		y = point_gety(state->block_list[i]);
+		z = point_getz(state->block_list[i]);
+
+		xb = x << 5;
+		yb = y << 5;
+		zb = z << 5;
+
+		lit = block_get_lit(state,x,y,z);
+
+		// up
+		if (!block_at(state,x,y,z+1))
+			block_up(xb,yb,zb+BLOCK_SIZE,(float)(block_get_lit(state,x,y,z+1) && lit));
+		// left 
+		if (!block_at(state,x-1,y,z))
+			block_left(xb,yb,zb+BLOCK_SIZE,0.f);
+		// right
+		if (!block_at(state,x+1,y,z))
+			block_right(xb,yb,zb+BLOCK_SIZE,(float)(block_get_lit(state,x+1,y,z) && lit));
+		//forward
+		if (!block_at(state,x,y-1,z))
+			block_forward(xb,yb,zb+BLOCK_SIZE,!block_get_lit(state,x,y-1,z),!block_get_lit(state,x,y-1,z+1) || block_at(state,x,y-1,z+1),!block_get_lit(state,x,y-1,z-1));
+		//back
+		if (!block_at(state,x,y+1,z))
+			block_back(xb,yb,zb+BLOCK_SIZE,!block_get_lit(state,x,y+1,z),!block_get_lit(state,x,y+1,z+1) || block_at(state,x,y+1,z+1),!block_get_lit(state,x,y+1,z-1));
+		// down
+		if (!block_at(state,x,y,z-1))
+			block_down(xb,yb,zb,0.f);
+
+
+		//glVertex3i(x,y,z);
 	}
-	glEnd();
+	//glEnd();
 	glEndList();
 	return list;
 }
+
 
 void model_draw(GLuint model)
 {

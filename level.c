@@ -58,8 +58,8 @@ void level_gen(game_state *state)
 				block_create(state,x+1,y,z);
 			if (!block_at_bounded(state,x,y+1,z))
 				block_create(state,x,y+1,z);
-			if (!block_at_bounded(state,x,y,z+1))
-				block_create(state,x,y,z+1);
+			if (!block_at_bounded(state,x,y,z-1))
+				block_create(state,x,y,z-1);
 		}
 	}
 }

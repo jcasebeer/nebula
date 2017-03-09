@@ -210,8 +210,8 @@ static void block_down(int x1, int y1, int z1, float uv)
 
 static void block_left(int x1, int y1, int z1, float uv)
 {
-	int x2, y2, z2;
-	x2=x1+BLOCK_SIZE;
+	int y2, z2;
+	//x2=x1+BLOCK_SIZE;
 	y2=y1+BLOCK_SIZE;
 	z2=z1-BLOCK_SIZE;
 
@@ -240,9 +240,9 @@ static void block_right(int x1, int y1, int z1, float uv)
 
 static void block_forward(int x1, int y1, int z1, int diag, int top, int bottom)
 {
-	int x2,y2,z2;
+	int x2,z2;
 	x2 = x1+BLOCK_SIZE;
-	y2 = y1+BLOCK_SIZE;
+	//y2 = y1+BLOCK_SIZE;
 	z2 = z1-BLOCK_SIZE;
 
 	int tlx,tly,trx,try,blx,bly,brx,bry;
@@ -345,8 +345,9 @@ GLuint level_model_build(game_state *state)
 {
 	GLuint list = glGenLists(1);
 	glNewList(list,GL_COMPILE);
-	//glBegin(GL_POINTS);
 	int x,y,z,xb,yb,zb,lit;
+	// save rng state
+	unsigned int seed = SEED;
 	for(int i = 0; i<state->block_count;i++)
 	{
 		x = point_getx(state->block_list[i]);
@@ -377,11 +378,9 @@ GLuint level_model_build(game_state *state)
 		// down
 		if (!block_at(state,x,y,z-1))
 			block_down(xb,yb,zb,0.f);
-
-
-		//glVertex3i(x,y,z);
 	}
-	//glEnd();
+	// restore rng state
+	seed_rng(seed);
 	glEndList();
 	return list;
 }

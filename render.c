@@ -12,7 +12,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
 	// clear background
 	glShadeModel(GL_FLAT);
-	glClearColor(0.025f,0.025f,0.025f,1.0f);
+	glClearColor(0.1f,0.1f,0.1f,1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set up projection matrix and window size
@@ -50,6 +50,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1./(512.0*512.0));
+	//glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
 
 	GLfloat spec[4] = {0.f,0.f,0.f,1.f};
 

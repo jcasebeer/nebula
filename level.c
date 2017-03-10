@@ -54,8 +54,8 @@ void level_gen(game_state *state)
 			z = point_getz(b);
 
 			
-			if (!block_at_bounded(state,x+1,y,z))
-				block_create(state,x+1,y,z);
+			if (!block_at_bounded(state,x-1,y,z))
+				block_create(state,x-1,y,z);
 			if (!block_at_bounded(state,x,y+1,z))
 				block_create(state,x,y+1,z);
 			if (!block_at_bounded(state,x,y,z-1))

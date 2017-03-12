@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,12 +8,143 @@
 #include "state.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "shaders.h"
+
+surface_data *surface_data_create(int width, int height)
+{
+	surface_data *surf = malloc(sizeof(surface_data));
+
+	// fbo texture
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1,&(surf->fbo_texture));
+	glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
+  	glBindTexture(GL_TEXTURE_2D,0);
+
+  	// depth buffer
+  	glGenRenderbuffers(1,&(surf->rbo_depth));
+  	glBindRenderbuffer(GL_RENDERBUFFER,surf->rbo_depth);
+  	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,width,height);
+  	glBindRenderbuffer(GL_RENDERBUFFER,0);
+
+  	// fbo
+  	glGenFramebuffers(1,&(surf->fbo));
+  	glBindFramebuffer(GL_FRAMEBUFFER,surf->fbo);
+  	// attach texture
+  	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,surf->fbo_texture,0);
+  	// attach depth
+  	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,surf->rbo_depth);
+  	GLenum status;
+  	if ((status = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE)
+  	{
+  		printf("glCheckFramebufferStatus: error");
+  		return NULL;
+  	}
+  	glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+  	GLfloat fbo_vertices[] = {
+  		-1,-1,
+  		 1,-1,
+  		-1, 1,
+  		 1, 1
+  	};
+
+  	glGenBuffers(1,&(surf->vbo_fbo_verts));
+  	glBindBuffer(GL_ARRAY_BUFFER,surf->vbo_fbo_verts);
+  	glBufferData(GL_ARRAY_BUFFER,sizeof(fbo_vertices),fbo_vertices,GL_STATIC_DRAW);
+  	glBindBuffer(GL_ARRAY_BUFFER,0);
+
+  	GLint result;
+  	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+  	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+  	glShaderSource(VertexShaderID,1,&post_shader_v,NULL);
+  	glCompileShader(VertexShaderID);
+  	glGetShaderiv(VertexShaderID,GL_COMPILE_STATUS, &result);
+
+  	printf("Vertex Shader Result: %d\n",(int)result);
+
+ 	glShaderSource(FragmentShaderID,1,&post_shader_f,NULL);
+  	glCompileShader(FragmentShaderID);
+  	glGetShaderiv(FragmentShaderID,GL_COMPILE_STATUS, &result);
+
+  	printf("Fragment Shader Result: %d\n",(int)result);
+
+  	surf->post_shader = glCreateProgram();
+  	glAttachShader(surf->post_shader,VertexShaderID);
+  	glAttachShader(surf->post_shader,FragmentShaderID);
+  	glLinkProgram(surf->post_shader);
+
+  	glGetProgramiv(surf->post_shader, GL_LINK_STATUS, &result);
+  	printf("Shader link status: %d\n",(int)result);
+
+  	glGetProgramiv(surf->post_shader, GL_VALIDATE_STATUS, &result);
+  	printf("Shader validation: %d\n", (int)result);
+
+  	surf->a_vcoord = glGetAttribLocation(surf->post_shader,"v_coord");
+  	surf->u_fbo_texture = glGetUniformLocation(surf->post_shader,"fbo_texture");
+
+  	glDetachShader(surf->post_shader,VertexShaderID);
+  	glDetachShader(surf->post_shader,FragmentShaderID);
+
+  	glDeleteShader(VertexShaderID);
+  	glDeleteShader(FragmentShaderID);
+
+  	return surf;
+}
+
+void surface_data_destroy(surface_data *surf)
+{
+	glDeleteRenderbuffers(1,&(surf->rbo_depth));
+	glDeleteTextures(1,&(surf->fbo_texture));
+	glDeleteFramebuffers(1,&(surf->fbo));
+	glDeleteBuffers(1,&(surf->vbo_fbo_verts));
+	glDeleteProgram(surf->post_shader);
+
+	free(surf);
+}
+
+void game_render_pp(game_state *state, SDL_Window *window, texture_data *textures, surface_data *surf)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER,surf->fbo);
+	game_render(state,window,textures);
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+	glClearColor(0.f,0.f,0.f,1.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glUseProgram(surf->post_shader);
+	glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
+	glUniform1i(surf->u_fbo_texture,0);
+	glEnableVertexAttribArray(surf->a_vcoord);
+
+	glBindBuffer(GL_ARRAY_BUFFER,surf->vbo_fbo_verts);
+	glVertexAttribPointer(
+		surf->a_vcoord,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		0,
+		0
+	);
+	glDrawArrays(GL_TRIANGLE_STRIP,0,4);
+	glDisableVertexAttribArray(surf->a_vcoord);
+}
 
 void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
 	// clear background
 	glShadeModel(GL_FLAT);
-	glClearColor(0.1f,0.1f,0.1f,1.0f);
+	glClearColor(1.0f,0.1f,0.1f,1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set up projection matrix and window size
@@ -41,7 +173,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
-	
 	glPushMatrix();
 	
 	GLfloat AmbientGlobal[4] = {0.0f,0.0f,0.0f,1.f};

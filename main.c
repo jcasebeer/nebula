@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 #include "gmath.h"
 #include "render.h"
@@ -20,12 +21,17 @@ int main()
 		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
 	);
 
+	// turn on double buffering and vsync
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
+	SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION,3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION,0);
+
 	// create opengl context
 	SDL_GL_CreateContext(window);
 
-	// turn on double buffering and vsync
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
-	//SDL_GL_SetSwapInterval(1);
+	// get our extensions
+	glewInit();
 
 	// initialze some variables for the main loop
 	#define TARGET_FPS 60
@@ -37,6 +43,9 @@ int main()
 	// sdl variables for handling input
 	SDL_Event event;
 	const Uint8 *key_state = SDL_GetKeyboardState(NULL);
+
+	// generate our drawing surface
+	surface_data *surf = surface_data_create(width,height);
 
 	// create and load our texture data
 	texture_data *textures = texture_data_create();
@@ -83,7 +92,7 @@ int main()
 		}
 
 		game_simulate(state,key_state);
-		game_render(state,window,textures);
+		game_render_pp(state,window,textures,surf);
 
 		if (state->next_level)
 		{
@@ -102,6 +111,7 @@ int main()
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);
 	free(textures);
+	surface_data_destroy(surf);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }

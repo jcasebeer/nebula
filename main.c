@@ -145,8 +145,8 @@ int main()
 			}
 		}
 		
-		
 		timespent = SDL_GetTicks() - time;
+		//printf("frametime: %u\n", timespent);
 		if (timespent<sleeptime)
 			SDL_Delay(sleeptime - timespent);
 	}

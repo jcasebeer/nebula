@@ -202,7 +202,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1./(512.0*512.0));
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1./(256.0*256.0));
 	//glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
 
 	GLfloat spec[4] = {0.f,0.f,0.f,1.f};

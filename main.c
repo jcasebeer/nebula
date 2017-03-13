@@ -9,8 +9,10 @@
 
 int main()
 {
-	int width = 1280;
-	int height = 720;
+	//int width = 1280;
+	//int height = 720;
+	int width = 1024;
+	int height = 576;
 
 	// create our window
 	SDL_Window *window = SDL_CreateWindow(
@@ -32,6 +34,7 @@ int main()
 
 	// get our extensions
 	glewInit();
+	glDisable(GL_DITHER);
 
 	// initialze some variables for the main loop
 	#define TARGET_FPS 60

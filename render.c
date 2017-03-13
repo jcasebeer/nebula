@@ -110,6 +110,22 @@ void surface_data_destroy(surface_data *surf)
 
 void game_render_pp(game_state *state, SDL_Window *window, texture_data *textures, surface_data *surf)
 {
+	int width, height;
+	SDL_GetWindowSize(window, &width, &height);
+
+	// resize fbo
+	if (width != surf->width || height != surf->height)
+	{
+		surf->width = width;
+		surf->height = height;
+		glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
+		glBindTexture(GL_TEXTURE_2D,0);
+
+		glBindRenderbuffer(GL_RENDERBUFFER,surf->rbo_depth);
+		glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,width,height);
+		glBindRenderbuffer(GL_RENDERBUFFER,0);
+	}
 	glBindFramebuffer(GL_FRAMEBUFFER,surf->fbo);
 	game_render(state,window,textures);
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -123,6 +139,8 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	glLoadIdentity();
 
 	glUseProgram(surf->post_shader);
+
+	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
 	glUniform1i(surf->u_fbo_texture,0);
 	glEnableVertexAttribArray(surf->a_vcoord);
@@ -138,13 +156,17 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	);
 	glDrawArrays(GL_TRIANGLE_STRIP,0,4);
 	glDisableVertexAttribArray(surf->a_vcoord);
+	glBindBuffer(GL_ARRAY_BUFFER,0);
+	glBindTexture(GL_TEXTURE_2D,0);
+	glUseProgram(0);
+	//glDisable(GL_TEXTURE_2D);
 }
 
 void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
 	// clear background
-	glShadeModel(GL_FLAT);
-	glClearColor(1.0f,0.1f,0.1f,1.0f);
+	//glShadeModel(GL_FLAT);
+	glClearColor(0.1f,0.1f,0.1f,1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set up projection matrix and window size
@@ -237,6 +259,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_CULL_FACE);
 }
 
 texture_data *texture_data_create()

@@ -14,9 +14,12 @@ const char *post_shader_v = ""
 const char *post_shader_f = ""
 	"uniform sampler2D fbo_texture;\n"
 	"varying vec2 f_texcoord;\n"
+	"const float div = 24.0;\n"
 
 	"void main(void) {\n"
-  		"gl_FragColor = texture2D(fbo_texture, f_texcoord);\n"
+	"vec3 c = texture2D(fbo_texture, f_texcoord).rgb;\n"
+	"c = vec3(floor(c.r*div)/div,floor(c.g*div)/div,floor(c.b*div)/div);\n"
+  		"gl_FragColor = vec4(c,1.0);\n"
 	"}\n";
 
 #endif

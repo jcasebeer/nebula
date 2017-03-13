@@ -11,6 +11,8 @@ typedef struct texture_data
 
 typedef struct surface_data
 {
+	int width;
+	int height;
 	GLuint fbo;
 	GLuint fbo_texture;
 	GLuint rbo_depth;

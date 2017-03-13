@@ -67,6 +67,7 @@ int main()
 	state->camy = state->camx;
 	state->camz = state->camx;
 
+	int error = 1;
 	// main game loop
 	while(!quit)
 	{
@@ -101,11 +102,50 @@ int main()
 		}
 
 		SDL_GL_SwapWindow(window);
+		while (error != GL_NO_ERROR)
+		{
+			error = glGetError();
+			switch(error)
+			{
+				case GL_NO_ERROR:
+				printf("No Error!\n");
+				break;
+
+				case GL_INVALID_ENUM:
+				printf("GL_INVALID_ENUM\n");
+				break;
+
+				case GL_INVALID_VALUE:
+				printf("GL_INVALID_VALUE\n");
+				break;
+
+				case GL_INVALID_OPERATION:
+				printf("GL_INVALID_OPERATION\n");
+				break;
+
+				case GL_STACK_OVERFLOW:
+				printf("GL_STACK_OVERFLOW\n");
+				break;
+
+				case GL_STACK_UNDERFLOW:
+				printf("GL_STACK_UNDERFLOW\n");
+				break;
+
+				case GL_OUT_OF_MEMORY:
+				printf("GL_OUT_OF_MEMORY\n");
+				break;
+
+				case GL_TABLE_TOO_LARGE:
+				printf("GL_TABLE_TOO_LARGE\n");
+				break;
+
+			}
+		}
+		
 		
 		timespent = SDL_GetTicks() - time;
 		if (timespent<sleeptime)
 			SDL_Delay(sleeptime - timespent);
-
 	}
 	model_destroy(state->level_model);
 	game_state_destroy(state);

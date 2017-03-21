@@ -25,6 +25,7 @@ void game_state_clear(game_state *state)
 		{
 			state->ec_list[i][w] = -1;
 		}
+	state->player = -1;
 }
 
 void game_state_destroy(game_state *state)

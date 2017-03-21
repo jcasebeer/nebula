@@ -66,11 +66,11 @@ int main()
 	state->level_model = level_model_build(state);
 
 	// move camera to center of level (for testing)
-	state->camx = LEVEL_SIZE*BLOCK_SIZE/2.;
-	state->camy = state->camx;
-	state->camz = state->camx;
+	//state->camx = LEVEL_SIZE*BLOCK_SIZE/2.;
+	//state->camy = state->camx;
+	//state->camz = state->camx;
 
-	int error = 1;
+	int error = 0;
 	// main game loop
 	while(!quit)
 	{

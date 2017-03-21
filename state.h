@@ -21,6 +21,9 @@ typedef struct game_state
 	/* component arrays */
 	v3 position[ENTITY_MAX];
 	v3 velocity[ENTITY_MAX];
+	v3 velocity_max[ENTITY_MAX];
+	float friction[ENTITY_MAX];
+	v3 bbox[ENTITY_MAX];
 
 	/* level data */
 	#define LEVEL_SIZE 192
@@ -32,7 +35,8 @@ typedef struct game_state
 	int next_level;
 	// gl index to display list for level model
 	GLuint level_model;
-
+	// player entity id
+	int player;
 	/* camera vars */
 	float camx;
 	float camy;
@@ -76,5 +80,8 @@ int block_at_bounded(game_state *state, int x, int y, int z);
 
 /***** gameplay stuff *********/
 void game_simulate(game_state *state,const Uint8 *key_state);
+
+/***** entitys *******/
+int player_create(game_state *state, v3 position);
 
 #endif

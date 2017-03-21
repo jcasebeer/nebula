@@ -5,6 +5,21 @@
 const double DEG2RAD = 3.141592655358979323846/180.;
 unsigned int SEED;
 
+float clamp(float x, float l, float r)
+{
+	if (x < l)
+		return l;
+	else if (x > r)
+		return r;
+	else
+		return x;
+}
+
+float sign(float x)
+{
+	return (float) (x > 0) - (x < 0);
+}
+
 void normalize(float *v)
 {
 	float m;

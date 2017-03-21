@@ -22,6 +22,11 @@ void level_gen(game_state *state)
 	y = x;
 	z = x;
 
+	int xstart, ystart, zstart;
+	xstart = x;
+	ystart = y;
+	zstart = z; 
+
 	while(blocks>0)
 	{
 		x+=choose3(1,0,-1);
@@ -62,6 +67,18 @@ void level_gen(game_state *state)
 				block_create(state,x,y,z-1);
 		}
 	}
+
+	// find suitable collision-free place to spawn player
+	while(block_at(state,xstart,ystart,zstart) || block_at(state,xstart,ystart,zstart+1))
+		zstart++;
+
+	// spawn player
+	v3 spawn;
+	spawn.x = xstart * BLOCK_SIZE + 16.0;
+	spawn.y = ystart * BLOCK_SIZE + 16.0;
+	spawn.z = zstart * BLOCK_SIZE;
+	
+	player_create(state,spawn);
 }
 
 void level_next(game_state *state)
@@ -76,9 +93,9 @@ void level_next(game_state *state)
 	state->level_model = level_model_build(state);
 
 	// move camera to center of level (for testing)
-	state->camx = LEVEL_SIZE*BLOCK_SIZE/2.;
-	state->camy = state->camx;
-	state->camz = state->camx;
+	//state->camx = LEVEL_SIZE*BLOCK_SIZE/2.;
+	//state->camy = state->camx;
+	//state->camz = state->camx;
 	state->camdir = 0.f;
 	state->camzdir = 0.f;
 }

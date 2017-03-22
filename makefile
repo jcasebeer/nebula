@@ -4,7 +4,7 @@ OBJS = $(SRCS:.c=.o)
 
 INCLUDE = -I/usr/local/include
 LIB = -L/usr/local/lib -lSDL2 -lGLEW -lGLU -lGL -lm -Wl,-rpath=/usr/local/lib
-CFLAGS = -Wall -Wextra -O3 -march=native -std=c99 $(INCLUDE)
+CFLAGS = -Wall -Wextra -O3 -msse2 -mfpmath=sse -std=c99 $(INCLUDE)
 LFLAGS = $(LIB)
 
 all: $(NAME)

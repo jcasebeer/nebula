@@ -10,7 +10,6 @@ static void add_velocity(game_state *state, int entity, float xsp, float ysp, fl
 	v->x = (v->x) + xsp;
 	v->y = (v->y) + ysp;
 	v->z = (v->z) + zsp;
-	//printf("vx %f vy %f vz %f\n",v->x,v->y,v->z);
 
 	v->x = clamp(v->x,-vm->x,vm->x);
 	v->y = clamp(v->y,-vm->y,vm->y);
@@ -19,10 +18,8 @@ static void add_velocity(game_state *state, int entity, float xsp, float ysp, fl
 
 static void motion_add(game_state *state, int entity, float dir, float speed)
 {
-	float xsp = lengthdir_x(speed,dir);
-	float ysp = lengthdir_y(speed,dir);
-	printf("xsp %f ysp %f\n",xsp,ysp);
-	add_velocity(state,entity,xsp,ysp,0);
+	//
+	add_velocity(state,entity,lengthdir_x(speed,dir),lengthdir_y(speed,dir),0);
 }
 
 static void move_colliding_with_level(game_state *state, int entity)
@@ -39,21 +36,45 @@ static void add_friction(game_state *state, int entity)
 {
 	v3 *v = &(state->velocity[entity]);
 	float f = state->friction[entity];
+	float m = sqrt(v->x * v->x + v->y * v->y);
 
-	if (abs(v->x) > f)
-		v->x -= sign(v->x)*f;
-	else
-		v->x = 0;
+	if (m!=0)
+	{
+		float mi = 1/m;
 
-	if (abs(v->y) > f)
-		v->y -= sign(v->y)*f;
-	else
-		v->y = 0;
+		// normalize vector
+		v->x *= mi;
+		v->y *= mi;
 
+		m-=f;
+		if (m<0)
+			m = 0;
+
+		// apply friction
+		v->x *= m;
+		v->y *= m;	
+	}
+	
 	if (abs(v->z) > f)
 		v->z -= sign(v->z)*f;
 	else
 		v->z = 0;
+}
+
+static void clamp_speed(game_state *state, int entity)
+{
+	v3 *v = &(state->velocity[entity]);
+	float vmax = state->velocity_max[entity].x;
+	float m = sqrt(v->x * v->x + v->y * v->y);
+	if (m>vmax)
+	{
+		float mi = 1/m;
+		v->x *= mi;
+		v->y *= mi;
+
+		v->x *= vmax;
+		v->y *= vmax;
+	}	
 }
 
 int player_create(game_state *state, v3 position)
@@ -77,9 +98,9 @@ int player_create(game_state *state, v3 position)
 	v->z = 0;
 
 	v3 *vmax = &(state->velocity_max[ent]);
-	vmax->x = 16;
-	vmax->y = 16;
-	vmax->z = 16;
+	vmax->x = 2;
+	vmax->y = 2;
+	vmax->z = 2;
 
 	float *f = &(state->friction[ent]);
 	*f = 0.2;
@@ -96,24 +117,24 @@ void player_step(game_state *state, const Uint8 *key_state)
 	// check if player exists
 	if (state->player == -1)
 		return;
-	float spd = 1.0;
+	float spd = 0.3;
 
 	if (key_state[SDL_SCANCODE_W])
 		motion_add(state,state->player,state->camdir,spd);
 	if (key_state[SDL_SCANCODE_S])
 		motion_add(state,state->player,state->camdir+180.f,spd);
 	if (key_state[SDL_SCANCODE_D])
-		motion_add(state,state->player,state->camdir-90.f,spd);
+		motion_add(state,state->player,state->camdir+90.f,spd);
 	if (key_state[SDL_SCANCODE_A])
-		motion_add(state,state->player,state->camdir+90,spd);
+		motion_add(state,state->player,state->camdir-90,spd);
 	if (key_state[SDL_SCANCODE_Q])
-		add_velocity(state,state->player,0,0,spd);
+		add_velocity(state,state->player,0,0,1.0);
 	if (key_state[SDL_SCANCODE_E])
-		add_velocity(state,state->player,0,0,-spd);
+		add_velocity(state,state->player,0,0,-1.0);
 	if (key_state[SDL_SCANCODE_LEFT])
-		state->camdir+=1.;
-	if (key_state[SDL_SCANCODE_RIGHT])
 		state->camdir-=1.;
+	if (key_state[SDL_SCANCODE_RIGHT])
+		state->camdir+=1.;
 	if (key_state[SDL_SCANCODE_UP])
 		state->camzdir+=1.;
 	if (key_state[SDL_SCANCODE_DOWN])
@@ -138,6 +159,7 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 {
 	player_step(state,key_state);
 	move_colliding_with_level(state,state->player);
+	clamp_speed(state,state->player);
 	add_friction(state,state->player);
 	camera_update(state);
 

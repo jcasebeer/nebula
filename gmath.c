@@ -1,5 +1,6 @@
 #include "gmath.h"
 #include "time.h"
+#include "stdio.h"
 #include "stdlib.h"
 
 const double DEG2RAD = 3.141592655358979323846/180.;
@@ -45,7 +46,7 @@ float lengthdir_x(float len, float dir)
 
 float lengthdir_y(float len, float dir)
 {
-	return len*sin(DEG2RAD*dir);
+	return -len*sin(DEG2RAD*dir);
 }
 
 void move_to(float *x, float *y,float dir, float speed)

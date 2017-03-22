@@ -185,9 +185,9 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 		state->camx,
         state->camy,
         state->camz+8,
-        state->camx+lengthdir_x(lengthdir_x(1,state->camzdir),state->camdir),
-        state->camy+lengthdir_y(lengthdir_x(1,state->camzdir),state->camdir),
-        state->camz+8+lengthdir_y(1,state->camzdir)
+        state->camx+lengthdir_x(lengthdir_x(1,-state->camzdir),state->camdir),
+        state->camy+lengthdir_y(lengthdir_x(1,-state->camzdir),state->camdir),
+        state->camz+8+lengthdir_y(1,-state->camzdir)
 	);
 
 	// draw level model

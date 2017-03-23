@@ -18,23 +18,7 @@ typedef struct game_state
 	   ex: ec_list[c_none] is the array of all the entitys with the c_none component flag */
 	int ec_list[c_last][ENTITY_MAX];
 
-	/* component arrays */
-	v3 position[ENTITY_MAX];
-	v3 velocity[ENTITY_MAX];
-	float velocity_max[ENTITY_MAX];
-	float friction[ENTITY_MAX];
-	v3i bbox[ENTITY_MAX];
-
-	/* level data */
-	#define LEVEL_SIZE 192
-	#define MAX_BLOCKS 32768
-	#define BLOCK_SIZE 32
-	int block_grid[LEVEL_SIZE][LEVEL_SIZE][LEVEL_SIZE];
-	int block_list[MAX_BLOCKS];
-	int block_count;
-	int next_level;
-	// gl index to display list for level model
-	GLuint level_model;
+	/* player data */
 	// player entity id
 	int player;
 	/* camera vars */
@@ -43,6 +27,25 @@ typedef struct game_state
 	float camz;
 	float camdir;
 	float camzdir;
+
+	/* component arrays */
+	v3 position[ENTITY_MAX];
+	v3 velocity[ENTITY_MAX];
+	float velocity_max[ENTITY_MAX];
+	float friction[ENTITY_MAX];
+	v3i bbox[ENTITY_MAX];
+
+	/* level data */
+	#define LEVEL_SIZE 256
+	#define MAX_BLOCKS 110000
+	#define BLOCK_SIZE 32
+	int block_grid[LEVEL_SIZE][LEVEL_SIZE][LEVEL_SIZE];
+	int block_list[MAX_BLOCKS];
+	int block_count;
+	int next_level;
+	// gl index to display list for level model
+	GLuint level_model;
+
 }game_state;
 
 // create game state object

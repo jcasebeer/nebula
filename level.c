@@ -6,10 +6,10 @@
 
 void level_gen(game_state *state)
 {
-	int blocks = LEVEL_SIZE * BLOCK_SIZE;
+	int blocks = LEVEL_SIZE * BLOCK_SIZE * 3;
 	int x,y,z;
 	int i;
-	
+
 	// set all initial values in block_grid to -1
 	int *gptr = &(state->block_grid[0][0][0]);
 	for(i=0;i<LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE;i++)
@@ -79,6 +79,7 @@ void level_gen(game_state *state)
 	spawn.z = zstart * BLOCK_SIZE + 16.0;
 	
 	player_create(state,spawn);
+	printf("level block count: %d\n",state->block_count);
 }
 
 void level_next(game_state *state)
@@ -133,6 +134,8 @@ int block_at_bounded(game_state *state, int x, int y, int z)
 
 void block_create(game_state *state, int x, int y, int z)
 {
+	if (state->block_count > MAX_BLOCKS)
+		return;
 	state->block_grid[x][y][z] = state->block_count;
 	state->block_list[state->block_count] = point_create(x,y,z);
 	state->block_count++;

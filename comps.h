@@ -20,4 +20,12 @@ typedef struct v3
 	float z;	
 }v3;
 
+typedef struct v3i 
+{
+	int x;
+	int y;
+	int z;	
+}v3i;
+
+
 #endif

@@ -32,11 +32,11 @@ void level_gen(game_state *state)
 		x+=choose3(1,0,-1);
 		y+=choose3(1,0,-1);
 		z+=choose3(1,0,-1);
-		if (x>LEVEL_SIZE || x < 0)
+		while (x>=LEVEL_SIZE || x < 0)
 			x = irandom(LEVEL_SIZE);
-		if (y>LEVEL_SIZE || y < 0)
+		while (y>=LEVEL_SIZE || y < 0)
 			y = irandom(LEVEL_SIZE);
-		if (z>LEVEL_SIZE || z < 0)
+		while (z>=LEVEL_SIZE || z < 0)
 			z = irandom(LEVEL_SIZE);
 
 		if (state->block_grid[x][y][z] == -1)
@@ -76,7 +76,7 @@ void level_gen(game_state *state)
 	v3 spawn;
 	spawn.x = xstart * BLOCK_SIZE + 16.0;
 	spawn.y = ystart * BLOCK_SIZE + 16.0;
-	spawn.z = zstart * BLOCK_SIZE;
+	spawn.z = zstart * BLOCK_SIZE + 16.0;
 	
 	player_create(state,spawn);
 }

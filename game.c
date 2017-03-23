@@ -5,15 +5,28 @@
 static void add_velocity(game_state *state, int entity, float xsp, float ysp, float zsp)
 {
 	v3 *v = &(state->velocity[entity]);
-	v3 *vm = &(state->velocity_max[entity]);
 
 	v->x = (v->x) + xsp;
 	v->y = (v->y) + ysp;
 	v->z = (v->z) + zsp;
+}
 
-	v->x = clamp(v->x,-vm->x,vm->x);
-	v->y = clamp(v->y,-vm->y,vm->y);
-	v->z = clamp(v->z,-vm->z,vm->z);
+static int level_collide(game_state *state, float xx, float yy, float zz, v3i bbox)
+{
+	int x = (int)xx;
+	int y = (int)yy;
+	int z = (int)zz;
+
+	return (
+		block_at(state,(x-bbox.x)>>5,(y-bbox.y)>>5,(z-bbox.z)>>5) ||
+		block_at(state,(x-bbox.x)>>5,(y+bbox.y)>>5,(z-bbox.z)>>5) ||
+		block_at(state,(x-bbox.x)>>5,(y-bbox.y)>>5,(z+bbox.z)>>5) ||
+		block_at(state,(x-bbox.x)>>5,(y+bbox.y)>>5,(z+bbox.z)>>5) ||
+		block_at(state,(x+bbox.x)>>5,(y-bbox.y)>>5,(z-bbox.z)>>5) ||
+		block_at(state,(x+bbox.x)>>5,(y+bbox.y)>>5,(z-bbox.z)>>5) ||
+		block_at(state,(x+bbox.x)>>5,(y-bbox.y)>>5,(z+bbox.z)>>5) ||
+		block_at(state,(x+bbox.x)>>5,(y+bbox.y)>>5,(z+bbox.z)>>5)
+	);
 }
 
 static void motion_add(game_state *state, int entity, float dir, float speed)
@@ -26,12 +39,75 @@ static void move_colliding_with_level(game_state *state, int entity)
 {
 	v3 *p = &(state->position[entity]);
 	v3 *v = &(state->velocity[entity]);
+	v3i bbox = state->bbox[entity];
 
-	p->x+=v->x;
-	p->y+=v->y;
-	p->z+=v->z;
+	if (!level_collide(state,p->x,p->y,p->z+v->z,bbox))
+	{
+		p->z+=v->z;
+	}
+	else
+	{
+		int z = (float)(p->z);
+		if (v->z>0.f)
+		{
+			float fract = frac(p->z);
+			z = ((z+bbox.z+32) & ~31) - bbox.z -1;
+			p->z = (float)z + fract;
+		}
+		else if (v->z<0.f)
+		{
+			z = ((z-bbox.z) & ~31) + bbox.z;
+			p->z = (float)z;
+		}
+		v->z = 0.f;
+	}
+
+	if (!level_collide(state,p->x,p->y+v->y,p->z,bbox))
+	{
+		p->y+=v->y;
+	}
+	else
+	{
+		int y = (int)(p->y);
+		if (v->y>0.f)
+		{
+			float fract = frac(p->y);
+			y = ((y+bbox.y+32) & ~31) - bbox.y -1;
+			p->y = (float)y + fract;
+		}
+		else if (v->y<0.f)
+		{
+			y = ((y-bbox.y) & ~31) + bbox.y;
+			p->y = (float)y;
+		}
+		v->y = 0.f;
+	}
+
+	if (!level_collide(state,p->x+v->x,p->y,p->z,bbox))
+	{
+		p->x+=v->x;
+	}
+	else
+	{
+		int x = (int)(p->x);
+		if (v->x>0.f)
+		{
+			float fract = frac(p->x);
+			x = ((x+bbox.x+32) & ~31) - bbox.x -1;
+			p->x = (float)x + fract;
+		}
+		else if (v->x<0.f)
+		{
+			x = ((x-bbox.x) & ~31) + bbox.x;
+			p->x = (float)x;
+		}
+		
+		v->x = 0.f;
+	}
 }
 
+// friction only applied to horizontal movement
+// gravity system handles objects falling (vertical movement)
 static void add_friction(game_state *state, int entity)
 {
 	v3 *v = &(state->velocity[entity]);
@@ -64,17 +140,20 @@ static void add_friction(game_state *state, int entity)
 static void clamp_speed(game_state *state, int entity)
 {
 	v3 *v = &(state->velocity[entity]);
-	float vmax = state->velocity_max[entity].x;
+	float vmax = state->velocity_max[entity];
 	float m = sqrt(v->x * v->x + v->y * v->y);
 	if (m>vmax)
 	{
 		float mi = 1/m;
 		v->x *= mi;
 		v->y *= mi;
+		//v->z *= mi;
 
 		v->x *= vmax;
 		v->y *= vmax;
-	}	
+		//v->z *= vmax;
+	}
+	v->z = clamp(v->z,-vmax,vmax);
 }
 
 int player_create(game_state *state, v3 position)
@@ -97,17 +176,13 @@ int player_create(game_state *state, v3 position)
 	v->y = 0;
 	v->z = 0;
 
-	v3 *vmax = &(state->velocity_max[ent]);
-	vmax->x = 2;
-	vmax->y = 2;
-	vmax->z = 2;
+	// velocity and friction
+	state->velocity_max[ent] = 8.0;
+	state->friction[ent] = 0.2;
 
-	float *f = &(state->friction[ent]);
-	*f = 0.2;
-
-	v3 *bbox = &(state->bbox[ent]);
-	bbox->x = 4;
-	bbox->y = 4;
+	v3i *bbox = &(state->bbox[ent]);
+	bbox->x = 8;
+	bbox->y = 8;
 	bbox->z = 8;
 	return ent;
 }
@@ -119,6 +194,11 @@ void player_step(game_state *state, const Uint8 *key_state)
 		return;
 	float spd = 0.3;
 
+	if (key_state[SDL_SCANCODE_Q])
+		add_velocity(state,state->player,0,0,1.f);
+	if (key_state[SDL_SCANCODE_E])
+		add_velocity(state,state->player,0,0,-1.f);
+
 	if (key_state[SDL_SCANCODE_W])
 		motion_add(state,state->player,state->camdir,spd);
 	if (key_state[SDL_SCANCODE_S])
@@ -126,23 +206,20 @@ void player_step(game_state *state, const Uint8 *key_state)
 	if (key_state[SDL_SCANCODE_D])
 		motion_add(state,state->player,state->camdir+90.f,spd);
 	if (key_state[SDL_SCANCODE_A])
-		motion_add(state,state->player,state->camdir-90,spd);
-	if (key_state[SDL_SCANCODE_Q])
-		add_velocity(state,state->player,0,0,1.0);
-	if (key_state[SDL_SCANCODE_E])
-		add_velocity(state,state->player,0,0,-1.0);
+		motion_add(state,state->player,state->camdir-90.f,spd);
+
 	if (key_state[SDL_SCANCODE_LEFT])
-		state->camdir-=1.;
+		state->camdir-=1.f;
 	if (key_state[SDL_SCANCODE_RIGHT])
-		state->camdir+=1.;
+		state->camdir+=1.f;
 	if (key_state[SDL_SCANCODE_UP])
-		state->camzdir+=1.;
+		state->camzdir+=1.f;
 	if (key_state[SDL_SCANCODE_DOWN])
-		state->camzdir-=1.;
-	if (state->camzdir>89.f)
-		state->camzdir = 89.f;
-	if (state->camzdir<-89.f)
-		state->camzdir = -89.f;
+		state->camzdir-=1.f;
+	if (state->camzdir>88.f)
+		state->camzdir = 88.f;
+	if (state->camzdir<-88.f)
+		state->camzdir = -88.f;
 }
 
 static void camera_update(game_state *state)
@@ -158,11 +235,10 @@ static void camera_update(game_state *state)
 void game_simulate(game_state *state, const Uint8 *key_state)
 {
 	player_step(state,key_state);
-	move_colliding_with_level(state,state->player);
 	clamp_speed(state,state->player);
+	move_colliding_with_level(state,state->player);
 	add_friction(state,state->player);
 	camera_update(state);
-
 	/*
 	float *x,*y,dir;
 	x = &(state->camx);

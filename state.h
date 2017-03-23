@@ -21,9 +21,9 @@ typedef struct game_state
 	/* component arrays */
 	v3 position[ENTITY_MAX];
 	v3 velocity[ENTITY_MAX];
-	v3 velocity_max[ENTITY_MAX];
+	float velocity_max[ENTITY_MAX];
 	float friction[ENTITY_MAX];
-	v3 bbox[ENTITY_MAX];
+	v3i bbox[ENTITY_MAX];
 
 	/* level data */
 	#define LEVEL_SIZE 192

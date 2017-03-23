@@ -16,6 +16,16 @@ float clamp(float x, float l, float r)
 		return x;
 }
 
+float roundf(float x)
+{
+	return floor(x+0.5);
+}
+
+float frac(float x)
+{
+	return x - floor(x);
+}
+
 float sign(float x)
 {
 	return (float) (x > 0) - (x < 0);

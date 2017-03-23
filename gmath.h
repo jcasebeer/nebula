@@ -18,5 +18,7 @@ int irandom(int range);
 int choose3(int x1, int x2, int x3);
 float sign(float x);
 float clamp(float x, float l, float r);
+float roundf(float x);
+float frac(float x);
 
 #endif

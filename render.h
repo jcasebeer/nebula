@@ -34,4 +34,5 @@ surface_data *surface_data_create(int width, int height);
 void surface_data_destroy(surface_data *surf);
 void game_render(game_state *state, SDL_Window *window, texture_data *textures);
 void game_render_pp(game_state *state, SDL_Window *window, texture_data *textures, surface_data *surf);
+void draw_sprite(game_state *state, int entity);
 #endif

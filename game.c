@@ -187,6 +187,22 @@ int player_create(game_state *state, v3 position)
 	return ent;
 }
 
+int test_sprite(game_state *state,float x, float y, float z)
+{
+	int ent = entity_create(state);
+	entity_component_add(state,ent,c_position);
+
+	v3 *pos = &(state->position[ent]);
+	pos->x = x;
+	pos->y = y;
+	pos->z = z;
+
+	sprite_add(state,ent,0,8,16,16);
+	spr *sprite = &(state->sprite[ent]);
+	sprite->image_speed = 0.25f;
+	return ent;
+}
+
 void player_step(game_state *state, const Uint8 *key_state)
 {
 	// check if player exists
@@ -207,6 +223,11 @@ void player_step(game_state *state, const Uint8 *key_state)
 		motion_add(state,state->player,state->camdir+90.f,spd);
 	if (key_state[SDL_SCANCODE_A])
 		motion_add(state,state->player,state->camdir-90.f,spd);
+	if (key_state[SDL_SCANCODE_R])
+	{
+		v3 *pos = &(state->position[state->player]);
+		test_sprite(state,pos->x,pos->y,pos->z);
+	}
 
 	if (key_state[SDL_SCANCODE_LEFT])
 		state->camdir-=1.f;

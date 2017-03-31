@@ -233,8 +233,15 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glEnable(GL_TEXTURE_2D);
 
 	// test drawing textures
+	//glDisable(GL_CULL_FACE);
 	glBindTexture(GL_TEXTURE_2D,textures->sprites);
-	glPushMatrix();
+	int *sprites = get_ec_set(state,c_sprite);
+	for(int i = 0; iterate_ec_set(sprites,i); i++)
+	{
+		draw_sprite(state,sprites[i]);
+	}
+	//glEnable(GL_CULL_FACE);
+	/*glPushMatrix();
 	glTranslatef(3072,3072,3072);
 	glBegin(GL_TRIANGLE_FAN);
 	glTexCoord2f(0.f,0.f);
@@ -254,7 +261,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
     //glColor3f(1,1,1);
     glVertex3f(-8,-8,0);
 	glEnd();
-	glPopMatrix();
+	glPopMatrix();*/
 
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_ALPHA_TEST);
@@ -578,3 +585,81 @@ void texture_destroy(GLuint tex)
 	glDeleteTextures(1,&tex);
 }
 
+void sprite_add(game_state *state, int entity, float sprite_index, float image_count, float width, float height)
+{
+	entity_component_add(state,entity,c_sprite);
+	spr *sprite = &(state->sprite[entity]);
+
+	sprite->sprite_index = sprite_index;
+	sprite->image_count = image_count;
+	sprite->width = width;
+	sprite->height = height;
+	sprite->image_index = 0;
+	sprite->image_speed = 0.f;
+}
+
+static float mdist(game_state *state, float x, float y, float z)
+{
+	float diffx = abs(state->camx - x);
+	float diffy = abs(state->camy - y);
+	float diffz = abs(state->camz - z);
+
+	return diffx+diffy+diffz;
+}
+
+void draw_sprite(game_state *state, int entity)
+{
+	spr *sprite = &(state->sprite[entity]);
+	v3 *pos = &(state->position[entity]);
+
+	float x = floor(sprite->image_index)*sprite->width;
+	float y = sprite->sprite_index*sprite->height;
+	float xto = x+sprite->width;
+	float yto = y+sprite->height;
+	float width = sprite->width;
+	float height = sprite->height;
+	x/=1024.f;
+	y/=1024.f;
+	xto/=1024.f;
+	yto/=1024.f;
+	const float maxdist = 2048.f;
+	float dist = 1.f - clamp(mdist(state,pos->x,pos->y,pos->z),0.f,maxdist)/maxdist;
+
+	glPushMatrix();
+		glTranslatef(pos->x,pos->y,pos->z);
+		glPushMatrix();
+			GLfloat m[4][4];
+			glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)m);
+			m[0][0] = 1.f;
+			m[0][1] = 0.f;
+			m[0][2] = 0.f;
+
+			m[1][0] = 0.f;
+			m[1][1] = 1.f;
+			m[1][2] = 0.f;
+
+			m[2][0] = 0.f;
+			m[2][1] = 0.f;
+			m[2][2] = 1.f;
+			glLoadMatrixf(&m[0][0]);
+			glBegin(GL_TRIANGLE_FAN);
+			glColor3f(dist,dist,dist);
+			glTexCoord2f(xto,y);
+		   	glVertex3f(width,height,0);
+		   	glTexCoord2f(x,y);
+		   	glVertex3f(-width,height,0);
+		   	glTexCoord2f(x,yto);
+		    glVertex3f(-width,-height,0);
+		    glTexCoord2f(xto,yto);
+		    glVertex3f(width,-height,0);
+		    glColor3f(1.f,1.f,1.f);
+			glEnd();
+		glPopMatrix();
+	glPopMatrix();
+
+
+	if (ceil(sprite->image_index) < sprite->image_count)
+		sprite->image_index += sprite->image_speed;
+	else
+		sprite->image_index = 0;
+}

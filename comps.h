@@ -10,6 +10,7 @@ typedef enum
 	c_friction,
 	c_grounded,
 	c_level_collider, // needs bbox
+	c_sprite,
 	c_last // special enum, keep at end
 }component_flag;
 
@@ -27,5 +28,14 @@ typedef struct v3i
 	int z;	
 }v3i;
 
+typedef struct spr
+{
+	float sprite_index;
+	float image_index;
+	float image_count;
+	float image_speed;
+	float width;
+	float height;
+}spr;
 
 #endif

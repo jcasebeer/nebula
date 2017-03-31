@@ -34,6 +34,7 @@ typedef struct game_state
 	float velocity_max[ENTITY_MAX];
 	float friction[ENTITY_MAX];
 	v3i bbox[ENTITY_MAX];
+	spr sprite[ENTITY_MAX];
 
 	/* level data */
 	#define LEVEL_SIZE 256
@@ -86,5 +87,8 @@ void game_simulate(game_state *state,const Uint8 *key_state);
 
 /***** entitys *******/
 int player_create(game_state *state, v3 position);
+
+/***** component adds ******/
+void sprite_add(game_state *state, int entity, float sprite_index, float image_count, float width, float height);
 
 #endif

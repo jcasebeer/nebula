@@ -229,6 +229,11 @@ void player_step(game_state *state, const Uint8 *key_state)
 		test_sprite(state,pos->x,pos->y,pos->z);
 	}
 
+	SDL_GetRelativeMouseState(&(state->mouse_x),&(state->mouse_y));
+
+	state->camdir+=(state->mouse_x)/20.f;
+	state->camzdir-=(state->mouse_y)/20.f;
+
 	if (key_state[SDL_SCANCODE_LEFT])
 		state->camdir-=1.f;
 	if (key_state[SDL_SCANCODE_RIGHT])

@@ -91,14 +91,7 @@ void level_next(game_state *state)
 	// generate new level data
 	level_gen(state);
 	// build new level model
-	state->level_model = level_model_build(state);
-
-	// move camera to center of level (for testing)
-	//state->camx = LEVEL_SIZE*BLOCK_SIZE/2.;
-	//state->camy = state->camx;
-	//state->camz = state->camx;
-	state->camdir = 0.f;
-	state->camzdir = 0.f;
+	state->level_model = level_model_build(state);	
 }
 
 // 10 bits for the x,y,z position of each point

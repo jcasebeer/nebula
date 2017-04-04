@@ -175,7 +175,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
 	glViewport(0,0,width,height);
-	draw_set_frustum(90.,(float)width/height,1.,32000.);
+	draw_set_frustum(90.f,(float)width/height,1.,32000.);
 
 	// point camera
 	glMatrixMode(GL_MODELVIEW);
@@ -240,33 +240,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	{
 		draw_sprite(state,sprites[i]);
 	}
-	//glEnable(GL_CULL_FACE);
-	/*glPushMatrix();
-	glTranslatef(3072,3072,3072);
-	glBegin(GL_TRIANGLE_FAN);
-	glTexCoord2f(0.f,0.f);
-	//glColor3f(1,0,0);
-   	glVertex3f(-8,+8,0);
-
-   	glTexCoord2f(1.f,0.f);
-   	//glColor3f(0,1,0);
-   	glVertex3f(+8,+8,0);
-
-   	glTexCoord2f(1.f,1.f);
-    //glColor3f(0,0,1);
-    glVertex3f(+8,-8,0);
-
-
-    glTexCoord2f(0.f,1.f);
-    //glColor3f(1,1,1);
-    glVertex3f(-8,-8,0);
-	glEnd();
-	glPopMatrix();*/
 
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_CULL_FACE);
 }
 
 texture_data *texture_data_create()

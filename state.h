@@ -27,6 +27,8 @@ typedef struct game_state
 	float camz;
 	float camdir;
 	float camzdir;
+	int mouse_x;
+	int mouse_y;
 
 	/* component arrays */
 	v3 position[ENTITY_MAX];

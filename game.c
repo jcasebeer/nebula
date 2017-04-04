@@ -181,9 +181,9 @@ int player_create(game_state *state, v3 position)
 	state->friction[ent] = 0.2;
 
 	v3i *bbox = &(state->bbox[ent]);
-	bbox->x = 8;
-	bbox->y = 8;
-	bbox->z = 8;
+	bbox->x = 4;
+	bbox->y = 4;
+	bbox->z = 12;
 	return ent;
 }
 

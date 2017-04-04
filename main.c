@@ -10,8 +10,8 @@
 int main()
 {
 	SDL_Init(SDL_INIT_VIDEO);
-	int width = 1600;
-	int height = 900;
+	int width = 1280;
+	int height = 720;
 
 	// turn on double buffering and set opengl version
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
@@ -25,7 +25,7 @@ int main()
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width,height,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP
+		SDL_WINDOW_OPENGL
 	);
 
 	// grab the mouse
@@ -97,6 +97,7 @@ int main()
 
 		game_simulate(state,key_state);
 		game_render_pp(state,window,textures,surf);
+		SDL_GL_SwapWindow(window);
 		
 
 		if (state->next_level)
@@ -150,7 +151,6 @@ int main()
 		//printf("frametime: %u\n", timespent);
 		if (timespent<sleeptime)
 			SDL_Delay(sleeptime - timespent);
-		SDL_GL_SwapWindow(window);
 	}
 	model_destroy(state->level_model);
 	game_state_destroy(state);

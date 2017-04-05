@@ -21,6 +21,7 @@ typedef struct game_state
 	/* player data */
 	// player entity id
 	int player;
+	float vheight;
 	/* camera vars */
 	float camx;
 	float camy;
@@ -48,7 +49,7 @@ typedef struct game_state
 	int next_level;
 	// gl index to display list for level model
 	GLuint level_model;
-
+	float gravity;
 }game_state;
 
 // create game state object

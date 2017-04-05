@@ -29,6 +29,11 @@ void level_gen(game_state *state)
 
 	while(blocks>0)
 	{
+		if (state->block_grid[x][y][z] == -1)
+		{
+			block_create(state,x,y,z);
+		}
+
 		x+=choose3(1,0,-1);
 		y+=choose3(1,0,-1);
 		z+=choose3(1,0,-1);
@@ -38,11 +43,6 @@ void level_gen(game_state *state)
 			y = irandom(LEVEL_SIZE);
 		while (z>=LEVEL_SIZE || z < 0)
 			z = irandom(LEVEL_SIZE);
-
-		if (state->block_grid[x][y][z] == -1)
-		{
-			block_create(state,x,y,z);
-		}
 
 		blocks--;
 	}

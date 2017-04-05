@@ -131,10 +131,17 @@ static void add_friction(game_state *state, int entity)
 		v->y *= m;	
 	}
 	
-	if (abs(v->z) > f)
+	/*if (abs(v->z) > f)
 		v->z -= sign(v->z)*f;
 	else
-		v->z = 0;
+		v->z = 0;*/
+}
+
+static void add_gravity(game_state *state, int entity)
+{
+	v3 *v = &(state->velocity[entity]);
+	//v3 *p = &(state->position[entity]);
+	v->z-=state->gravity;
 }
 
 static void clamp_speed(game_state *state, int entity)
@@ -153,7 +160,7 @@ static void clamp_speed(game_state *state, int entity)
 		v->y *= vmax;
 		//v->z *= vmax;
 	}
-	v->z = clamp(v->z,-vmax,vmax);
+	//v->z = clamp(v->z,-vmax,vmax);
 }
 
 int player_create(game_state *state, v3 position)
@@ -177,13 +184,13 @@ int player_create(game_state *state, v3 position)
 	v->z = 0;
 
 	// velocity and friction
-	state->velocity_max[ent] = 8.0;
+	state->velocity_max[ent] = 2.0;
 	state->friction[ent] = 0.2;
 
 	v3i *bbox = &(state->bbox[ent]);
-	bbox->x = 4;
-	bbox->y = 4;
-	bbox->z = 12;
+	bbox->x = 6;
+	bbox->y = 6;
+	bbox->z = 10;
 	return ent;
 }
 
@@ -209,11 +216,8 @@ void player_step(game_state *state, const Uint8 *key_state)
 	if (state->player == -1)
 		return;
 	float spd = 0.3;
-
-	if (key_state[SDL_SCANCODE_Q])
-		add_velocity(state,state->player,0,0,1.f);
-	if (key_state[SDL_SCANCODE_E])
-		add_velocity(state,state->player,0,0,-1.f);
+	v3 *pos = &(state->position[state->player]);
+	v3i bbox = state->bbox[state->player];
 
 	if (key_state[SDL_SCANCODE_W])
 		motion_add(state,state->player,state->camdir,spd);
@@ -223,6 +227,12 @@ void player_step(game_state *state, const Uint8 *key_state)
 		motion_add(state,state->player,state->camdir+90.f,spd);
 	if (key_state[SDL_SCANCODE_A])
 		motion_add(state,state->player,state->camdir-90.f,spd);
+
+	int grounded = level_collide(state,pos->x,pos->y,pos->z - 1,bbox);
+
+	if (grounded && key_state[SDL_SCANCODE_SPACE])
+		add_velocity(state,state->player,0,0,3.0);
+
 	if (key_state[SDL_SCANCODE_R])
 	{
 		v3 *pos = &(state->position[state->player]);
@@ -260,9 +270,26 @@ static void camera_update(game_state *state)
 
 void game_simulate(game_state *state, const Uint8 *key_state)
 {
+	int i;
+	int *ents;
+
+	// player stuff
 	player_step(state,key_state);
 	clamp_speed(state,state->player);
-	move_colliding_with_level(state,state->player);
+
+	// gravity system
+	ents = get_ec_set(state,c_grounded);
+	for(i=0; iterate_ec_set(ents,i); i++)
+		add_gravity(state,ents[i]);
+
+	// friction system
 	add_friction(state,state->player);
+
+	// level collision system
+	ents = get_ec_set(state,c_level_collider);
+	for(i=0; iterate_ec_set(ents,i); i++)
+		move_colliding_with_level(state,ents[i]);
+
+	// camera update system
 	camera_update(state);
 }

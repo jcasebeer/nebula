@@ -146,11 +146,13 @@ int main()
 
 			}
 		}
-		
+
+		// limit framerate to 60fps
 		timespent = SDL_GetTicks() - time;
-		//printf("frametime: %u\n", timespent);
-		if (timespent<sleeptime)
-			SDL_Delay(sleeptime - timespent);
+		while (timespent<sleeptime)
+		{
+			timespent = SDL_GetTicks() - time;
+		}
 	}
 	model_destroy(state->level_model);
 	game_state_destroy(state);

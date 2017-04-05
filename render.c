@@ -184,10 +184,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	draw_position_camera(
 		state->camx,
         state->camy,
-        state->camz,
+        state->camz+state->vheight,
         state->camx+lengthdir_x(lengthdir_x(1,-state->camzdir),state->camdir),
         state->camy+lengthdir_y(lengthdir_x(1,-state->camzdir),state->camdir),
-        state->camz+lengthdir_y(1,-state->camzdir)
+        state->camz+state->vheight+lengthdir_y(1,-state->camzdir)
 	);
 
 	// draw level model

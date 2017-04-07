@@ -49,6 +49,7 @@ typedef struct game_state
 	int next_level;
 	// gl index to display list for level model
 	GLuint level_model;
+	GLuint grass_model;
 	float gravity;
 }game_state;
 

@@ -35,7 +35,7 @@ int main()
 	// create opengl context
 	SDL_GL_CreateContext(window);
 	// turn on vsync
-	SDL_GL_SetSwapInterval(1);
+	//SDL_GL_SetSwapInterval(1);
 
 	// get our extensions
 	glewInit();
@@ -67,15 +67,16 @@ int main()
     time_seed_rng();
 
 	// generate a level and build its model
-	level_gen(state);
-	state->level_model = level_model_build(state);
+	//level_gen(state);
+	//state->level_model = level_model_build(state);
+	level_next(state);
 
 	int error = 0;
 	// main game loop
 	while(!quit)
 	{
 		time = SDL_GetTicks();
-
+	
 		while(SDL_PollEvent(&event))
 		{
 			if (event.type==SDL_QUIT)
@@ -99,7 +100,6 @@ int main()
 		game_render_pp(state,window,textures,surf);
 		SDL_GL_SwapWindow(window);
 		
-
 		if (state->next_level)
 		{
 			level_next(state);
@@ -148,6 +148,7 @@ int main()
 		}
 
 		// limit framerate to 60fps
+		//SDL_Delay(1);
 		timespent = SDL_GetTicks() - time;
 		while (timespent<sleeptime)
 		{
@@ -155,6 +156,7 @@ int main()
 		}
 	}
 	model_destroy(state->level_model);
+	model_destroy(state->grass_model);
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);
 	free(textures);

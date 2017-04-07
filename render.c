@@ -194,6 +194,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	//glPointSize(2.0);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+	glLineWidth(4);
 
 	glPushMatrix();
 	
@@ -220,11 +221,25 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textures->shadow);
 	model_draw(state->level_model);
+	
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_TEXTURE_2D);
-
-	glDisable(GL_LIGHTING);
 	glDisable(GL_LIGHT0);
+
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.f);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.0f);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION,0.f);
+	glLightfv(GL_LIGHT1,GL_POSITION,light_pos);
+	glLightfv(GL_LIGHT1,GL_SPECULAR,spec);
+	GLfloat gAmbient[4] = {0.5f,0.5f,0.5f,1.f};
+	GLfloat gDiffuse[4] = {.5f,.5f,.5f,1.f};
+	glLightfv(GL_LIGHT1,GL_DIFFUSE,gDiffuse);
+	glLightfv(GL_LIGHT1,GL_AMBIENT,gAmbient);
+	glEnable(GL_LIGHT1);
+	model_draw(state->grass_model);
+	glDisable(GL_LIGHT1);
+	glDisable(GL_LIGHTING);
+	
 	glPopMatrix();
 	
 
@@ -315,6 +330,12 @@ static void vertex(int x, int y, int z, float xnorm, float ynorm, float znorm, f
 	glTexCoord2f(uv_x,uv_y);
 	glNormal3f(xnorm,ynorm,znorm);
 	glVertex3i(x+offset(6),y+offset(6),z+offset(6));
+}
+
+static void nvertex(int x, int y, int z, float xnorm, float ynorm, float znorm)
+{
+	glNormal3f(xnorm,ynorm,znorm);
+	glVertex3i(x,y,z);
 }
 
 static void block_up(int x1, int y1, int z1, float uv)
@@ -524,6 +545,45 @@ GLuint level_model_build(game_state *state)
 	return list;
 }
 
+GLuint grass_model_build(game_state *state)
+{
+	GLuint list = glGenLists(1);
+	glNewList(list,GL_COMPILE);
+	unsigned int seed = SEED;
+	int x,y,z,xb,yb,zb;
+	for(int i = 0; i<state->block_count;i++)
+	{
+		x = point_getx(state->block_list[i]);
+		y = point_gety(state->block_list[i]);
+		z = point_getz(state->block_list[i]);
+
+		xb = x << 5;
+		yb = y << 5;
+		zb = z << 5;
+
+		seed_rng(x*y-z);
+		if (irandom(10)>5 && !block_at(state,x,y,z+1))
+		{
+			glBegin(GL_LINES);
+			for(int w = 0; w<8; w++)
+			{
+				int gx, gy, gz;
+				gx = xb + irandom(32);
+				gy = yb + irandom(32);
+				gz = zb + 32;
+				nvertex(gx,gy,gz,0.70710678118,0,0.70710678118);
+				gx = gx + irandom(16) - 8;
+				gy = gy + irandom(16) - 8;
+				gz = gz + 8 + irandom(4);
+				nvertex(gx,gy,gz,0.70710678118,0,0.70710678118);
+			}
+			glEnd();
+		}
+	}
+	seed_rng(seed);
+	glEndList();
+	return list;
+}
 
 void model_draw(GLuint model)
 {

@@ -36,4 +36,5 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures);
 void game_render_pp(game_state *state, SDL_Window *window, texture_data *textures, surface_data *surf);
 void draw_sprite(game_state *state, int entity);
 GLuint grass_model_build(game_state *state);
+GLuint dust_model_build(game_state *state);
 #endif

@@ -50,6 +50,8 @@ typedef struct game_state
 	// gl index to display list for level model
 	GLuint level_model;
 	GLuint grass_model;
+	GLuint dust_model;
+	float dust_anim;
 	float gravity;
 }game_state;
 
@@ -76,7 +78,7 @@ int iterate_ec_set(int *set,int id);
 
 /****** LEVEL STUFF **************/
 void level_gen(game_state *state);
-void level_next(game_state *state);
+void level_next(game_state *state, int clearModels);
 int point_getx(int block);
 int point_gety(int block);
 int point_getz(int block);

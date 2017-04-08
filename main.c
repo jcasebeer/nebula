@@ -25,7 +25,7 @@ int main()
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width,height,
-		SDL_WINDOW_OPENGL
+		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
 	);
 
 	// grab the mouse
@@ -69,7 +69,7 @@ int main()
 	// generate a level and build its model
 	//level_gen(state);
 	//state->level_model = level_model_build(state);
-	level_next(state);
+	level_next(state,0);
 
 	int error = 0;
 	// main game loop
@@ -102,7 +102,7 @@ int main()
 		
 		if (state->next_level)
 		{
-			level_next(state);
+			level_next(state,1);
 			state->next_level = 0;
 		}
 

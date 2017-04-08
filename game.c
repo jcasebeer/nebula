@@ -273,6 +273,8 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 	int i;
 	int *ents;
 
+	// misc
+	state->dust_anim+=0.01;
 	// player stuff
 	player_step(state,key_state);
 	clamp_speed(state,state->player);

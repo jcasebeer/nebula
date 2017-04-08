@@ -82,11 +82,15 @@ void level_gen(game_state *state)
 	printf("level block count: %d\n",state->block_count);
 }
 
-void level_next(game_state *state)
+void level_next(game_state *state, int clearModels)
 {
-	// destory level model
-	model_destroy(state->level_model);
-	model_destroy(state->grass_model);
+	if (clearModels)
+	{
+		// destory level model
+		model_destroy(state->level_model);
+		model_destroy(state->grass_model);
+		model_destroy(state->dust_model);
+	}
 	// clear old game_states memory
 	game_state_clear(state);
 	// generate new level data
@@ -94,6 +98,7 @@ void level_next(game_state *state)
 	// build new level model
 	state->level_model = level_model_build(state);	
 	state->grass_model = grass_model_build(state);
+	state->dust_model = dust_model_build(state);
 }
 
 // 10 bits for the x,y,z position of each point

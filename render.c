@@ -231,8 +231,8 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION,0.f);
 	glLightfv(GL_LIGHT1,GL_POSITION,light_pos);
 	glLightfv(GL_LIGHT1,GL_SPECULAR,spec);
-	GLfloat gAmbient[4] = {0.4f,0.4f,0.4f,1.f};
-	GLfloat gDiffuse[4] = {0.4f,0.4f,0.4f,1.f};
+	GLfloat gAmbient[4] = {0.4f,0.5f,0.4f,1.f};
+	GLfloat gDiffuse[4] = {0.5f,0.4f,0.5f,1.f};
 	glLightfv(GL_LIGHT1,GL_DIFFUSE,gDiffuse);
 	glLightfv(GL_LIGHT1,GL_AMBIENT,gAmbient);
 	glEnable(GL_LIGHT1);

@@ -28,6 +28,10 @@ int main()
 		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
 	);
 
+	// process priority
+	if (SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH)<0)
+		printf("Thread Priority Error: %s\n",SDL_GetError());
+
 	// grab the mouse
 	SDL_SetWindowGrab(window,1);
 	SDL_SetRelativeMouseMode(1);
@@ -44,9 +48,9 @@ int main()
 	// initialze some variables for the main loop
 	#define TARGET_FPS 60
 	int quit = 0;
-	unsigned int time = 0;
-	unsigned int timespent = 0;
-	unsigned int sleeptime = 1000/TARGET_FPS;
+	unsigned long int time = 0;
+	unsigned long int timespent = 0;
+	unsigned long int sleeptime = 1000/TARGET_FPS;
 
 	// sdl variables for handling input
 	SDL_Event event;
@@ -75,7 +79,7 @@ int main()
 	// main game loop
 	while(!quit)
 	{
-		time = SDL_GetTicks();
+		time = SDL_GetPerformanceCounter()*1000/SDL_GetPerformanceFrequency();
 	
 		while(SDL_PollEvent(&event))
 		{
@@ -99,7 +103,7 @@ int main()
 		game_simulate(state,key_state);
 		game_render_pp(state,window,textures,surf);
 		SDL_GL_SwapWindow(window);
-		
+
 		if (state->next_level)
 		{
 			level_next(state,1);
@@ -149,10 +153,11 @@ int main()
 
 		// limit framerate to 60fps
 		//SDL_Delay(1);
-		timespent = SDL_GetTicks() - time;
+		timespent = SDL_GetPerformanceCounter()*1000/SDL_GetPerformanceFrequency() - time;
+		//printf("timespent: %d\n",timespent);
 		while (timespent<sleeptime)
 		{
-			timespent = SDL_GetTicks() - time;
+			timespent = SDL_GetPerformanceCounter()*1000/SDL_GetPerformanceFrequency() - time;
 		}
 	}
 	model_destroy(state->level_model);

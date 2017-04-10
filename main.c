@@ -10,8 +10,9 @@
 int main()
 {
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
-	int width = 1024;
-	int height = 576;
+	int width = 960;
+	int height = 720;
+	int fullscreen = 0;
 
 	// turn on double buffering and set opengl version
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
@@ -25,7 +26,7 @@ int main()
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		width,height,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+		SDL_WINDOW_OPENGL
 	);
 
 	// process priority
@@ -100,7 +101,7 @@ int main()
 					{
 						state->next_level = 1;
 					}
-					if (event.key.keysym.sym == SDLK_m)
+					if (event.key.keysym.sym == SDLK_F5)
 					{
 						if (skip_max == 1)
 							skip_max = 2;
@@ -108,6 +109,19 @@ int main()
 							skip_max = 1;
 
 						skip_counter = 0;
+					}
+					if (event.key.keysym.sym == SDLK_F4)
+					{
+						if (fullscreen)
+						{
+							fullscreen = 0;
+							SDL_SetWindowFullscreen(window,0);
+						}
+						else
+						{
+							fullscreen = 1;
+							SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN_DESKTOP);
+						}
 					}
 				}
 		}

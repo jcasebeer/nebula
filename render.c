@@ -194,7 +194,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glPointSize(2.0);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	glLineWidth(4);
+	//glLineWidth(4);
 
 	glPushMatrix();
 	
@@ -236,12 +236,13 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightfv(GL_LIGHT1,GL_DIFFUSE,gDiffuse);
 	glLightfv(GL_LIGHT1,GL_AMBIENT,gAmbient);
 	glEnable(GL_LIGHT1);
-	//glDisable(GL_LIGHTING);
 	glPushMatrix();
 	glTranslatef(sin(state->dust_anim)*10,cos(state->dust_anim)*10,sin(state->dust_anim)*10);
 	model_draw(state->dust_model);
 	glPopMatrix();
+	glDisable(GL_CULL_FACE);
 	model_draw(state->grass_model);
+	glEnable(GL_CULL_FACE);
 	glDisable(GL_LIGHT1);
 	glDisable(GL_LIGHTING);
 	
@@ -337,10 +338,10 @@ static void vertex(int x, int y, int z, float xnorm, float ynorm, float znorm, f
 	glVertex3i(x+offset(6),y+offset(6),z+offset(6));
 }
 
-static void nvertex(int x, int y, int z, float xnorm, float ynorm, float znorm)
+static void nvertex(float x, float y, float z, float xnorm, float ynorm, float znorm)
 {
 	glNormal3f(xnorm,ynorm,znorm);
-	glVertex3i(x,y,z);
+	glVertex3f(x,y,z);
 }
 
 static void block_up(int x1, int y1, int z1, float uv)
@@ -556,6 +557,7 @@ GLuint grass_model_build(game_state *state)
 	glNewList(list,GL_COMPILE);
 	unsigned int seed = SEED;
 	int x,y,z,xb,yb,zb;
+	float gsize = 1;
 	for(int i = 0; i<state->block_count;i++)
 	{
 		x = point_getx(state->block_list[i]);
@@ -569,18 +571,25 @@ GLuint grass_model_build(game_state *state)
 		seed_rng(x*y-z);
 		if (irandom(10)>5 && !block_at(state,x,y,z+1))
 		{
-			glBegin(GL_LINES);
+			glBegin(GL_QUADS);
 			for(int w = 0; w<8; w++)
 			{
-				int gx, gy, gz;
-				gx = xb + irandom(32);
-				gy = yb + irandom(32);
-				gz = zb + 32;
-				nvertex(gx,gy,gz,0.70710678118,0,0.70710678118);
-				gx = gx + irandom(16) - 8;
-				gy = gy + irandom(16) - 8;
-				gz = gz + 8;
-				nvertex(gx,gy,gz,0.70710678118,0,0.70710678118);
+				int gx, gy, gz,gx2,gy2,gz2;
+				gx = xb + random(32);
+				gy = yb + random(32);
+				gz = zb + 28+random(4);
+				gx2 = gx + random(16) - 8;
+				gy2 = gy + random(16) - 8;
+				gz2 = gz + 8;
+				nvertex(gx-gsize,gy,gz,0.70710678118,0,0.70710678118);
+				nvertex(gx+gsize,gy,gz,0.70710678118,0,0.70710678118);
+				nvertex(gx2+gsize,gy2,gz2,0.70710678118,0,0.70710678118);
+				nvertex(gx2-gsize,gy2,gz2,0.70710678118,0,0.70710678118);
+
+				nvertex(gx,gy-gsize,gz,0.70710678118,0,0.70710678118);
+				nvertex(gx,gy+gsize,gz,0.70710678118,0,0.70710678118);
+				nvertex(gx2,gy2+gsize,gz2,0.70710678118,0,0.70710678118);
+				nvertex(gx2,gy2-gsize,gz2,0.70710678118,0,0.70710678118);
 			}
 			glEnd();
 		}

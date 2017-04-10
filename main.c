@@ -9,9 +9,9 @@
 
 int main()
 {
-	SDL_Init(SDL_INIT_VIDEO);
-	int width = 1280;
-	int height = 720;
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
+	int width = 1024;
+	int height = 576;
 
 	// turn on double buffering and set opengl version
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1);
@@ -29,8 +29,8 @@ int main()
 	);
 
 	// process priority
-	if (SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH)<0)
-		printf("Thread Priority Error: %s\n",SDL_GetError());
+	//if (SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH)<0)
+	//	printf("Thread Priority Error: %s\n",SDL_GetError());
 
 	// grab the mouse
 	SDL_SetWindowGrab(window,1);

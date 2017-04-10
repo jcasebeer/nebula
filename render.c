@@ -721,10 +721,4 @@ void draw_sprite(game_state *state, int entity)
 			glEnd();
 		glPopMatrix();
 	glPopMatrix();
-
-
-	if (ceil(sprite->image_index) < sprite->image_count)
-		sprite->image_index += sprite->image_speed;
-	else
-		sprite->image_index = 0;
 }

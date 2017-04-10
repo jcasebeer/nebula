@@ -51,6 +51,9 @@ int main()
 	unsigned long int time = 0;
 	unsigned long int timespent = 0;
 	unsigned long int sleeptime = 1000/TARGET_FPS;
+	int skip_counter = 0;
+	int skip_max = 1;
+
 
 	// sdl variables for handling input
 	SDL_Event event;
@@ -97,13 +100,28 @@ int main()
 					{
 						state->next_level = 1;
 					}
+					if (event.key.keysym.sym == SDLK_m)
+					{
+						if (skip_max == 1)
+							skip_max = 2;
+						else
+							skip_max = 1;
+
+						skip_counter = 0;
+					}
 				}
 		}
 
 		game_simulate(state,key_state);
-		game_render_pp(state,window,textures,surf);
-		SDL_GL_SwapWindow(window);
 
+		if (skip_counter == skip_max)
+		{
+			game_render_pp(state,window,textures,surf);
+			SDL_GL_SwapWindow(window);
+			skip_counter = 0;
+		}
+		skip_counter++;
+		
 		if (state->next_level)
 		{
 			level_next(state,1);

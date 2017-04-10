@@ -163,6 +163,15 @@ static void clamp_speed(game_state *state, int entity)
 	//v->z = clamp(v->z,-vmax,vmax);
 }
 
+static void update_sprites(game_state *state, int entity)
+{
+	spr *sprite = &(state->sprite[entity]);
+	if (ceil(sprite->image_index) < sprite->image_count)
+		sprite->image_index += sprite->image_speed;
+	else
+		sprite->image_index = 0;
+}
+
 int player_create(game_state *state, v3 position)
 {
 	int ent = entity_create(state);
@@ -294,4 +303,9 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 
 	// camera update system
 	camera_update(state);
+
+	// update sprites
+	ents = get_ec_set(state,c_sprite);
+	for(i=0; iterate_ec_set(ents,i); i++)
+		update_sprites(state,ents[i]);
 }

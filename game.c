@@ -160,7 +160,7 @@ static void clamp_speed(game_state *state, int entity)
 		v->y *= vmax;
 		//v->z *= vmax;
 	}
-	//v->z = clamp(v->z,-vmax,vmax);
+	v->z = clamp(v->z,-24,24);
 }
 
 static void update_sprites(game_state *state, int entity)
@@ -226,6 +226,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 		return;
 	float spd = 0.3;
 	v3 *pos = &(state->position[state->player]);
+	v3 *vel = &(state->velocity[state->player]);
 	v3i bbox = state->bbox[state->player];
 
 	if (key_state[SDL_SCANCODE_W])
@@ -238,9 +239,19 @@ void player_step(game_state *state, const Uint8 *key_state)
 		motion_add(state,state->player,state->camdir-90.f,spd);
 
 	int grounded = level_collide(state,pos->x,pos->y,pos->z - 1,bbox);
+	if (grounded)
+		state->jumps = 1;
 
-	if (grounded && key_state[SDL_SCANCODE_SPACE])
-		add_velocity(state,state->player,0,0,3.0);
+	if (state->jumps>0 && key_state[SDL_SCANCODE_SPACE] && state->can_jump)
+	{
+		state->can_jump = 0;
+		if (!grounded)
+			state->jumps--;
+		vel->z = 3.0;
+	}
+
+	if (!key_state[SDL_SCANCODE_SPACE])
+		state->can_jump = 1;
 
 	if (key_state[SDL_SCANCODE_R])
 	{

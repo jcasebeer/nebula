@@ -131,6 +131,7 @@ int main()
 		if (skip_counter == skip_max)
 		{
 			game_render_pp(state,window,textures,surf);
+			//game_render(state,window,textures);
 			SDL_GL_SwapWindow(window);
 			skip_counter = 0;
 		}

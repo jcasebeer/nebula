@@ -22,6 +22,8 @@ typedef struct game_state
 	// player entity id
 	int player;
 	float vheight;
+	float jumps;
+	float can_jump;
 	/* camera vars */
 	float camx;
 	float camy;
@@ -47,6 +49,7 @@ typedef struct game_state
 	int block_list[MAX_BLOCKS];
 	int block_count;
 	int next_level;
+	GLfloat levelColor[4];
 	// gl index to display list for level model
 	GLuint level_model;
 	GLuint grass_model;

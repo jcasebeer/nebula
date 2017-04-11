@@ -166,7 +166,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
 	// clear background
 	//glShadeModel(GL_FLAT);
-	glClearColor(0.f,0.f,0.f,1.0f);
+	glClearColor(0.03f,0.03f,0.03f,1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set up projection matrix and window size
@@ -191,7 +191,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	);
 
 	// draw level model
-	glPointSize(2.0);
+	glPointSize(2);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	//glLineWidth(4);
@@ -200,7 +200,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	
 	GLfloat AmbientGlobal[4] = {0.0f,0.0f,0.0f,1.f};
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,AmbientGlobal);
-
+	glLightfv(GL_LIGHT0, GL_DIFFUSE,state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1./(384.0*384.0));
@@ -220,7 +220,9 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glEnable(GL_LIGHT0);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textures->shadow);
+	//glEnable(GL_COLOR_MATERIAL);
 	model_draw(state->level_model);
+	//glDisable(GL_COLOR_MATERIAL);
 	
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_TEXTURE_2D);
@@ -558,6 +560,7 @@ GLuint grass_model_build(game_state *state)
 	unsigned int seed = SEED;
 	int x,y,z,xb,yb,zb;
 	float gsize = 1;
+	
 	for(int i = 0; i<state->block_count;i++)
 	{
 		x = point_getx(state->block_list[i]);
@@ -569,10 +572,11 @@ GLuint grass_model_build(game_state *state)
 		zb = z << 5;
 
 		seed_rng(x*y-z);
+		
 		if (irandom(10)>5 && !block_at(state,x,y,z+1))
 		{
 			glBegin(GL_QUADS);
-			for(int w = 0; w<8; w++)
+			for(int w = 0; w<16; w++)
 			{
 				int gx, gy, gz,gx2,gy2,gz2;
 				gx = xb + random(32);
@@ -581,19 +585,26 @@ GLuint grass_model_build(game_state *state)
 				gx2 = gx + random(16) - 8;
 				gy2 = gy + random(16) - 8;
 				gz2 = gz + 8;
-				nvertex(gx-gsize,gy,gz,0.70710678118,0,0.70710678118);
-				nvertex(gx+gsize,gy,gz,0.70710678118,0,0.70710678118);
-				nvertex(gx2+gsize,gy2,gz2,0.70710678118,0,0.70710678118);
-				nvertex(gx2-gsize,gy2,gz2,0.70710678118,0,0.70710678118);
 
-				nvertex(gx,gy-gsize,gz,0.70710678118,0,0.70710678118);
-				nvertex(gx,gy+gsize,gz,0.70710678118,0,0.70710678118);
-				nvertex(gx2,gy2+gsize,gz2,0.70710678118,0,0.70710678118);
-				nvertex(gx2,gy2-gsize,gz2,0.70710678118,0,0.70710678118);
+				if (irandom(2) == 0)
+				{
+					nvertex(gx-gsize,gy,gz,0.70710678118,0,0.70710678118);
+					nvertex(gx+gsize,gy,gz,0.70710678118,0,0.70710678118);
+					nvertex(gx2+gsize,gy2,gz2,0.70710678118,0,0.70710678118);
+					nvertex(gx2-gsize,gy2,gz2,0.70710678118,0,0.70710678118);
+				}
+				else
+				{
+					nvertex(gx,gy-gsize,gz,0.70710678118,0,0.70710678118);
+					nvertex(gx,gy+gsize,gz,0.70710678118,0,0.70710678118);
+					nvertex(gx2,gy2+gsize,gz2,0.70710678118,0,0.70710678118);
+					nvertex(gx2,gy2-gsize,gz2,0.70710678118,0,0.70710678118);
+				}
 			}
 			glEnd();
 		}
 	}
+	
 	seed_rng(seed);
 	glEndList();
 	return list;
@@ -614,8 +625,8 @@ GLuint dust_model_build(game_state *state)
 		xb = x << 5;
 		yb = y << 5;
 		zb = z << 5;
-
-		nvertex(xb+irandom(512)-256,yb+irandom(512)-256,zb+irandom(512)-256,0.70710678118,0,0.70710678118);
+		if (irandom(2)==0)
+			nvertex(xb+irandom(512)-256,yb+irandom(512)-256,zb+irandom(512)-256,-0.70710678118,0,0.70710678118);
 	}
 	glEnd();
 	glEndList();

@@ -28,6 +28,8 @@ void game_state_clear(game_state *state)
 	state->player = -1;
 	state->gravity = 0.1;
 	state->vheight = 6;
+	state->jumps = 1;
+	state->can_jump = 1;
 }
 
 void game_state_destroy(game_state *state)

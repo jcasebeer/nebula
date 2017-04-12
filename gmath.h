@@ -20,5 +20,6 @@ float sign(float x);
 float clamp(float x, float l, float r);
 float roundf(float x);
 float frac(float x);
+float lerp(float a, float b, float f);
 
 #endif

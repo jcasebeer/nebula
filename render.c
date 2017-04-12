@@ -138,8 +138,8 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	glEnable(GL_FRAMEBUFFER_SRGB);
 	glUseProgram(surf->post_shader);
-
 	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
 	glUniform1i(surf->u_fbo_texture,0);
@@ -159,6 +159,7 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	glBindBuffer(GL_ARRAY_BUFFER,0);
 	glBindTexture(GL_TEXTURE_2D,0);
 	glUseProgram(0);
+	glDisable(GL_FRAMEBUFFER_SRGB);
 	//glDisable(GL_TEXTURE_2D);
 }
 
@@ -250,6 +251,28 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	
 	glPopMatrix();
 	
+	glPushMatrix();
+	if (state->grapple != -1)
+	{
+		v3 *gpos = &(state->position[state->grapple]);
+		v3 *ppos = &(state->position[state->player]);
+		glBegin(GL_LINE_STRIP);
+		glVertex3f(ppos->x,ppos->y,ppos->z);
+		for(int i = 0; i<16; i++)
+		{
+			if (state->grapple_state == 0)
+			{
+				glVertex3f(
+					lerp(ppos->x,gpos->x,i/16.0)+random(i*2.0)-i,
+					lerp(ppos->y,gpos->y,i/16.0)+random(i*2.0)-i,
+					lerp(ppos->z,gpos->z,i/16.0)+random(i*2.0)-i-sin(i/16.f*3.14)*32
+				);
+			}
+		}
+		glVertex3f(gpos->x,gpos->y,gpos->z);
+		glEnd();
+	}
+	glPopMatrix();
 
 	glAlphaFunc(GL_GREATER,0.f);
 	glEnable(GL_ALPHA_TEST);
@@ -263,7 +286,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	{
 		draw_sprite(state,sprites[i]);
 	}
-
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);

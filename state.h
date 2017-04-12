@@ -21,9 +21,13 @@ typedef struct game_state
 	/* player data */
 	// player entity id
 	int player;
+	int grapple;
+	int grapple_life;
+	int grapple_state;
 	float vheight;
 	float jumps;
 	float can_jump;
+	float can_shoot;
 	/* camera vars */
 	float camx;
 	float camy;

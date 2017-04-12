@@ -26,6 +26,10 @@ void game_state_clear(game_state *state)
 			state->ec_list[i][w] = -1;
 		}
 	state->player = -1;
+	state->grapple = -1;
+	state->grapple_life = 100;
+	state->grapple_state = 0;
+	state->can_shoot = 1;
 	state->gravity = 0.1;
 	state->vheight = 6;
 	state->jumps = 1;

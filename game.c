@@ -35,6 +35,69 @@ static void motion_add(game_state *state, int entity, float dir, float speed)
 	add_velocity(state,entity,lengthdir_x(speed,dir),lengthdir_y(speed,dir),0);
 }
 
+static void move_entitys(game_state *state, int entity)
+{
+	v3 *p = &(state->position[entity]);
+	v3 *v = &(state->velocity[entity]);
+
+	p->x+=v->x;
+	p->y+=v->y;
+	p->z+=v->z;
+}
+
+static void grapple_step(game_state *state)
+{
+	if (state->grapple==-1 || state->player == -1)
+		return;
+	v3 *pos = &(state->position[state->grapple]);
+	v3 *vel = &(state->velocity[state->grapple]);
+	spr *sprite = &(state->sprite[state->grapple]);
+
+	v3 *ppos = &(state->position[state->player]);
+	v3 *pvel = &(state->velocity[state->player]);
+	float *vmax = &(state->velocity_max[state->player]);
+
+	if (level_collide(state,pos->x,pos->y,pos->z,state->bbox[state->grapple]))
+	{
+		vel->x = 0;
+		vel->y = 0;
+		vel->z = 0;
+
+		if (entity_has_component(state,state->grapple,c_grounded))
+			entity_component_remove(state,state->grapple,c_grounded);
+
+		if (*vmax < 16.0)
+			(*vmax)+=0.1;
+		else
+			*vmax = 16.0;
+
+		sprite->image_speed = 0.25;
+
+		float zadd = clamp((pos->z+32.f - ppos->z)/1000.f,0.f,2.f);
+		if (ppos->z < pos->z)
+		{
+			state->grapple_state = 1;
+			pvel->z+=zadd;
+			state->grapple_life--;
+			
+		}
+		else
+		{
+			if (state->grapple_state == 1)
+				state->grapple_life = 0;
+		}
+		if (state->grapple_life<=0)
+		{
+			if (state->grapple_state == 1)
+				state->jumps = 1;
+			entity_destroy(state,state->grapple);
+			state->grapple = -1;
+		}	
+		
+	}
+
+}
+
 static void move_colliding_with_level(game_state *state, int entity)
 {
 	v3 *p = &(state->position[entity]);
@@ -172,6 +235,28 @@ static void update_sprites(game_state *state, int entity)
 		sprite->image_index = 0;
 }
 
+static int grapple_create(game_state *state, v3 position, v3 velocity)
+{
+	int ent = entity_create(state);
+	state->grapple = ent;
+
+	entity_component_add(state,ent,c_position);
+	entity_component_add(state,ent,c_grounded);
+	entity_component_add(state,ent,c_velocity);
+	//entity_component_add(state,ent,c_level_collider);
+	//entity_component_add(state,ent,c_sprite);
+	sprite_add(state,ent,63,3,16,16);
+	state->position[ent] = position;
+	state->velocity[ent] = velocity;
+
+	v3i *bbox = &(state->bbox[ent]);
+	bbox->x = 8;
+	bbox->y = 8;
+	bbox->z = 8;
+
+	return ent;
+}
+
 int player_create(game_state *state, v3 position)
 {
 	int ent = entity_create(state);
@@ -228,7 +313,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 	v3 *pos = &(state->position[state->player]);
 	v3 *vel = &(state->velocity[state->player]);
 	v3i bbox = state->bbox[state->player];
-
+	float *vmax = &(state->velocity_max[state->player]);
 	if (key_state[SDL_SCANCODE_W])
 		motion_add(state,state->player,state->camdir,spd);
 	if (key_state[SDL_SCANCODE_S])
@@ -259,7 +344,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 		test_sprite(state,pos->x,pos->y,pos->z);
 	}
 
-	SDL_GetRelativeMouseState(&(state->mouse_x),&(state->mouse_y));
+	int mouseButton = SDL_GetRelativeMouseState(&(state->mouse_x),&(state->mouse_y));
 
 	state->camdir+=(state->mouse_x)/20.f;
 	state->camzdir-=(state->mouse_y)/20.f;
@@ -276,6 +361,36 @@ void player_step(game_state *state, const Uint8 *key_state)
 		state->camzdir = 88.f;
 	if (state->camzdir<-88.f)
 		state->camzdir = -88.f;
+
+	if (mouseButton & SDL_BUTTON(SDL_BUTTON_LEFT))
+	{
+		if (state->grapple==-1 && state->can_shoot)
+		{
+			state->can_shoot = 0;
+			v3 gvel;
+			float speed = 8.0;
+			gvel.x = lengthdir_x(lengthdir_x(1,-state->camzdir),state->camdir)*speed;
+			gvel.y = lengthdir_y(lengthdir_x(1,-state->camzdir),state->camdir)*speed;
+			gvel.z = lengthdir_y(1,-state->camzdir)*speed;
+			state->grapple_life = 100;
+			state->grapple_state = 0;
+			grapple_create(state,*pos,gvel);
+		}
+	}
+	else
+	{
+		state->can_shoot = 1;
+		if (state->grapple!=-1)
+		{
+			entity_destroy(state,state->grapple);
+			state->grapple = -1;
+		}
+	}
+
+	if (*vmax > 2.0)
+		(*vmax) -= 0.05;
+	else
+		*vmax = 2.0;
 }
 
 static void camera_update(game_state *state)
@@ -297,6 +412,7 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 	state->dust_anim+=0.01;
 	// player stuff
 	player_step(state,key_state);
+	grapple_step(state);
 	clamp_speed(state,state->player);
 
 	// gravity system
@@ -306,6 +422,15 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 
 	// friction system
 	add_friction(state,state->player);
+
+	// physics down here
+
+	ents = get_ec_set(state,c_velocity);
+	for(i=0; iterate_ec_set(ents,i); i++)
+	{
+		if (!entity_has_component(state,ents[i],c_level_collider))
+			move_entitys(state,ents[i]);
+	}
 
 	// level collision system
 	ents = get_ec_set(state,c_level_collider);

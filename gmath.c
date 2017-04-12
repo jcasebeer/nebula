@@ -6,6 +6,11 @@
 const double DEG2RAD = 3.141592655358979323846/180.;
 unsigned int SEED;
 
+float lerp(float a, float b, float f)
+{
+    return a + f * (b - a);
+}
+
 float clamp(float x, float l, float r)
 {
 	if (x < l)

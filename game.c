@@ -66,11 +66,7 @@ static void grapple_step(game_state *state)
 		if (entity_has_component(state,state->grapple,c_grounded))
 			entity_component_remove(state,state->grapple,c_grounded);
 
-		if (*vmax < 16.0)
-			(*vmax)+=0.1;
-		else
-			*vmax = 16.0;
-
+		
 		sprite->image_speed = 0.25;
 
 		float zadd = clamp((pos->z+32.f - ppos->z)/1000.f,0.f,2.f);
@@ -79,6 +75,14 @@ static void grapple_step(game_state *state)
 			state->grapple_state = 1;
 			pvel->z+=zadd;
 			state->grapple_life--;
+
+			if (!level_collide(state,ppos->x,ppos->y,ppos->z -1,state->bbox[state->player]))
+			{	
+				if (*vmax < 16.0)
+					(*vmax)+=0.125;
+				else
+					*vmax = 16.0;
+			}
 			
 		}
 		else
@@ -368,7 +372,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 		{
 			state->can_shoot = 0;
 			v3 gvel;
-			float speed = 8.0;
+			float speed = 12.0;
 			gvel.x = lengthdir_x(lengthdir_x(1,-state->camzdir),state->camdir)*speed;
 			gvel.y = lengthdir_y(lengthdir_x(1,-state->camzdir),state->camdir)*speed;
 			gvel.z = lengthdir_y(1,-state->camzdir)*speed;
@@ -387,8 +391,14 @@ void player_step(game_state *state, const Uint8 *key_state)
 		}
 	}
 
+	float drag = 0.05;
+	if (grounded)
+	{
+		drag = 1.0;
+	}
+
 	if (*vmax > 2.0)
-		(*vmax) -= 0.05;
+		(*vmax) -= drag;
 	else
 		*vmax = 2.0;
 }

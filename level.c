@@ -51,8 +51,8 @@ void level_gen(game_state *state)
 		blocks--;
 	}
 	// fatten blocks
-	int b;
-	for(int w = 0; w<2; w++)
+	int b,w;
+	for(w = 0; w<2; w++)
 	{
 		blocks = state->block_count;
 		for(i = 0; i<blocks;i++)
@@ -69,6 +69,34 @@ void level_gen(game_state *state)
 				block_create(state,x,y+1,z);
 			if (!block_at_bounded(state,x,y,z-1))
 				block_create(state,x,y,z-1);
+		}
+	}
+
+	for(w=0; w<2; w++)
+	{
+		blocks = state->block_count;
+		for(i=0; i<blocks; i++)
+		{
+			b = state->block_list[i];
+			x = point_getx(b);
+			y = point_gety(b);
+			z = point_getz(b);
+
+			if (!block_at_bounded(state,x,y+1,z) && block_at_bounded(state,x+1,y+1,z))
+				block_create(state,x,y+1,z);
+			
+			/*if (!block_at_bounded(state,x,y,z+1) && block_at_bounded(state,x,y,z+2))
+				block_create(state,x,y,z+1);
+
+			if (!block_at_bounded(state,x,y+1,z) && block_at_bounded(state,x,y+2,z))
+				block_create(state,x,y+1,z);
+
+			if (!block_at_bounded(state,x+1,y,z) && block_at_bounded(state,x+2,y,z))
+				block_create(state,x+1,y,z);
+
+			if (!block_at_bounded(state,x,y+1,z) && block_at_bounded(state,x-1,y+1,z))
+				block_create(state,x-1,y+1,z);*/
+
 		}
 	}
 
@@ -138,7 +166,7 @@ int block_at_bounded(game_state *state, int x, int y, int z)
 
 void block_create(game_state *state, int x, int y, int z)
 {
-	if (state->block_count > MAX_BLOCKS)
+	if (state->block_count >= MAX_BLOCKS || x>=LEVEL_SIZE || x<0 || y>=LEVEL_SIZE || y<0 || z>=LEVEL_SIZE || z<0)
 		return;
 	state->block_grid[x][y][z] = state->block_count;
 	state->block_list[state->block_count] = point_create(x,y,z);

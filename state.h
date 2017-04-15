@@ -47,7 +47,7 @@ typedef struct game_state
 
 	/* level data */
 	#define LEVEL_SIZE 256
-	#define MAX_BLOCKS 110000
+	#define MAX_BLOCKS 130000
 	#define BLOCK_SIZE 32
 	int block_grid[LEVEL_SIZE][LEVEL_SIZE][LEVEL_SIZE];
 	int block_list[MAX_BLOCKS];

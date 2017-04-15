@@ -13,6 +13,7 @@ typedef struct surface_data
 {
 	int width;
 	int height;
+	float gamma;
 	GLuint fbo;
 	GLuint fbo_texture;
 	GLuint rbo_depth;
@@ -20,6 +21,7 @@ typedef struct surface_data
 	GLuint post_shader;
 	GLuint u_fbo_texture;
 	GLuint a_vcoord;
+	GLuint u_gamma;
 }surface_data;
 
 texture_data *texture_data_create();
@@ -30,7 +32,7 @@ void model_draw(GLuint model);
 void model_destroy(GLuint model);
 GLuint texture_load(const char *file, int width, int height);
 void texture_destroy(GLuint texture);
-surface_data *surface_data_create(int width, int height);
+surface_data *surface_data_create(int width, int height, float gamma);
 void surface_data_destroy(surface_data *surf);
 void game_render(game_state *state, SDL_Window *window, texture_data *textures);
 void game_render_pp(game_state *state, SDL_Window *window, texture_data *textures, surface_data *surf);

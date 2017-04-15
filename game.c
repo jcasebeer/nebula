@@ -335,7 +335,10 @@ void player_step(game_state *state, const Uint8 *key_state)
 	{
 		state->can_jump = 0;
 		if (!grounded)
+		{
+			*vmax = 2.0;
 			state->jumps--;
+		}
 		vel->z = 3.0;
 	}
 

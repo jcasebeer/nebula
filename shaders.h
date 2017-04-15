@@ -13,6 +13,7 @@ const char *post_shader_v = ""
 
 const char *post_shader_f = ""
 	"uniform sampler2D fbo_texture;\n"
+	"uniform float gamma;"
 	"varying vec2 f_texcoord;\n"
 	"const float div = 24.0;\n"
 
@@ -23,7 +24,6 @@ const char *post_shader_f = ""
 	"float g = c.g*255.0;\n"
 	"float b = c.b*255.0;\n"
 	"gl_FragColor = vec4(floor(r/8.0)/31,floor(g/6.0)/42.0,floor(b/8.0)/31.0,1.0);\n"
-	"float gamma = 1.8;\n"
 	"gl_FragColor.rgb = pow(gl_FragColor.rgb,vec3(gamma));"
 	"}\n";
 

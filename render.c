@@ -10,9 +10,12 @@
 #include "stb_image.h"
 #include "shaders.h"
 
-surface_data *surface_data_create(int width, int height)
+surface_data *surface_data_create(int width, int height, float gamma)
 {
 	surface_data *surf = malloc(sizeof(surface_data));
+	surf->width = width;
+	surf->height = height;
+	surf->gamma = gamma;
 
 	// fbo texture
 	glActiveTexture(GL_TEXTURE0);
@@ -87,6 +90,7 @@ surface_data *surface_data_create(int width, int height)
 
   	surf->a_vcoord = glGetAttribLocation(surf->post_shader,"v_coord");
   	surf->u_fbo_texture = glGetUniformLocation(surf->post_shader,"fbo_texture");
+  	surf->u_gamma = glGetUniformLocation(surf->post_shader,"gamma");
 
   	glDetachShader(surf->post_shader,VertexShaderID);
   	glDetachShader(surf->post_shader,FragmentShaderID);
@@ -143,6 +147,7 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
 	glUniform1i(surf->u_fbo_texture,0);
+	glUniform1f(surf->u_gamma,surf->gamma);
 	glEnableVertexAttribArray(surf->a_vcoord);
 
 	glBindBuffer(GL_ARRAY_BUFFER,surf->vbo_fbo_verts);

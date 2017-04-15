@@ -7,8 +7,12 @@
 #include "render.h"
 #include "state.h"
 
-int main()
+int main(int argc, char *argv[])
 {
+	// hide unused parameter warning
+	(void) argc;
+	(void) argv;
+
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 	int width = 960;
 	int height = 720;
@@ -61,7 +65,7 @@ int main()
 	const Uint8 *key_state = SDL_GetKeyboardState(NULL);
 
 	// generate our drawing surface
-	surface_data *surf = surface_data_create(width,height);
+	surface_data *surf = surface_data_create(width,height,1.8);
 
 	// create and load our texture data
 	texture_data *textures = texture_data_create();
@@ -122,6 +126,14 @@ int main()
 							fullscreen = 1;
 							SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN_DESKTOP);
 						}
+					}
+
+					if (event.key.keysym.sym == SDLK_F6)
+					{
+						if (surf->gamma < 2.6)
+							surf->gamma += 0.2;
+						else
+							surf->gamma = 1.6;
 					}
 				}
 		}
@@ -201,4 +213,5 @@ int main()
 	surface_data_destroy(surf);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+	return 0;
 }

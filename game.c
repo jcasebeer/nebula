@@ -389,6 +389,8 @@ void player_step(game_state *state, const Uint8 *key_state)
 		state->can_shoot = 1;
 		if (state->grapple!=-1)
 		{
+			if (state->grapple_state == 1)
+				state->jumps = 1;
 			entity_destroy(state,state->grapple);
 			state->grapple = -1;
 		}

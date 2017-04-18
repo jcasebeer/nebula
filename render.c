@@ -10,6 +10,9 @@
 #include "stb_image.h"
 #include "shaders.h"
 
+void draw_text(float xstart, float ystart, float size, const char *text);
+void draw_text_br(float xstart, float ystart, float size, const char *text);
+
 surface_data *surface_data_create(int width, int height, float gamma)
 {
 	surface_data *surf = malloc(sizeof(surface_data));
@@ -256,7 +259,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	
 	glPopMatrix();
 	
-	glPushMatrix();
 	if (state->grapple != -1)
 	{
 		v3 *gpos = &(state->position[state->grapple]);
@@ -277,7 +279,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 		glVertex3f(gpos->x,gpos->y,gpos->z);
 		glEnd();
 	}
-	glPopMatrix();
 
 	glAlphaFunc(GL_GREATER,0.f);
 	glEnable(GL_ALPHA_TEST);
@@ -291,9 +292,26 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	{
 		draw_sprite(state,sprites[i]);
 	}
+	
+
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0,width,height,0,-1,1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	/* ~~~~~~~~~ hud ~~~~~~~~~~~~~ */
+
+	draw_text(0,0,16,"Wow! Text is working!!");
+	draw_text_br(width,height,16,"Wow! text in the bottom right corner!");
+
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
+
+
 }
 
 texture_data *texture_data_create()
@@ -717,6 +735,62 @@ static float mdist(game_state *state, float x, float y, float z)
 	float diffz = abs(state->camz - z);
 
 	return diffx+diffy+diffz;
+}
+
+static int str_size(const char *str)
+{
+	int count = 0;
+	char *c = (char *)str;
+	while(*c)
+	{	
+		c++;
+		count++;
+	}
+	return count;
+}
+
+void draw_text_br(float xstart, float ystart, float size, const char *text)
+{
+	float xoffset = str_size(text)*size;
+	float yoffset = size;
+
+	glPushMatrix();
+	glTranslatef(-xoffset,-yoffset,0);
+	draw_text(xstart,ystart,size,text);
+	glPopMatrix();
+}
+
+void draw_text(float xstart, float ystart, float size, const char *text)
+{
+	char *c = (char *)text;
+	while(*c)
+	{
+		float x = (float)(*c - 32)*8.f;
+		float y = 1016.f;
+		float xto = x+8.f;
+		float yto = y+8.f;
+		x/=1024.f;
+		y/=1024.f;
+		xto/=1024.f;
+		yto/=1024.f;
+		
+
+		if (*c>31 && *c<123)
+		{
+			glBegin(GL_TRIANGLE_FAN);
+			glTexCoord2f(xto,y);
+			glVertex3f(xstart+size,ystart,0);
+			glTexCoord2f(x,y);
+			glVertex3f(xstart,ystart,0);
+			glTexCoord2f(x,yto);
+			glVertex3f(xstart,ystart+size,0);
+			glTexCoord2f(xto,yto);
+			glVertex3f(xstart+size,ystart+size,0);
+			glEnd();
+		}
+		xstart+=size;
+		c++;
+	}
 }
 
 void draw_sprite(game_state *state, int entity)

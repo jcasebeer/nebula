@@ -249,7 +249,8 @@ static int grapple_create(game_state *state, v3 position, v3 velocity)
 	entity_component_add(state,ent,c_velocity);
 	//entity_component_add(state,ent,c_level_collider);
 	//entity_component_add(state,ent,c_sprite);
-	sprite_add(state,ent,63,3,16,16);
+	sprite_add(state,ent,62,3,16,16);
+	position.z+=state->vheight;
 	state->position[ent] = position;
 	state->velocity[ent] = velocity;
 

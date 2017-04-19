@@ -11,6 +11,7 @@ typedef enum
 	c_grounded,
 	c_level_collider, // needs bbox
 	c_sprite,
+	c_gun,
 	c_last // special enum, keep at end
 }component_flag;
 
@@ -37,5 +38,10 @@ typedef struct spr
 	float width;
 	float height;
 }spr;
+
+typedef struct gun
+{
+	int sprite;
+}gun;
 
 #endif

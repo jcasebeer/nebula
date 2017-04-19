@@ -12,6 +12,7 @@
 
 void draw_text(float xstart, float ystart, float size, const char *text);
 void draw_text_br(float xstart, float ystart, float size, const char *text);
+void draw_player_gun(game_state *state);
 
 surface_data *surface_data_create(int width, int height, float gamma)
 {
@@ -189,14 +190,20 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	// point camera
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	float xto = state->camx+lengthdir_x(lengthdir_x(1,-state->camzdir),state->camdir);
+	float yto = state->camy+lengthdir_y(lengthdir_x(1,-state->camzdir),state->camdir);
+	float zbob = state->camz+state->vheight+sin(state->view_bob)*2;
+	float zto = zbob+lengthdir_y(1,-state->camzdir);
+	
 		
 	draw_position_camera(
 		state->camx,
         state->camy,
-        state->camz+state->vheight,
-        state->camx+lengthdir_x(lengthdir_x(1,-state->camzdir),state->camdir),
-        state->camy+lengthdir_y(lengthdir_x(1,-state->camzdir),state->camdir),
-        state->camz+state->vheight+lengthdir_y(1,-state->camzdir)
+        zbob,
+        xto,
+        yto,
+        zto
 	);
 
 	// draw level model
@@ -284,15 +291,17 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_TEXTURE_2D);
 
+	
 	// test drawing textures
 	//glDisable(GL_CULL_FACE);
 	glBindTexture(GL_TEXTURE_2D,textures->sprites);
+	
 	int *sprites = get_ec_set(state,c_sprite);
 	for(int i = 0; iterate_ec_set(sprites,i); i++)
 	{
 		draw_sprite(state,sprites[i]);
 	}
-	
+	draw_player_gun(state);
 
 
 	glMatrixMode(GL_PROJECTION);
@@ -541,7 +550,7 @@ static void block_back(int x1, int y1, int z1, int diag, int top, int bottom)
 	glEnd();
 }
 
-static int block_get_lit(game_state *state,int x, int y, int z)
+int block_get_lit(game_state *state,int x, int y, int z)
 {
 	while (x < LEVEL_SIZE && z < LEVEL_SIZE)
 	{
@@ -791,6 +800,73 @@ void draw_text(float xstart, float ystart, float size, const char *text)
 		xstart+=size;
 		c++;
 	}
+}
+
+void draw_player_gun(game_state *state)
+{
+	if (state->player == -1)
+		return;
+
+	v3 *p = &(state->position[state->player]);
+	gun *g = &(state->pstate->weapons[state->pstate->weapon]);
+	// gun size is 32 on sprite sheet
+	float x = g->sprite * 32.f;
+	float y = 928.f;
+	float xto = x+32.f;
+	float yto = y+32.f;
+	float width = 4.f;
+	float height = 8.f;
+
+	float xpos = 8.5;
+	float ypos = -7;
+	float zpos = -2;
+
+	x/=1024.f;
+	y/=1024.f;
+	xto/=1024.f;
+	yto/=1024.f;
+	glDepthFunc(GL_ALWAYS);
+	glPushMatrix();
+		//glRotatef(state->camzdir,0.f,1.f,0.f);
+		//
+		glTranslatef(p->x,p->y,p->z+state->vheight+sin(state->view_bob)*2.5f);
+		glPushMatrix();
+			glRotatef(state->gundir,0.f,0.f,-1.f);
+			glRotatef(state->gunzdir,0.f,-1.f,0.f);
+			glScalef(state->gun_change,1,1);
+			glColor3f(0.f,0.f,0.f);
+			glPushMatrix();
+				glTranslatef(xpos,ypos-0.5,zpos);
+				glBegin(GL_TRIANGLE_FAN);
+				glTexCoord2f(xto,y);
+			   	glVertex3f(-width,0,height);
+				glTexCoord2f(x,y);
+				glVertex3f(width,0,height);
+				glTexCoord2f(x,yto);
+				glVertex3f(width,0,-height);
+				glTexCoord2f(xto,yto);
+				glVertex3f(-width,0,-height);
+				glEnd();
+			glPopMatrix();
+			glColor3f(state->in_shadow,state->in_shadow,state->in_shadow);
+			glPushMatrix();
+				glTranslatef(xpos,ypos,zpos);
+				glBegin(GL_TRIANGLE_FAN);
+				glTexCoord2f(xto,y);
+			   	glVertex3f(-width,0,height);
+				glTexCoord2f(x,y);
+				glVertex3f(width,0,height);
+				glTexCoord2f(x,yto);
+				glVertex3f(width,0,-height);
+				glTexCoord2f(xto,yto);
+				glVertex3f(-width,0,-height);
+				glEnd();
+			glPopMatrix();
+			glColor3f(1.f,1.f,1.f);
+		glPopMatrix();
+	glPopMatrix();
+	glDepthFunc(GL_LESS);
+	//glEnable(GL_DEPTH_TEST);
 }
 
 void draw_sprite(game_state *state, int entity)

@@ -7,6 +7,13 @@ static void ec_set_remove_entity(game_state *state, int id, component_flag flag)
 static void entity_set_component_flag(game_state *state,int id,component_flag flag, int value);
 static int entity_is_empty(game_state *state, int id);
 
+p_state *p_state_create()
+{
+	p_state *pstate = malloc(sizeof(p_state));
+	memset(pstate,0,sizeof(p_state));
+	return pstate;
+}
+
 // create game state object
 game_state *game_state_create()
 {

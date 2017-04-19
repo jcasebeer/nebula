@@ -114,7 +114,7 @@ void level_gen(game_state *state)
 	printf("level block count: %d\n",state->block_count);
 }
 
-void level_next(game_state *state, int clearModels)
+void level_next(game_state *state, int clearModels, p_state *pstate)
 {
 	if (clearModels)
 	{
@@ -125,6 +125,7 @@ void level_next(game_state *state, int clearModels)
 	}
 	// clear old game_states memory
 	game_state_clear(state);
+	state->pstate = pstate;
 	// generate new level data
 	level_gen(state);
 	// build new level model

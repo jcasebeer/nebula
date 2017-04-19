@@ -275,6 +275,8 @@ int player_create(game_state *state, v3 position)
 	entity_component_add(state,ent,c_friction);
 	entity_component_add(state,ent,c_level_collider);
 	entity_component_add(state,ent,c_grounded);
+	//entity_component_add(state,ent,c_gun);
+	//state->guns[ent].sprite = 5.f;
 	// initialize components
 	state->position[ent] = position;
 	v3 *v = &(state->velocity[ent]);
@@ -315,6 +317,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 	if (state->player == -1)
 		return;
 	float spd = 0.3;
+
 	v3 *pos = &(state->position[state->player]);
 	v3 *vel = &(state->velocity[state->player]);
 	v3i bbox = state->bbox[state->player];
@@ -328,9 +331,29 @@ void player_step(game_state *state, const Uint8 *key_state)
 	if (key_state[SDL_SCANCODE_A])
 		motion_add(state,state->player,state->camdir-90.f,spd);
 
+	float c_speed = sqrt(vel->x * vel->x + vel->y * vel->y);
+	int bx,by,bz;
+	bx = ((int)pos->x) >> 5;
+	by = ((int)pos->y) >> 5;
+	bz = ((int)pos->z) >> 5;
+	int lit = block_get_lit(state,bx,by,bz);
+	if (!lit)
+	{
+		state->in_shadow = lerp(state->in_shadow,0.2f,0.1);
+	}
+	else
+	{
+		state->in_shadow = lerp(state->in_shadow,1.f,0.1);
+	}
+
+
 	int grounded = level_collide(state,pos->x,pos->y,pos->z - 1,bbox);
 	if (grounded)
+	{
 		state->jumps = 1;
+		if (c_speed > 1.f)
+			state->view_bob+=0.2*(c_speed/2);
+	}
 
 	if (state->jumps>0 && key_state[SDL_SCANCODE_SPACE] && state->can_jump)
 	{
@@ -370,9 +393,23 @@ void player_step(game_state *state, const Uint8 *key_state)
 	if (state->camzdir<-88.f)
 		state->camzdir = -88.f;
 
+	if (key_state[SDL_SCANCODE_1] && state->pstate->weapon != 0)
+	{
+		state->pstate->weapon = 0;
+		state->gun_change = 0.f;
+	}
+	else if (key_state[SDL_SCANCODE_2] && state->pstate->weapon != 1)
+	{
+		state->pstate->weapon = 1;
+		state->gun_change = 0.f;
+	}
+
+	state->gundir += (state->camdir - state->gundir)/4.f;
+	state->gunzdir += (state->camzdir - state->gunzdir)/3.f;
+
 	if (mouseButton & SDL_BUTTON(SDL_BUTTON_LEFT))
 	{
-		if (state->grapple==-1 && state->can_shoot)
+		if (state->grapple==-1 && state->can_shoot && state->pstate->grapple_out)
 		{
 			state->can_shoot = 0;
 			v3 gvel;
@@ -397,6 +434,19 @@ void player_step(game_state *state, const Uint8 *key_state)
 		}
 	}
 
+	if((mouseButton & SDL_BUTTON(SDL_BUTTON_RIGHT)))
+	{
+		if(state->mouse_rb == 0)
+		{
+			state->pstate->grapple_out = !(state->pstate->grapple_out);
+		}
+		state->mouse_rb = 1;
+	}
+	else
+	{
+		state->mouse_rb = 0;
+	}
+
 	float drag = 0.05;
 	if (grounded)
 	{
@@ -407,6 +457,15 @@ void player_step(game_state *state, const Uint8 *key_state)
 		(*vmax) -= drag;
 	else
 		*vmax = 2.0;
+
+	if (state->pstate->grapple_out)
+	{
+		state->gun_change = lerp(state->gun_change,0.f,0.25);
+	}
+	else
+	{
+		state->gun_change = lerp(state->gun_change,1.f,0.25);
+	}
 }
 
 static void camera_update(game_state *state)
@@ -460,4 +519,6 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 	ents = get_ec_set(state,c_sprite);
 	for(i=0; iterate_ec_set(ents,i); i++)
 		update_sprites(state,ents[i]);
+
+	state->timer++;
 }

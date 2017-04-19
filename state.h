@@ -4,8 +4,16 @@
 #include <SDL2/SDL_opengl.h>
 #include "comps.h"
 
+typedef struct persistent_state
+{
+	int weapon;
+	int grapple_out;
+	gun weapons[2];
+}p_state;
+
 typedef struct game_state
 {
+	p_state *pstate;
 	#define ENTITY_MAX 512 // max number of entitys
 	/* running total number of entitys*/
 	int entity_count;
@@ -25,17 +33,25 @@ typedef struct game_state
 	int grapple_life;
 	int grapple_state;
 	float vheight;
+	float view_bob;
 	float jumps;
 	float can_jump;
 	float can_shoot;
+	float gun_change;
+	float in_shadow;
 	/* camera vars */
 	float camx;
 	float camy;
 	float camz;
 	float camdir;
 	float camzdir;
+	float gundir;
+	float gunzdir;
 	int mouse_x;
 	int mouse_y;
+	int mouse_rb;
+	int mouse_lb;
+	int timer;
 
 	/* component arrays */
 	v3 position[ENTITY_MAX];
@@ -44,6 +60,7 @@ typedef struct game_state
 	float friction[ENTITY_MAX];
 	v3i bbox[ENTITY_MAX];
 	spr sprite[ENTITY_MAX];
+	gun guns[ENTITY_MAX];
 
 	/* level data */
 	#define LEVEL_SIZE 256
@@ -61,6 +78,8 @@ typedef struct game_state
 	float dust_anim;
 	float gravity;
 }game_state;
+
+p_state *p_state_create();
 
 // create game state object
 game_state *game_state_create();
@@ -85,7 +104,7 @@ int iterate_ec_set(int *set,int id);
 
 /****** LEVEL STUFF **************/
 void level_gen(game_state *state);
-void level_next(game_state *state, int clearModels);
+void level_next(game_state *state, int clearModels, p_state *pstate);
 int point_getx(int block);
 int point_gety(int block);
 int point_getz(int block);
@@ -94,6 +113,7 @@ int point_create(int x, int y, int z);
 int block_at(game_state *state,int x, int y, int z);
 void block_create(game_state *state, int x, int y, int z);
 int block_at_bounded(game_state *state, int x, int y, int z);
+int block_get_lit(game_state *state,int x, int y, int z);
 
 /***** gameplay stuff *********/
 void game_simulate(game_state *state,const Uint8 *key_state);

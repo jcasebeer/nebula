@@ -75,6 +75,9 @@ int main(int argc, char *argv[])
 
 	// create our game_state
 	game_state *state = game_state_create();
+	p_state *pstate = p_state_create();
+	pstate->weapons[0].sprite = 5.f;
+	pstate->weapons[1].sprite = 7.f;
 
     // seed rng
     time_seed_rng();
@@ -82,7 +85,7 @@ int main(int argc, char *argv[])
 	// generate a level and build its model
 	//level_gen(state);
 	//state->level_model = level_model_build(state);
-	level_next(state,0);
+	level_next(state,0,pstate);
 
 	int error = 0;
 	// main game loop
@@ -152,7 +155,7 @@ int main(int argc, char *argv[])
 		
 		if (state->next_level)
 		{
-			level_next(state,1);
+			level_next(state,1,pstate);
 			state->next_level = 0;
 		}
 
@@ -206,6 +209,7 @@ int main(int argc, char *argv[])
 			timespent = SDL_GetPerformanceCounter()*1000/SDL_GetPerformanceFrequency() - time;
 		}
 	}
+	free(pstate);
 	model_destroy(state->level_model);
 	model_destroy(state->grass_model);
 	game_state_destroy(state);

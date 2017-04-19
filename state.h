@@ -47,6 +47,7 @@ typedef struct game_state
 	float camzdir;
 	float gundir;
 	float gunzdir;
+	float cam_shake;
 	int mouse_x;
 	int mouse_y;
 	int mouse_rb;
@@ -117,6 +118,7 @@ int block_get_lit(game_state *state,int x, int y, int z);
 
 /***** gameplay stuff *********/
 void game_simulate(game_state *state,const Uint8 *key_state);
+gun gen_gun();
 
 /***** entitys *******/
 int player_create(game_state *state, v3 position);

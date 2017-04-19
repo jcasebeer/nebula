@@ -76,11 +76,12 @@ int main(int argc, char *argv[])
 	// create our game_state
 	game_state *state = game_state_create();
 	p_state *pstate = p_state_create();
-	pstate->weapons[0].sprite = 5.f;
-	pstate->weapons[1].sprite = 7.f;
-
-    // seed rng
+	 // seed rng
     time_seed_rng();
+    pstate->weapons[0] = gen_gun();
+	pstate->weapons[1] = gen_gun();
+
+   
 
 	// generate a level and build its model
 	//level_gen(state);

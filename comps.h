@@ -41,7 +41,12 @@ typedef struct spr
 
 typedef struct gun
 {
+	int active;
 	int sprite;
+	int type;
+	int recoil;
+	int rtime;
+	int accuracy;
 }gun;
 
 #endif

@@ -2,6 +2,37 @@
 #include "state.h"
 #include "gmath.h"
 
+gun gen_gun()
+{
+	gun g;
+	g.type = choose2(0,1);
+	g.active = 1.f;
+	switch(g.type)
+	{
+		case 0: // machinegun
+		g.sprite = choose2(choose2(2,3),choose2(4,5));
+		g.rtime = 16+random(16)-8;
+		break;
+
+		case 1: // shotgun
+		g.sprite = choose2(6,7);
+		g.rtime = 40+random(16)-8;
+		break;
+
+		case 2: // special gun
+		break;
+	}
+	return g;
+}
+
+static void shake_cam(game_state *state,float shake)
+{
+	if (state->cam_shake+shake < 32)
+		state->cam_shake+=shake;
+	else
+		state->cam_shake = 32;
+}
+
 static void add_velocity(game_state *state, int entity, float xsp, float ysp, float zsp)
 {
 	v3 *v = &(state->velocity[entity]);
@@ -262,6 +293,25 @@ static int grapple_create(game_state *state, v3 position, v3 velocity)
 	return ent;
 }
 
+static void reset_recoil(gun *g)
+{
+	if (g->recoil > 0)
+		g->recoil-=2;
+	else
+		g->recoil = 0;
+}
+
+static void shoot_gun(game_state *state, gun *g)
+{
+	if (g->recoil == 0)
+	{
+		g->recoil = g->rtime;
+		state->gunzdir += g->recoil/2;
+		state->gundir += random(g->recoil) - g->recoil/2;
+		shake_cam(state,g->recoil*1.2);
+	}
+}
+
 int player_create(game_state *state, v3 position)
 {
 	int ent = entity_create(state);
@@ -303,9 +353,27 @@ int test_sprite(game_state *state,float x, float y, float z)
 	v3 *pos = &(state->position[ent]);
 	pos->x = x;
 	pos->y = y;
-	pos->z = z;
+	pos->z = z+state->vheight;
 
-	sprite_add(state,ent,0,8,16,16);
+	switch(irandom(5))
+	{
+		case 0:
+			sprite_add(state,ent,0,8,16,16);
+		break;
+		case 1:
+			sprite_add(state,ent,1,3,16,16);
+		break;
+		case 2:
+			sprite_add(state,ent,2,8,16,16);
+		break;
+		case 3:
+			sprite_add(state,ent,3,10,16,16);
+		break;
+		case 4:
+			sprite_add(state,ent,4,4,16,16);
+		break;
+	}
+	
 	spr *sprite = &(state->sprite[ent]);
 	sprite->image_speed = 0.25f;
 	return ent;
@@ -369,7 +437,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 	if (!key_state[SDL_SCANCODE_SPACE])
 		state->can_jump = 1;
 
-	if (key_state[SDL_SCANCODE_R])
+	if (key_state[SDL_SCANCODE_R] && state->timer % 30 == 0)
 	{
 		v3 *pos = &(state->position[state->player]);
 		test_sprite(state,pos->x,pos->y,pos->z);
@@ -393,23 +461,25 @@ void player_step(game_state *state, const Uint8 *key_state)
 	if (state->camzdir<-88.f)
 		state->camzdir = -88.f;
 
-	if (key_state[SDL_SCANCODE_1] && state->pstate->weapon != 0)
+	if (state->pstate->weapons[state->pstate->weapon].recoil == 0.f)
 	{
-		state->pstate->weapon = 0;
-		state->gun_change = 0.f;
+		if (key_state[SDL_SCANCODE_1] && state->pstate->weapon != 0 && state->pstate->weapons[0].active)
+		{
+			state->pstate->weapon = 0;
+			state->gun_change = 0.f;
+		}
+		else if (key_state[SDL_SCANCODE_2] && state->pstate->weapon != 1 && state->pstate->weapons[1].active)
+		{
+			state->pstate->weapon = 1;
+			state->gun_change = 0.f;
+		}
 	}
-	else if (key_state[SDL_SCANCODE_2] && state->pstate->weapon != 1)
-	{
-		state->pstate->weapon = 1;
-		state->gun_change = 0.f;
-	}
-
 	state->gundir += (state->camdir - state->gundir)/4.f;
 	state->gunzdir += (state->camzdir - state->gunzdir)/3.f;
 
 	if (mouseButton & SDL_BUTTON(SDL_BUTTON_LEFT))
 	{
-		if (state->grapple==-1 && state->can_shoot && state->pstate->grapple_out)
+		if (state->pstate->grapple_out && state->grapple==-1 && state->can_shoot && state->pstate->grapple_out)
 		{
 			state->can_shoot = 0;
 			v3 gvel;
@@ -421,6 +491,8 @@ void player_step(game_state *state, const Uint8 *key_state)
 			state->grapple_state = 0;
 			grapple_create(state,*pos,gvel);
 		}
+		if (!(state->pstate->grapple_out))
+			shoot_gun(state,&(state->pstate->weapons[state->pstate->weapon]));
 	}
 	else
 	{
@@ -466,6 +538,8 @@ void player_step(game_state *state, const Uint8 *key_state)
 	{
 		state->gun_change = lerp(state->gun_change,1.f,0.25);
 	}
+
+	reset_recoil(&(state->pstate->weapons[state->pstate->weapon]));
 }
 
 static void camera_update(game_state *state)
@@ -521,4 +595,8 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 		update_sprites(state,ents[i]);
 
 	state->timer++;
+	if (state->cam_shake > 0.f)
+		state->cam_shake -= 2.f;
+	else
+		state->cam_shake = 0.f;
 }

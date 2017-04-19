@@ -108,3 +108,14 @@ int choose3(int x1, int x2, int x3)
 	}
 	return x1;
 }
+int choose2(int x1, int x2)
+{
+	switch(irandom(2))
+	{
+		case 0:
+			return x1;
+		case 1:
+			return x2;
+	}
+	return x1;
+}

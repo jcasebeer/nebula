@@ -191,10 +191,14 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	float xto = state->camx+lengthdir_x(lengthdir_x(1,-state->camzdir),state->camdir);
-	float yto = state->camy+lengthdir_y(lengthdir_x(1,-state->camzdir),state->camdir);
+	float dir_shake = state->camdir+(random(state->cam_shake) - state->cam_shake*0.5)/10.f;
+	float zdir_shake = -clamp(state->camzdir+(random(state->cam_shake) - state->cam_shake*0.5)/10.f,-89,89);
+
+
+	float xto = state->camx+lengthdir_x(lengthdir_x(1,zdir_shake),dir_shake);
+	float yto = state->camy+lengthdir_y(lengthdir_x(1,zdir_shake),dir_shake);
 	float zbob = state->camz+state->vheight+sin(state->view_bob)*2;
-	float zto = zbob+lengthdir_y(1,-state->camzdir);
+	float zto = zbob+lengthdir_y(1,zdir_shake);
 	
 		
 	draw_position_camera(
@@ -817,7 +821,7 @@ void draw_player_gun(game_state *state)
 	float width = 4.f;
 	float height = 8.f;
 
-	float xpos = 8.5;
+	float xpos = 8.5 - g->recoil*0.3333;
 	float ypos = -7;
 	float zpos = -2;
 
@@ -832,7 +836,7 @@ void draw_player_gun(game_state *state)
 		glTranslatef(p->x,p->y,p->z+state->vheight+sin(state->view_bob)*2.5f);
 		glPushMatrix();
 			glRotatef(state->gundir,0.f,0.f,-1.f);
-			glRotatef(state->gunzdir,0.f,-1.f,0.f);
+			glRotatef(state->gunzdir + g->recoil/1.5f,0.f,-1.f,0.f);
 			glScalef(state->gun_change,1,1);
 			glColor3f(0.f,0.f,0.f);
 			glPushMatrix();

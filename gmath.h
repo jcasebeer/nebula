@@ -21,5 +21,6 @@ float clamp(float x, float l, float r);
 float roundf(float x);
 float frac(float x);
 float lerp(float a, float b, float f);
+int choose2(int x1, int x2);
 
 #endif

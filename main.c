@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
 	int skip_counter = 0;
 	int skip_max = 1;
 
-
 	// sdl variables for handling input
 	SDL_Event event;
 	const Uint8 *key_state = SDL_GetKeyboardState(NULL);
@@ -80,8 +79,6 @@ int main(int argc, char *argv[])
     time_seed_rng();
     pstate->weapons[0] = gen_gun();
 	pstate->weapons[1] = gen_gun();
-
-   
 
 	// generate a level and build its model
 	//level_gen(state);

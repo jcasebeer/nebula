@@ -329,6 +329,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 texture_data *texture_data_create()
 {
+	//
 	return malloc(sizeof(texture_data));
 }
 
@@ -387,6 +388,7 @@ void draw_set_frustum(float fov, float ar,float znear, float zfar)
 
 static int offset(int amount)
 {
+	//
 	return irandom(amount) - (amount >> 1);
 }
 
@@ -737,8 +739,19 @@ void sprite_add(game_state *state, int entity, float sprite_index, float image_c
 	sprite->image_count = image_count;
 	sprite->width = width;
 	sprite->height = height;
+	sprite->qwidth = width;
+	sprite->qheight = height;
 	sprite->image_index = 0;
 	sprite->image_speed = 0.f;
+	sprite->play_once = 0.f;
+}
+
+void sprite_add_size(game_state *state, int entity, float sprite_index,float image_count, float width, float height, float qwidth, float qheight)
+{
+	sprite_add(state,entity,sprite_index,image_count,width,height);
+	spr *sprite = &(state->sprite[entity]);
+	sprite->qwidth = qwidth;
+	sprite->qheight = qheight;
 }
 
 static float mdist(game_state *state, float x, float y, float z)
@@ -882,14 +895,16 @@ void draw_sprite(game_state *state, int entity)
 	float y = sprite->sprite_index*sprite->height;
 	float xto = x+sprite->width;
 	float yto = y+sprite->height;
-	float width = sprite->width;
-	float height = sprite->height;
+	float width = sprite->qwidth;
+	float height = sprite->qheight;
 	x/=1024.f;
 	y/=1024.f;
 	xto/=1024.f;
 	yto/=1024.f;
 	const float maxdist = 2048.f;
-	float dist = 1.f - clamp(mdist(state,pos->x,pos->y,pos->z),0.f,maxdist)/maxdist;
+	float dist = 1.f;
+	if (!entity_has_component(state,entity,c_sprite_fullbright))
+		dist = 1.f - clamp(mdist(state,pos->x,pos->y,pos->z),0.f,maxdist)/maxdist;
 
 	glPushMatrix();
 		glTranslatef(pos->x,pos->y,pos->z);

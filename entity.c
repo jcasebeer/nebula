@@ -112,6 +112,12 @@ int entity_has_component(game_state *state, int id, component_flag flag)
 	return (state->flags[id][flag/32] >> (flag%32)) & 0x1;
 }
 
+void entity_kill(game_state *state,int entity)
+{
+	if (!entity_has_component(state,entity,c_dead))
+		entity_component_add(state,entity,c_dead);
+}
+
 void entity_component_add(game_state *state, int id, component_flag flag)
 {
 	/*

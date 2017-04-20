@@ -7,16 +7,22 @@ gun gen_gun()
 	gun g;
 	g.type = choose2(0,1);
 	g.active = 1.f;
+	g.speed = 32.f+random(32.f);
+	g.range = 4096/((int)g.speed);
 	switch(g.type)
 	{
 		case 0: // machinegun
 		g.sprite = choose2(choose2(2,3),choose2(4,5));
-		g.rtime = 16+random(16)-8;
+		g.rtime = 8+random(16);
+		g.bullets = 1;
+		g.accuracy = 16 - random(16);
 		break;
 
 		case 1: // shotgun
 		g.sprite = choose2(6,7);
 		g.rtime = 40+random(16)-8;
+		g.bullets = 8+irandom(8) - 4;
+		g.accuracy = 32 + random(16) - 8;
 		break;
 
 		case 2: // special gun
@@ -266,6 +272,11 @@ static void update_sprites(game_state *state, int entity)
 	spr *sprite = &(state->sprite[entity]);
 	if (ceil(sprite->image_index) < sprite->image_count)
 		sprite->image_index += sprite->image_speed;
+	else if (sprite->play_once == 1)
+	{
+		sprite->image_index = sprite->image_count -1;
+		sprite->image_speed = 0.f;
+	}
 	else
 		sprite->image_index = 0;
 }
@@ -281,6 +292,9 @@ static int grapple_create(game_state *state, v3 position, v3 velocity)
 	//entity_component_add(state,ent,c_level_collider);
 	//entity_component_add(state,ent,c_sprite);
 	sprite_add(state,ent,62,3,16,16);
+	entity_component_add(state,ent,c_sprite_fullbright);
+	spr *sprite = &(state->sprite[ent]);
+	sprite->play_once = 1;
 	position.z+=state->vheight;
 	state->position[ent] = position;
 	state->velocity[ent] = velocity;
@@ -293,6 +307,94 @@ static int grapple_create(game_state *state, v3 position, v3 velocity)
 	return ent;
 }
 
+static int bullet_create(game_state *state, v3 position, v3 v, int damage, float accuracy, float speed, int range)
+{
+	int ent = entity_create(state);
+	entity_component_add(state,ent,c_bullet);
+	entity_component_add(state,ent,c_sprite_fullbright);
+	sprite_add_size(state,ent,60,8,16,16,32,32);
+	spr *sprite = &(state->sprite[ent]);
+	sprite->play_once = 1;
+	sprite->image_speed = 0.5f;
+	state->damage[ent] = damage;
+	state->position[ent] = position;
+	state->life[ent] = range;
+	state->radius[ent] = 16.f;
+	state->velocity_max[ent] = speed;
+
+	v.x *= 100.f;
+	v.y *= 100.f;
+	v.z *= 100.f;
+	
+	v.x += random(accuracy) - accuracy*0.5;
+	v.y += random(accuracy) - accuracy*0.5;
+	v.z += random(accuracy) - accuracy*0.5;
+
+	float m = 1/sqrt(v.x*v.x+v.y*v.y+v.z*v.z);
+	v.x *= m;
+	v.y *= m;
+	v.z *= m;
+
+	float diameter = state->radius[ent]*2.f;
+	v.x *= diameter;
+	v.y *= diameter;
+	v.z *= diameter;
+	state->velocity[ent] = v;
+	return ent;
+}
+
+static void bullet_step(game_state *state, int entity)
+{
+	v3 *p = &(state->position[entity]);
+	v3 *v = &(state->velocity[entity]);
+	int steps = (int)ceil(state->velocity_max[entity]/(state->radius[entity]*2));
+
+	for(int i=0; i<steps; i++)
+	{
+		int x = p->x;
+		int y = p->y;
+		int z = p->z;
+		x = x >> 5;
+		y = y >> 5;
+		z = z >> 5;
+		if (block_at_bounded(state,x,y,z))
+		{
+			float m = 4/sqrt(v->x*v->x + v->y*v->y + v->z*v->z);
+			v->x*=m;
+			v->y*=m;
+			v->z*=m;
+			int move = state->radius[entity]*2;
+			while(move-- && block_at_bounded(state,x,y,z))
+			{
+				p->x -= v->x;
+				p->y -= v->y;
+				p->z -= v->z;
+				x = p->x;
+				y = p->y;
+				z = p->z;
+				x = x >> 5;
+				y = y >> 5;
+				z = z >> 5;
+			}
+			p->x -= v->x;
+			p->y -= v->y;
+			p->z -= v->z;
+			
+			entity_kill(state,entity);
+			return;
+		}
+		p->x += v->x;
+		p->y += v->y;
+		p->z += v->z;
+	}
+
+	state->life[entity]--;
+	if (state->life[entity] == 0)
+	{
+		entity_kill(state,entity);
+	}
+}
+
 static void reset_recoil(gun *g)
 {
 	if (g->recoil > 0)
@@ -301,14 +403,27 @@ static void reset_recoil(gun *g)
 		g->recoil = 0;
 }
 
-static void shoot_gun(game_state *state, gun *g)
+static void shoot_gun(game_state *state, int entity, v3 v)
 {
+	gun *g;
+	v3 p = state->position[entity];
+
+	if (entity == state->player)
+	{
+		g = &(state->pstate->weapons[state->pstate->weapon]);
+		p.z+=state->vheight;
+	}
+	else
+		g = &(state->guns[entity]);
+	
 	if (g->recoil == 0)
 	{
 		g->recoil = g->rtime;
 		state->gunzdir += g->recoil/2;
 		state->gundir += random(g->recoil) - g->recoil/2;
 		shake_cam(state,g->recoil*1.2);
+		for(int i = 0; i<g->bullets; i++)
+			bullet_create(state,p,v,g->damage,g->accuracy,g->speed,g->range);
 	}
 }
 
@@ -325,7 +440,7 @@ int player_create(game_state *state, v3 position)
 	entity_component_add(state,ent,c_friction);
 	entity_component_add(state,ent,c_level_collider);
 	entity_component_add(state,ent,c_grounded);
-	//entity_component_add(state,ent,c_gun);
+	entity_component_add(state,ent,c_gun);
 	//state->guns[ent].sprite = 5.f;
 	// initialize components
 	state->position[ent] = position;
@@ -492,7 +607,13 @@ void player_step(game_state *state, const Uint8 *key_state)
 			grapple_create(state,*pos,gvel);
 		}
 		if (!(state->pstate->grapple_out))
-			shoot_gun(state,&(state->pstate->weapons[state->pstate->weapon]));
+		{
+			v3 bvel;
+			bvel.x = lengthdir_x(lengthdir_x(1,-state->camzdir),state->camdir);
+			bvel.y = lengthdir_y(lengthdir_x(1,-state->camzdir),state->camdir);
+			bvel.z = lengthdir_y(1,-state->camzdir);
+			shoot_gun(state,state->player,bvel);
+		}
 	}
 	else
 	{
@@ -557,11 +678,19 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 	int i;
 	int *ents;
 
+	// entity destroy system
+	ents = get_ec_set(state,c_dead);
+	while(iterate_ec_set(ents,0))
+		entity_destroy(state,ents[0]);
+
 	// misc
 	state->dust_anim+=0.01;
 	// player stuff
 	player_step(state,key_state);
 	grapple_step(state);
+	ents = get_ec_set(state,c_bullet);
+	for(i=0; iterate_ec_set(ents,i); i++)
+		bullet_step(state,ents[i]);
 	clamp_speed(state,state->player);
 
 	// gravity system

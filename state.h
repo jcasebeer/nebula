@@ -59,6 +59,9 @@ typedef struct game_state
 	v3 velocity[ENTITY_MAX];
 	float velocity_max[ENTITY_MAX];
 	float friction[ENTITY_MAX];
+	int damage[ENTITY_MAX];
+	int life[ENTITY_MAX];
+	float radius[ENTITY_MAX];
 	v3i bbox[ENTITY_MAX];
 	spr sprite[ENTITY_MAX];
 	gun guns[ENTITY_MAX];
@@ -91,6 +94,7 @@ void game_state_clear(game_state *state);
 // create and destroy entitys
 int entity_create(game_state *state);
 void entity_destroy(game_state *state, int id);
+void entity_kill(game_state *state,int entity);
 
 // manage entity components
 int entity_has_component(game_state *state, int id, component_flag flag);
@@ -125,5 +129,6 @@ int player_create(game_state *state, v3 position);
 
 /***** component adds ******/
 void sprite_add(game_state *state, int entity, float sprite_index, float image_count, float width, float height);
+void sprite_add_size(game_state *state, int entity, float sprite_index,float image_count, float width, float height, float qwidth, float qheight);
 
 #endif

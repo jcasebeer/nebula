@@ -9,6 +9,9 @@ gun gen_gun()
 	g.active = 1.f;
 	g.speed = 32.f+random(32.f);
 	g.range = 4096/((int)g.speed);
+
+	g.recoil = 0;
+	g.damage = 0;
 	switch(g.type)
 	{
 		case 0: // machinegun

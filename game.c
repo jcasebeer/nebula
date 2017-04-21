@@ -367,7 +367,7 @@ static void bullet_step(game_state *state, int entity)
 			v->y*=m;
 			v->z*=m;
 			int move = state->radius[entity]*2;
-			while(move-- && block_at_bounded(state,x,y,z))
+			while(move-- && block_at(state,x,y,z))
 			{
 				p->x -= v->x;
 				p->y -= v->y;

@@ -360,7 +360,7 @@ static void bullet_step(game_state *state, int entity)
 		x = x >> 5;
 		y = y >> 5;
 		z = z >> 5;
-		if (block_at_bounded(state,x,y,z))
+		if (block_at(state,x,y,z))
 		{
 			float m = 4/sqrt(v->x*v->x + v->y*v->y + v->z*v->z);
 			v->x*=m;

@@ -53,6 +53,7 @@ typedef struct game_state
 	int mouse_rb;
 	int mouse_lb;
 	int timer;
+	int frame_time;
 
 	/* component arrays */
 	v3 position[ENTITY_MAX];

@@ -561,7 +561,8 @@ void player_step(game_state *state, const Uint8 *key_state)
 		test_sprite(state,pos->x,pos->y,pos->z);
 	}
 
-	int mouseButton = SDL_GetRelativeMouseState(&(state->mouse_x),&(state->mouse_y));
+	int mouseButton = SDL_GetMouseState(NULL,NULL);
+	SDL_GetRelativeMouseState(&(state->mouse_x),&(state->mouse_y));
 
 	state->camdir+=(state->mouse_x)/20.f;
 	state->camzdir-=(state->mouse_y)/20.f;
@@ -705,7 +706,6 @@ void game_simulate(game_state *state, const Uint8 *key_state)
 	add_friction(state,state->player);
 
 	// physics down here
-
 	ents = get_ec_set(state,c_velocity);
 	for(i=0; iterate_ec_set(ents,i); i++)
 	{

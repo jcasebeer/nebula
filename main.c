@@ -56,8 +56,9 @@ int main(int argc, char *argv[])
 	int quit = 0;
 	unsigned long int time = 0;
 	unsigned long int timespent = 0;
-	unsigned long int sleeptime = 1000/TARGET_FPS;
-	int skip_counter = 0;
+	unsigned long int second_counter = 0;
+	unsigned long int timer_res = 1000;
+	unsigned long int sleeptime = timer_res/TARGET_FPS;
 	int skip_max = 1;
 
 	// sdl variables for handling input
@@ -86,10 +87,12 @@ int main(int argc, char *argv[])
 	level_next(state,0,pstate);
 
 	int error = 0;
+	int frames = 0;
+
 	// main game loop
 	while(!quit)
 	{
-		time = SDL_GetPerformanceCounter()*1000/SDL_GetPerformanceFrequency();
+		time = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency();
 	
 		while(SDL_PollEvent(&event))
 		{
@@ -114,7 +117,7 @@ int main(int argc, char *argv[])
 						else
 							skip_max = 1;
 
-						skip_counter = 0;
+						sleeptime = timer_res/(TARGET_FPS/skip_max);
 					}
 					if (event.key.keysym.sym == SDLK_F4)
 					{
@@ -140,17 +143,16 @@ int main(int argc, char *argv[])
 				}
 		}
 
-		game_simulate(state,key_state);
-
-		if (skip_counter == skip_max)
+		for (int i = 0; i<skip_max; i++)
 		{
-			game_render_pp(state,window,textures,surf);
-			//game_render(state,window,textures);
-			SDL_GL_SwapWindow(window);
-			skip_counter = 0;
+			SDL_PumpEvents();
+			game_simulate(state,key_state);
 		}
-		skip_counter++;
-		
+
+		game_render_pp(state,window,textures,surf);
+		SDL_GL_SwapWindow(window);
+		frames++;
+
 		if (state->next_level)
 		{
 			level_next(state,1,pstate);
@@ -197,14 +199,18 @@ int main(int argc, char *argv[])
 
 			}
 		}
-
-		// limit framerate to 60fps
-		//SDL_Delay(1);
-		timespent = SDL_GetPerformanceCounter()*1000/SDL_GetPerformanceFrequency() - time;
-		//printf("timespent: %d\n",timespent);
+		if (time - second_counter > timer_res)
+		{
+			state->frame_time = (int)frames/((time-second_counter)/timer_res);
+			frames = 0;
+			second_counter = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency();
+		}
+			
+		// limit framerate
+		timespent = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency() - time;
 		while (timespent<sleeptime)
 		{
-			timespent = SDL_GetPerformanceCounter()*1000/SDL_GetPerformanceFrequency() - time;
+			timespent = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency() - time;
 		}
 	}
 	free(pstate);

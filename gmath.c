@@ -2,6 +2,7 @@
 #include "time.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "comps.h"
 
 const double DEG2RAD = 3.141592655358979323846/180.;
 unsigned int SEED;
@@ -118,4 +119,47 @@ int choose2(int x1, int x2)
 			return x2;
 	}
 	return x1;
+}
+
+int sphere_collide(v3 *s1, v3 *s2, float s1_radius, float s2_radius)
+{
+	float xdiff = s1->x - s2->x;
+	float ydiff = s1->y - s2->y;
+	float zdiff = s1->z - s2->z;
+	float rsum = s1_radius+s2_radius;
+
+	//return sqrt(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff) < rsum
+	return (xdiff*xdiff + ydiff*ydiff + zdiff*zdiff) < rsum*rsum;
+}
+
+void itoa(int num, char *buff)
+{
+	const char *dig = "0123456789";
+	int div = 1;
+	int c = 0;
+	if (num == 0)
+	{
+		buff[0] = '0';
+		buff[1] = '\0';
+		return;
+	}
+	while(num)
+	{
+		num/=div;
+		div=10;
+		int n = (num % 10);
+		if (num!=0)
+		{
+			buff[c] = dig[n];
+			c++;
+		}
+	}
+	c--;
+	for(int i = 0; i<=c/2; i++)
+	{
+		int temp = buff[c-i];
+		buff[c-i] = buff[i];
+		buff[i] = temp;
+	}
+	buff[++c] = '\0';
 }

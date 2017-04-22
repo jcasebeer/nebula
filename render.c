@@ -317,8 +317,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glClear(GL_DEPTH_BUFFER_BIT);
 	/* ~~~~~~~~~ hud ~~~~~~~~~~~~~ */
 
-	draw_text(0,0,16,"Wow! Text is working!!");
-	draw_text_br(width,height,16,"Wow! text in the bottom right corner!");
+	char fps_string[16] = "\0";
+	itoa(state->frame_time,fps_string);
+	draw_text(0,0,16,fps_string);
+	//draw_text_br(width,height,16,"Wow! text in the bottom right corner!");
 
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_ALPHA_TEST);

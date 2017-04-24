@@ -6,9 +6,9 @@
 
 void level_gen(game_state *state)
 {
-	state->levelColor[0] = 0.7+random(0.3);
-	state->levelColor[1] = 0.7+random(0.3);
-	state->levelColor[2] = 0.7+random(0.3);
+	state->levelColor[0] = 0.5+random(0.3);
+	state->levelColor[1] = 0.5+random(0.3);
+	state->levelColor[2] = 0.5+random(0.3);
 	state->levelColor[3] = 1.f;
 	int blocks = LEVEL_SIZE * BLOCK_SIZE * 3;
 	int x,y,z;

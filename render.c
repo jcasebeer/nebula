@@ -646,7 +646,7 @@ GLuint grass_model_build(game_state *state)
 				gz = zb + 28+random(4);
 				gx2 = gx + random(16) - 8;
 				gy2 = gy + random(16) - 8;
-				gz2 = gz + 8;
+				gz2 = gz + 4+random(6);
 
 				if (irandom(2) == 0)
 				{

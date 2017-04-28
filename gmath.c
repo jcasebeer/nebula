@@ -5,7 +5,17 @@
 #include "comps.h"
 
 const double DEG2RAD = 3.141592655358979323846/180.;
+const double RAD2DEG = 180.f/3.141592655358979323846;
 unsigned int SEED;
+
+v3 v3_create(float x, float y, float z)
+{
+	v3 v;
+	v.x = x;
+	v.y = y;
+	v.z = z;
+	return v;
+}
 
 float lerp(float a, float b, float f)
 {

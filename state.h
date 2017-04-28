@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "comps.h"
+#include "sound.h"
 
 typedef struct persistent_state
 {
@@ -82,12 +83,14 @@ typedef struct game_state
 	GLuint dust_model;
 	float dust_anim;
 	float gravity;
+
+	sound_data *sound;
 }game_state;
 
 p_state *p_state_create();
 
 // create game state object
-game_state *game_state_create();
+game_state *game_state_create(sound_data *sound);
 void game_state_destroy(game_state *state);
 void game_state_print(game_state *state);
 void game_state_clear(game_state *state);
@@ -124,6 +127,7 @@ int block_get_lit(game_state *state,int x, int y, int z);
 /***** gameplay stuff *********/
 void game_simulate(game_state *state,const Uint8 *key_state);
 gun gen_gun();
+v3 v3_create(float x, float y, float z);
 
 /***** entitys *******/
 int player_create(game_state *state, v3 position);

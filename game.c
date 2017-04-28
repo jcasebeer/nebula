@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include "state.h"
 #include "gmath.h"
+#include "sound.h"
 
 gun gen_gun()
 {
@@ -104,8 +105,15 @@ static void grapple_step(game_state *state)
 		vel->z = 0;
 
 		if (entity_has_component(state,state->grapple,c_grounded))
+		{
+			sound_play_at(state->sound,state->sound->grapple_stick, v3_create(state->camx,state->camy,state->camz),*pos,state->camdir);
 			entity_component_remove(state,state->grapple,c_grounded);
+		}
 
+		if (state->timer % 30 == 0)
+		{
+			//sound_play_at(state->sound,state->sound->grapple_stick,v3_create(state->camx,state->camy,state->camz),*pos,state->camdir);
+		}
 		
 		sprite->image_speed = 0.25;
 
@@ -421,6 +429,7 @@ static void shoot_gun(game_state *state, int entity, v3 v)
 	
 	if (g->recoil == 0)
 	{
+		sound_play(state->sound,state->sound->rifle);
 		g->recoil = g->rtime;
 		state->gunzdir += g->recoil/2;
 		state->gundir += random(g->recoil) - g->recoil/2;
@@ -550,6 +559,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 			state->jumps--;
 		}
 		vel->z = 3.0;
+		sound_play(state->sound,state->sound->jump);
 	}
 
 	if (!key_state[SDL_SCANCODE_SPACE])
@@ -609,6 +619,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 			state->grapple_life = 100;
 			state->grapple_state = 0;
 			grapple_create(state,*pos,gvel);
+			sound_play_at(state->sound,state->sound->grapple_shoot,v3_create(state->camx,state->camy,state->camz),*pos,state->camdir);
 		}
 		if (!(state->pstate->grapple_out))
 		{
@@ -677,7 +688,7 @@ static void camera_update(game_state *state)
 	state->camz = pos->z;
 }
 
-void game_simulate(game_state *state, const Uint8 *key_state)
+void game_simulate(game_state *state,const Uint8 *key_state)
 {
 	int i;
 	int *ents;

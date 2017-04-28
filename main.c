@@ -6,6 +6,7 @@
 #include "gmath.h"
 #include "render.h"
 #include "state.h"
+#include "sound.h"
 
 int main(int argc, char *argv[])
 {
@@ -68,13 +69,20 @@ int main(int argc, char *argv[])
 	// generate our drawing surface
 	surface_data *surf = surface_data_create(width,height,1.8);
 
+	// init audio and create our audio object
+	sound_data *sounds = sound_data_create();
+	sounds->jump = sound_load(sounds,"snd/jump.wav");
+	sounds->rifle = sound_load(sounds,"snd/rifle.wav");
+	sounds->grapple_shoot = sound_load(sounds,"snd/grapple_shoot.wav");
+	sounds->grapple_stick = sound_load(sounds,"snd/stick.wav");
+
 	// create and load our texture data
 	texture_data *textures = texture_data_create();
 	textures->sprites = texture_load("tex/sprites.png",1024,1024);
 	textures->shadow = texture_load("tex/shadow.png",256,256);
 
 	// create our game_state
-	game_state *state = game_state_create();
+	game_state *state = game_state_create(sounds);
 	p_state *pstate = p_state_create();
 	 // seed rng
     time_seed_rng();
@@ -218,6 +226,7 @@ int main(int argc, char *argv[])
 	model_destroy(state->grass_model);
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);
+	sound_data_destroy(sounds);
 	free(textures);
 	surface_data_destroy(surf);
 	SDL_DestroyWindow(window);

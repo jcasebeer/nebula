@@ -15,9 +15,10 @@ p_state *p_state_create()
 }
 
 // create game state object
-game_state *game_state_create()
+game_state *game_state_create(sound_data *sound)
 {
 	game_state *state = malloc(sizeof(game_state));
+	state->sound = sound;
 	game_state_clear(state);
 	printf("size in mb of game_state object: %f\n",(float)sizeof(game_state)/1000000.);
 	return state;
@@ -25,6 +26,7 @@ game_state *game_state_create()
 
 void game_state_clear(game_state *state)
 {
+	sound_data *sound = state->sound;
 	memset(state,0,sizeof(game_state));
 	int i,w;
 	for(i=0;i<c_last;i++)
@@ -41,6 +43,7 @@ void game_state_clear(game_state *state)
 	state->vheight = 6;
 	state->jumps = 1;
 	state->can_jump = 1;
+	state->sound = sound;
 }
 
 void game_state_destroy(game_state *state)

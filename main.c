@@ -71,10 +71,10 @@ int main(int argc, char *argv[])
 
 	// init audio and create our audio object
 	sound_data *sounds = sound_data_create();
-	sounds->jump = sound_load(sounds,"snd/jump.wav");
-	sounds->rifle = sound_load(sounds,"snd/rifle.wav");
-	sounds->grapple_shoot = sound_load(sounds,"snd/grapple_shoot.wav");
-	sounds->grapple_stick = sound_load(sounds,"snd/stick.wav");
+	sounds->jump = sound_load("snd/jump.wav");
+	sounds->rifle = sound_load("snd/rifle.wav");
+	sounds->grapple_shoot = sound_load("snd/grapple_shoot.wav");
+	sounds->grapple_stick = sound_load("snd/stick.wav");
 
 	// create and load our texture data
 	texture_data *textures = texture_data_create();
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	//state->level_model = level_model_build(state);
 	level_next(state,0,pstate);
 
-	int error = 0;
+	int error = 1;
 	int frames = 0;
 
 	// main game loop
@@ -207,6 +207,7 @@ int main(int argc, char *argv[])
 
 			}
 		}
+
 		if (time - second_counter > timer_res)
 		{
 			state->frame_time = (int)frames/((time-second_counter)/timer_res);

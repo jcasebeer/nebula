@@ -3,75 +3,97 @@
 #include "sound.h"
 #include "comps.h"
 #include "gmath.h"
-#include <SDL2/SDL_mixer.h>
 
 sound_data *sound_data_create()
 {
 	sound_data *data = malloc(sizeof(sound_data));
-	
-	data->sound_count = 0;
-	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT,2 ,4096) <0)
+	printf("ALUT Initialization: %d\n",alutInit(NULL,NULL));
+	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+	alListenerf(AL_GAIN,0.5f);
+	alGenSources(MAX_SOURCES,(ALuint *)data->sources);
+	for(int i = 0; i<MAX_SOURCES; i++)
 	{
-		printf("Audio Error: %s\n",Mix_GetError());
-		return NULL; 
+		alSourcef(data->sources[i],AL_ROLLOFF_FACTOR,1.f);
+		alSourcef(data->sources[i],AL_MAX_DISTANCE,1024.f);
+		alSourcef(data->sources[i],AL_REFERENCE_DISTANCE,512.f);
 	}
-	data->channels = Mix_AllocateChannels(256);
-	printf("Audio Mix Channels Allocated: %d\n", data->channels);
 	return data;
 }
 
 void sound_data_destroy(sound_data *data)
 {
-	// free all of our sounds
-	for(int i = 0; i<data->sound_count; i++)
-		Mix_FreeChunk(data->sounds[i]);
+	alDeleteSources(MAX_SOURCES,(ALuint *)data->sources);
+	alutExit();
 	free(data);
-	Mix_CloseAudio();
 }
 
-int sound_load(sound_data *data, char *file)
+int sound_load(char *file)
 {
-	data->sounds[data->sound_count] = Mix_LoadWAV(file);
-	data->sound_count++;
-	return data->sound_count-1;
+	int buffer;
+	buffer = (int) alutCreateBufferFromFile(file);
+	return buffer;
 }
 
-int sound_play(sound_data *data, int sound)
+void sound_play(sound_data *data,int sound)
 {
-	int channel = Mix_PlayChannel(-1, data->sounds[sound], 0);
-	Mix_SetPosition(channel,0,0);
-	return channel;
-}
-
-int sound_play_channel(sound_data *data, int sound, int channel)
-{
-	Mix_PlayChannel(channel, data->sounds[sound], 0);
-	Mix_SetPosition(channel,0,0);
-	return channel;
-}
-
-
-void sound_play_at(sound_data *data, int sound, v3 listener, v3 position, float listener_dir)
-{
-	// calculate magnitude and angle
-	float diffx, diffy, diffz;
-	diffx = position.x - listener.x;
-	diffy = position.y - listener.y;
-	diffz = position.z - listener.z;
-
-	float distance = sqrt(diffx*diffx + diffy*diffy + diffz*diffz);
-	unsigned char idist;
-	float angle = 0.f;
-	
-	angle = fmod(RAD2DEG*(atan2(diffy,diffx))+180.f,360.f) - fmod(listener_dir,360.f);
-	angle = fmod(angle,360.f);
-	idist = (clamp(distance,0,1024.f)/1024.f)*255;
-	
-	// post process channel
-	if (distance < 1024)
+	// find source
+	int source = -1;
+	for(int i = 0; i<MAX_SOURCES; i++)
 	{
-		int channel = sound_play_channel(data,sound,-1);
-		Mix_SetPosition(channel,(int)angle,idist);
+		int state;
+		alGetSourcei(data->sources[i],AL_SOURCE_STATE,&state);
+		if (state != AL_PLAYING)
+		{
+			source = data->sources[i];
+			break;
+		}
 	}
-	
+
+	alSourcei(source,AL_BUFFER,(ALuint) sound);
+	float lpos[3];
+	alGetListenerfv(AL_POSITION,(ALfloat *)lpos);
+	alSourcefv(source,AL_POSITION,lpos);
+	alSourcePlay(source); 
+}
+
+
+
+void sound_play_at(sound_data *data, int sound, v3 position)
+{
+	// find source
+	int source = -1;
+	for(int i = 0; i<MAX_SOURCES; i++)
+	{
+		int state;
+		alGetSourcei(data->sources[i],AL_SOURCE_STATE,&state);
+		if (state != AL_PLAYING)
+		{
+			source = data->sources[i];
+			break;
+		}
+	}
+
+	if (source == -1)
+		return;
+
+	alSourcei(source,AL_BUFFER,(ALuint) sound);
+	alSource3f(source,AL_POSITION,position.x,position.y,position.z);
+	alSourcePlay(source);
+
+}
+
+void sound_listener_set(v3 pos, v3 vel, float dir, float zdir)
+{
+	alListener3f(AL_POSITION,pos.x,pos.y,pos.z);
+	alListener3f(AL_VELOCITY,vel.x,vel.y,vel.z);
+	float orientation[6];
+
+	orientation[1] = lengthdir_x(lengthdir_x(1,-zdir),dir);
+	orientation[2] = lengthdir_y(lengthdir_x(1,-zdir),dir);
+	orientation[3] = lengthdir_x(1,-zdir);
+
+	orientation[3] = 0.f;
+	orientation[4] = 0.f;
+	orientation[5] = 1.f;
+	alListenerfv(AL_ORIENTATION,orientation);
 }

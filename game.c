@@ -106,7 +106,7 @@ static void grapple_step(game_state *state)
 
 		if (entity_has_component(state,state->grapple,c_grounded))
 		{
-			sound_play_at(state->sound,state->sound->grapple_stick, v3_create(state->camx,state->camy,state->camz),*pos,state->camdir);
+			sound_play_at(state->sound,state->sound->grapple_stick, *pos);
 			entity_component_remove(state,state->grapple,c_grounded);
 		}
 
@@ -619,7 +619,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 			state->grapple_life = 100;
 			state->grapple_state = 0;
 			grapple_create(state,*pos,gvel);
-			sound_play_at(state->sound,state->sound->grapple_shoot,v3_create(state->camx,state->camy,state->camz),*pos,state->camdir);
+			sound_play(state->sound,state->sound->grapple_shoot);
 		}
 		if (!(state->pstate->grapple_out))
 		{
@@ -688,6 +688,18 @@ static void camera_update(game_state *state)
 	state->camz = pos->z;
 }
 
+static void sound_update(game_state *state)
+{
+	v3 pos = v3_create(state->camx,state->camy,state->camz);
+	v3 vel;
+	vel.x = 0.f;
+	vel.y = 0.f;
+	vel.z = 0.f;
+	//if (state->player != -1)
+		//vel = state->velocity[state->player];
+	sound_listener_set(pos,vel,state->camdir,state->camzdir);
+}
+
 void game_simulate(game_state *state,const Uint8 *key_state)
 {
 	int i;
@@ -731,6 +743,7 @@ void game_simulate(game_state *state,const Uint8 *key_state)
 
 	// camera update system
 	camera_update(state);
+	sound_update(state);
 
 	// update sprites
 	ents = get_ec_set(state,c_sprite);

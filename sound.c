@@ -14,8 +14,8 @@ sound_data *sound_data_create()
 	for(int i = 0; i<MAX_SOURCES; i++)
 	{
 		alSourcef(data->sources[i],AL_ROLLOFF_FACTOR,1.f);
-		alSourcef(data->sources[i],AL_MAX_DISTANCE,1024.f);
-		alSourcef(data->sources[i],AL_REFERENCE_DISTANCE,512.f);
+		alSourcef(data->sources[i],AL_MAX_DISTANCE,2048.f);
+		alSourcef(data->sources[i],AL_REFERENCE_DISTANCE,1024.f);
 	}
 	return data;
 }

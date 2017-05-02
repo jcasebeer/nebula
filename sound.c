@@ -8,7 +8,7 @@ sound_data *sound_data_create()
 {
 	sound_data *data = malloc(sizeof(sound_data));
 	printf("ALUT Initialization: %d\n",alutInit(NULL,NULL));
-	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 	alListenerf(AL_GAIN,0.5f);
 	alGenSources(MAX_SOURCES,(ALuint *)data->sources);
 	for(int i = 0; i<MAX_SOURCES; i++)
@@ -91,9 +91,9 @@ void sound_listener_set(v3 pos, v3 vel, float dir, float zdir)
 	orientation[1] = lengthdir_x(lengthdir_x(1,-zdir),dir);
 	orientation[2] = lengthdir_y(lengthdir_x(1,-zdir),dir);
 	orientation[3] = lengthdir_x(1,-zdir);
-
-	orientation[3] = 0.f;
-	orientation[4] = 0.f;
-	orientation[5] = 1.f;
+	float zdir2 = zdir+90.f;
+	orientation[3] = lengthdir_x(lengthdir_x(1,-zdir2),dir);
+	orientation[4] = lengthdir_y(lengthdir_x(1,-zdir2),dir);
+	orientation[5] = lengthdir_x(1,-zdir2);
 	alListenerfv(AL_ORIENTATION,orientation);
 }

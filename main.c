@@ -75,6 +75,8 @@ int main(int argc, char *argv[])
 	sounds->rifle = sound_load("snd/rifle.wav");
 	sounds->grapple_shoot = sound_load("snd/grapple_shoot.wav");
 	sounds->grapple_stick = sound_load("snd/stick.wav");
+	sounds->grapple_buzz = sound_load("snd/grappling.wav");
+	sounds->grapple_end = sound_load("snd/grapple_end.wav");
 
 	// create and load our texture data
 	texture_data *textures = texture_data_create();
@@ -227,6 +229,12 @@ int main(int argc, char *argv[])
 	model_destroy(state->grass_model);
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);
+	sound_free(sounds->jump); 
+	sound_free(sounds->rifle); 
+	sound_free(sounds->grapple_shoot);
+	sound_free(sounds->grapple_stick); 
+	sound_free(sounds->grapple_buzz);
+	sound_free(sounds->grapple_end);
 	sound_data_destroy(sounds);
 	free(textures);
 	surface_data_destroy(surf);

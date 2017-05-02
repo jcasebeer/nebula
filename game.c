@@ -123,6 +123,7 @@ static void grapple_step(game_state *state)
 			state->grapple_state = 1;
 			pvel->z+=zadd;
 			state->grapple_life--;
+			sound_play_loop(state->sound,state->sound->grapple_buzz);
 
 			if (!level_collide(state,ppos->x,ppos->y,ppos->z -1,state->bbox[state->player]))
 			{	
@@ -140,6 +141,7 @@ static void grapple_step(game_state *state)
 		}
 		if (state->grapple_life<=0)
 		{
+			sound_play_at(state->sound,state->sound->grapple_end,*pos);
 			if (state->grapple_state == 1)
 				state->jumps = 1;
 			entity_destroy(state,state->grapple);
@@ -635,6 +637,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 		state->can_shoot = 1;
 		if (state->grapple!=-1)
 		{
+			sound_play_at(state->sound,state->sound->grapple_end,state->position[state->grapple]);
 			if (state->grapple_state == 1)
 				state->jumps = 1;
 			entity_destroy(state,state->grapple);

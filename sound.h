@@ -15,6 +15,8 @@ typedef struct sound_data
 	int rifle;
 	int grapple_shoot;
 	int grapple_stick;
+	int grapple_buzz;
+	int grapple_end;
 }sound_data;
 
 sound_data *sound_data_create();
@@ -23,6 +25,8 @@ int sound_load(char *file);
 void sound_play(sound_data *data, int sound);
 void sound_play_at(sound_data *data, int sound, v3 position);
 void sound_listener_set(v3 pos, v3 vel, float dir, float zdir);
-
+void sound_free(int sound);
+void sound_play_loop(sound_data *data, int sound);
+int sound_get_source(sound_data *data);
 
 #endif

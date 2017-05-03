@@ -11,9 +11,6 @@ sound_data *sound_data_create()
 	data->device = alcOpenDevice(NULL); // open default device
 	data->context = alcCreateContext(data->device,NULL);
 	alcMakeContextCurrent(data->context);
-//*** 
-	//for using alutCreateBufferFromContext()
-	alutInitWithoutContext(NULL,NULL);
 	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 	alListenerf(AL_GAIN,0.9f);
 	alGenSources(MAX_SOURCES,(ALuint *)data->sources);
@@ -36,16 +33,33 @@ void sound_data_destroy(sound_data *data)
 	free(data);
 }
 
+
 int sound_load(char *file)
 {
-	int buffer = 0;
+	// open sound file
+	SF_INFO sinfo;
+	sinfo.format = 0;
+	SNDFILE *sfile = sf_open(file,SFM_READ,&sinfo);
+	//print sinfo state
+	//printf("sinfo for %s:\nframes:%ld samplerate:%d channels:%d format:%d sections:%d seekable:%d\n",file,sinfo.frames,sinfo.samplerate,sinfo.channels,sinfo.format,sinfo.sections,sinfo.seekable);
+	
+	// fill data array with sound file's data
+	unsigned int data_size = sizeof(short)*sinfo.frames*sinfo.channels;
+	short *data = malloc(data_size);
+	sf_readf_short(sfile,data,sinfo.frames);
+	// close file
+	sf_close(sfile);
 
-	buffer = (int) alutCreateBufferFromFile(file);
+	// put data into openal buffer
+	unsigned int buffer;
+	alGenBuffers(1,&buffer);
+	alBufferData(buffer,AL_FORMAT_MONO16,data,data_size,sinfo.samplerate);
+	// free data array
+	free(data);
 	return buffer;
-//***
 }
 
-void sound_play(sound_data *data,int sound)
+void sound_play(sound_data *data,unsigned int sound)
 {
 	// find source
 	int source = sound_get_source(data);
@@ -76,16 +90,17 @@ int sound_get_source(sound_data *data)
 	return source;
 }
 
-void sound_play_loop(sound_data *data, int sound)
+void sound_play_loop(sound_data *data,unsigned int sound)
 {
 	// find buffer where sound is already playing
 	int source = -1;
 	for(int i = 0; i<MAX_SOURCES; i++)
 	{
-		int buffer,state;
+		int buffer;
+		int state;
 		alGetSourcei(data->sources[i],AL_BUFFER,&buffer);
 		alGetSourcei(data->sources[i],AL_SOURCE_STATE,&state);
-		if (buffer == sound && state==AL_PLAYING)
+		if ((unsigned int)buffer == sound && state==AL_PLAYING)
 		{
 			source = data->sources[i];
 			break;
@@ -97,13 +112,23 @@ void sound_play_loop(sound_data *data, int sound)
 
 }
 
-void sound_free(int sound)
+void sound_free(sound_data *data, unsigned int sound)
 {
-	alDeleteBuffers(1,(const unsigned int *)&sound);
+	for(int i = 0; i<MAX_SOURCES; i++)
+	{
+		int buffer;
+		alGetSourcei(data->sources[i],AL_BUFFER,&buffer);
+		if ((unsigned int)buffer == sound)
+		{
+			alSourceStop(data->sources[i]);
+			alSourcei(data->sources[i],AL_BUFFER,0);
+		}
+	}
+	alDeleteBuffers(1,&sound);
 }
 
 
-void sound_play_at(sound_data *data, int sound, v3 position)
+void sound_play_at(sound_data *data,unsigned int sound, v3 position)
 {
 	// find source
 	int source = sound_get_source(data);

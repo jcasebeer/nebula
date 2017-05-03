@@ -3,7 +3,7 @@ SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 
 INCLUDE = -I/usr/local/include
-LIB = -L/usr/local/lib -lSDL2 -lGLEW -lGL -lopenal -lalut -lm  -Wl,-rpath=/usr/local/lib
+LIB = -L/usr/local/lib -lSDL2 -lGLEW -lGL -lopenal -lsndfile -lm  -Wl,-rpath=/usr/local/lib
 CFLAGS = -Wall -Wextra -O3 -msse2 -mfpmath=sse -std=c99 $(INCLUDE)
 LFLAGS = $(LIB)
 

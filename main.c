@@ -229,12 +229,12 @@ int main(int argc, char *argv[])
 	model_destroy(state->grass_model);
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);
-	sound_free(sounds->jump); 
-	sound_free(sounds->rifle); 
-	sound_free(sounds->grapple_shoot);
-	sound_free(sounds->grapple_stick); 
-	sound_free(sounds->grapple_buzz);
-	sound_free(sounds->grapple_end);
+	sound_free(sounds,sounds->jump); 
+	sound_free(sounds,sounds->rifle); 
+	sound_free(sounds,sounds->grapple_shoot);
+	sound_free(sounds,sounds->grapple_stick); 
+	sound_free(sounds,sounds->grapple_buzz);
+	sound_free(sounds,sounds->grapple_end);
 	sound_data_destroy(sounds);
 	free(textures);
 	surface_data_destroy(surf);

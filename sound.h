@@ -3,12 +3,15 @@
 
 //#include <SDL2/SDL_mixer.h> 
 #include <AL/al.h>
+#include <AL/alc.h>
 #include <AL/alut.h>
 #include "comps.h"
 
 
 typedef struct sound_data
 {
+	ALCdevice *device;
+	ALCcontext *context;
 	#define MAX_SOURCES 32
 	int sources[MAX_SOURCES];
 	int jump;

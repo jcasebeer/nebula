@@ -7,9 +7,15 @@
 sound_data *sound_data_create()
 {
 	sound_data *data = malloc(sizeof(sound_data));
-	printf("ALUT Initialization: %d\n",alutInit(NULL,NULL));
+	//printf("ALUT Initialization: %d\n",alutInit(NULL,NULL));
+	data->device = alcOpenDevice(NULL); // open default device
+	data->context = alcCreateContext(data->device,NULL);
+	alcMakeContextCurrent(data->context);
+//*** 
+	//for using alutCreateBufferFromContext()
+	alutInitWithoutContext(NULL,NULL);
 	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-	alListenerf(AL_GAIN,0.5f);
+	alListenerf(AL_GAIN,0.9f);
 	alGenSources(MAX_SOURCES,(ALuint *)data->sources);
 	for(int i = 0; i<MAX_SOURCES; i++)
 	{
@@ -23,15 +29,20 @@ sound_data *sound_data_create()
 void sound_data_destroy(sound_data *data)
 {
 	alDeleteSources(MAX_SOURCES,(ALuint *)data->sources);
-	printf("alutExit status: %d\n",alutExit());
+	data->device = alcGetContextsDevice(data->context);
+	alcMakeContextCurrent(NULL);
+	alcDestroyContext(data->context);
+	alcCloseDevice(data->device);
 	free(data);
 }
 
 int sound_load(char *file)
 {
-	int buffer;
+	int buffer = 0;
+
 	buffer = (int) alutCreateBufferFromFile(file);
 	return buffer;
+//***
 }
 
 void sound_play(sound_data *data,int sound)

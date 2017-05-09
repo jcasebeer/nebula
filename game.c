@@ -454,7 +454,7 @@ int player_create(game_state *state, v3 position)
 	entity_component_add(state,ent,c_friction);
 	entity_component_add(state,ent,c_level_collider);
 	entity_component_add(state,ent,c_grounded);
-	entity_component_add(state,ent,c_gun);
+	//entity_component_add(state,ent,c_gun);
 	//state->guns[ent].sprite = 5.f;
 	// initialize components
 	state->position[ent] = position;
@@ -466,11 +466,48 @@ int player_create(game_state *state, v3 position)
 	// velocity and friction
 	state->velocity_max[ent] = 2.0;
 	state->friction[ent] = 0.2;
+	state->radius[ent] = 8.f;
 
 	v3i *bbox = &(state->bbox[ent]);
 	bbox->x = 6;
 	bbox->y = 6;
 	bbox->z = 10;
+	return ent;
+}
+
+static int gun_pickup_create(game_state *state, float x, float y, float z, gun g)
+{
+	int ent  = entity_create(state);
+	entity_component_add(state,ent,c_position);
+	entity_component_add(state,ent,c_velocity);
+	entity_component_add(state,ent,c_gun);
+	entity_component_add(state,ent,c_grounded);
+	entity_component_add(state,ent,c_level_collider);
+	entity_component_add(state,ent,c_gun_pickup);
+
+	state->guns[ent] = g;
+	sprite_add_size(state,ent,29,9,32,32,16,16);
+
+	v3 *p = &(state->position[ent]);
+	v3 *v = &(state->velocity[ent]);
+	v3i *bbox = &(state->bbox[ent]);
+	spr *s = &(state->sprite[ent]);
+	p->x = x;
+	p->y = y;
+	p->z = z;
+
+	v->x = 0.f;
+	v->y = 0.f;
+	v->z = 0.5f;
+
+	bbox->x = 8.f;
+	bbox->y = 8.f;
+	bbox->z = 8.f;
+
+	state->radius[ent] = 8.f;
+
+	s->image_index = (float)g.sprite;
+
 	return ent;
 }
 
@@ -506,6 +543,35 @@ int test_sprite(game_state *state,float x, float y, float z)
 	spr *sprite = &(state->sprite[ent]);
 	sprite->image_speed = 0.25f;
 	return ent;
+} 
+
+void player_gun_pickup(game_state *state)
+{
+	v3 *pos = &(state->position[state->player]);
+	int *ents = get_ec_set(state,c_gun_pickup);
+	for(int i=0; iterate_ec_set(ents,i); i++)
+	{
+		int gun_ent = ents[i];
+		gun *g = &(state->guns[gun_ent]);
+		v3 *gunpos = &(state->position[gun_ent]);
+		v3 *gunvel = &(state->velocity[gun_ent]);
+		if (gunvel->z == 0.f && sphere_collide(pos,gunpos,state->radius[state->player],state->radius[gun_ent]) && !entity_has_component(state,gun_ent,c_dead))
+		{
+			for(int i = 0; i<2; i++)
+			{
+				if (state->pstate->weapons[i].active == 0)
+				{
+					g->active = 1;
+					state->pstate->weapons[i] = *g;
+					state->pstate->grapple_out = 0;
+					state->pstate->weapon = i;
+					state->gun_change = 0.f;
+					entity_kill(state,gun_ent);
+					return;
+				}
+			}
+		}
+	}
 }
 
 void player_step(game_state *state, const Uint8 *key_state)
@@ -527,6 +593,29 @@ void player_step(game_state *state, const Uint8 *key_state)
 		motion_add(state,state->player,state->camdir+90.f,spd);
 	if (key_state[SDL_SCANCODE_A])
 		motion_add(state,state->player,state->camdir-90.f,spd);
+	if (key_state[SDL_SCANCODE_Q] && state->gun_change>0.9f && !state->pstate->grapple_out && state->pstate->weapons[state->pstate->weapon].active)
+	{
+		gun_pickup_create(state,pos->x+lengthdir_x(4,state->camdir),pos->y+lengthdir_y(4,state->camdir),pos->z+state->vheight,state->pstate->weapons[state->pstate->weapon]);
+		state->pstate->weapons[state->pstate->weapon].active = 0;
+		state->gun_change = 0.f;
+		int no_weapons = 1;
+		for(int i = 0; i<2; i++)
+		{
+			if (state->pstate->weapons[i].active != 0)
+			{
+				state->pstate->weapon = i;
+				no_weapons = 0;
+				break;
+			}
+		}
+
+		if (no_weapons)
+			state->pstate->grapple_out = 1;
+	}
+
+	if (key_state[SDL_SCANCODE_E] && (state->gun_change>0.9f || state->pstate->grapple_out) )
+		player_gun_pickup(state);
+
 
 	float c_speed = sqrt(vel->x * vel->x + vel->y * vel->y);
 	int bx,by,bz;
@@ -647,7 +736,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 
 	if((mouseButton & SDL_BUTTON(SDL_BUTTON_RIGHT)))
 	{
-		if(state->mouse_rb == 0)
+		if(state->mouse_rb == 0 && state->pstate->weapons[state->pstate->weapon].active == 1)
 		{
 			state->pstate->grapple_out = !(state->pstate->grapple_out);
 		}

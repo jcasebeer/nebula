@@ -1,6 +1,7 @@
 #ifndef GMATH_H
 #define GMATH_H
 #include <math.h>
+#include "comps.h"
 
 extern const double DEG2RAD;
 extern const double RAD2DEG;
@@ -10,7 +11,7 @@ float lengthdir_y(float len, float dir);
 void normalize(float *v);
 void cross(float *result, float *v1, float *v2);
 void move_to(float *x, float *y,float dir, float speed);
-
+int sphere_collide(v3 *s1, v3 *s2, float s1_radius, float s2_radius);
 
 void seed_rng(unsigned int seed);
 void time_seed_rng();

@@ -14,6 +14,7 @@ typedef enum
 	c_sprite_fullbright,
 	c_gun,
 	c_bullet,
+	c_gun_pickup,
 	c_last // special enum, keep at end
 }component_flag;
 

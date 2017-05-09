@@ -2,7 +2,7 @@
 #include "time.h"
 #include "stdio.h"
 #include "stdlib.h"
-#include "comps.h"
+//#include "comps.h"
 
 const double DEG2RAD = 3.141592655358979323846/180.;
 const double RAD2DEG = 180.f/3.141592655358979323846;

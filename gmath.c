@@ -142,6 +142,24 @@ int sphere_collide(v3 *s1, v3 *s2, float s1_radius, float s2_radius)
 	return (xdiff*xdiff + ydiff*ydiff + zdiff*zdiff) < rsum*rsum;
 }
 
+v3 dirToVector(float dir, float zdir, float m)
+{
+	v3 v;
+	v.x = lengthdir_x(lengthdir_x(1,-zdir),dir);
+	v.y = lengthdir_y(lengthdir_x(1,-zdir),dir);
+	v.z = lengthdir_y(1,-zdir);
+
+	float dp = v.x*v.x + v.y*v.y + v.z*v.z;
+	float im = 1.f;
+	if (dp != 0.f)
+		im = m/dp;
+	v.x*=im;
+	v.y*=im;
+	v.z*=im;
+	
+	return v;
+}
+
 void itoa(int num, char *buff)
 {
 	const char *dig = "0123456789";

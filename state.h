@@ -69,10 +69,10 @@ typedef struct game_state
 	gun guns[ENTITY_MAX];
 
 	/* level data */
-	#define LEVEL_SIZE 256
-	#define MAX_BLOCKS 130000
+	#define LEVEL_SIZE 512
+	#define MAX_BLOCKS 250000
 	#define BLOCK_SIZE 32
-	int block_grid[LEVEL_SIZE][LEVEL_SIZE][LEVEL_SIZE];
+	char block_grid[LEVEL_SIZE][LEVEL_SIZE][LEVEL_SIZE];
 	int block_list[MAX_BLOCKS];
 	int block_count;
 	int next_level;

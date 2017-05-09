@@ -223,6 +223,8 @@ static void move_colliding_with_level(game_state *state, int entity)
 	}
 }
 
+
+
 // friction only applied to horizontal movement
 // gravity system handles objects falling (vertical movement)
 static void add_friction(game_state *state, int entity)
@@ -252,6 +254,13 @@ static void add_friction(game_state *state, int entity)
 		v->z -= sign(v->z)*f;
 	else
 		v->z = 0;*/
+}
+
+static void add_ground_friction(game_state *state, int entity)
+{
+	v3 *p = &(state->position[entity]);
+	if (level_collide(state,p->x,p->y,p->z - 1,state->bbox[entity]))
+		add_friction(state,entity);
 }
 
 static void add_gravity(game_state *state, int entity)
@@ -475,7 +484,7 @@ int player_create(game_state *state, v3 position)
 	return ent;
 }
 
-static int gun_pickup_create(game_state *state, float x, float y, float z, gun g)
+static int gun_pickup_create(game_state *state, float x, float y, float z, v3 velocity ,gun g)
 {
 	int ent  = entity_create(state);
 	entity_component_add(state,ent,c_position);
@@ -485,24 +494,28 @@ static int gun_pickup_create(game_state *state, float x, float y, float z, gun g
 	entity_component_add(state,ent,c_level_collider);
 	entity_component_add(state,ent,c_gun_pickup);
 	entity_component_add(state,ent,c_kill_on_fall);
+	entity_component_add(state,ent,c_sprite_background);
+	entity_component_add(state,ent,c_ground_friction);
 
 	state->guns[ent] = g;
+	state->velocity[ent] = velocity;
+	state->friction[ent] = 0.2f;
 	sprite_add_size(state,ent,29,9,32,32,16,16);
 
 	v3 *p = &(state->position[ent]);
-	v3 *v = &(state->velocity[ent]);
+	//v3 *v = &(state->velocity[ent]);
 	v3i *bbox = &(state->bbox[ent]);
 	spr *s = &(state->sprite[ent]);
 	p->x = x;
 	p->y = y;
 	p->z = z;
 
-	v->x = 0.f;
-	v->y = 0.f;
-	v->z = 0.5f;
+	//v->x = 0.f;
+	//v->y = 0.f;
+	//v->z = 0.5f;
 
-	bbox->x = 8.f;
-	bbox->y = 8.f;
+	bbox->x = 6.f;
+	bbox->y = 6.f;
 	bbox->z = 8.f;
 
 	state->radius[ent] = 8.f;
@@ -516,6 +529,7 @@ int test_sprite(game_state *state,float x, float y, float z)
 {
 	int ent = entity_create(state);
 	entity_component_add(state,ent,c_position);
+	//entity_component_add(state,ent,c_sprite_background);
 
 	v3 *pos = &(state->position[ent]);
 	pos->x = x;
@@ -596,7 +610,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 		motion_add(state,state->player,state->camdir-90.f,spd);
 	if (key_state[SDL_SCANCODE_Q] && state->gun_change>0.9f && !state->pstate->grapple_out && state->pstate->weapons[state->pstate->weapon].active)
 	{
-		gun_pickup_create(state,pos->x+lengthdir_x(4,state->camdir),pos->y+lengthdir_y(4,state->camdir),pos->z+state->vheight,state->pstate->weapons[state->pstate->weapon]);
+		gun_pickup_create(state,pos->x,pos->y,pos->z+state->vheight,dirToVector(state->camdir,state->camzdir,4.f),state->pstate->weapons[state->pstate->weapon]);
 		state->pstate->weapons[state->pstate->weapon].active = 0;
 		state->gun_change = 0.f;
 		int no_weapons = 1;
@@ -827,7 +841,13 @@ void game_simulate(game_state *state,const Uint8 *key_state)
 		add_gravity(state,ents[i]);
 
 	// friction system
-	add_friction(state,state->player);
+	ents = get_ec_set(state,c_friction);
+	for(i=0; iterate_ec_set(ents,i); i++)
+		add_friction(state,ents[i]);
+
+	ents = get_ec_set(state,c_ground_friction);
+	for(i=0; iterate_ec_set(ents,i); i++)
+		add_ground_friction(state,ents[i]);
 
 	// physics down here
 	ents = get_ec_set(state,c_velocity);

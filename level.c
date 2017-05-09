@@ -15,7 +15,7 @@ void level_gen(game_state *state)
 	int i;
 
 	// set all initial values in block_grid to -1
-	int *gptr = &(state->block_grid[0][0][0]);
+	char *gptr = &(state->block_grid[0][0][0]);
 	for(i=0;i<LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE;i++)
 	{
 		*(gptr+i) = -1;
@@ -41,13 +41,13 @@ void level_gen(game_state *state)
 		x+=choose3(1,0,-1);
 		y+=choose3(1,0,-1);
 		z+=choose3(1,0,-1);
-		while (x>=LEVEL_SIZE || x < 0)
-			x = irandom(LEVEL_SIZE);
-		while (y>=LEVEL_SIZE || y < 0)
-			y = irandom(LEVEL_SIZE);
-		while (z>=LEVEL_SIZE || z < 0)
-			z = irandom(LEVEL_SIZE);
-
+		while (x>=LEVEL_SIZE || x < 0 || y>=LEVEL_SIZE || y < 0 || z>=LEVEL_SIZE || z < 0)
+		{
+			int point = state->block_list[irandom(state->block_count)];
+			x = point_getx(point);
+			y = point_gety(point);
+			z = point_getz(point);
+		}
 		blocks--;
 	}
 	// fatten blocks
@@ -169,7 +169,7 @@ void block_create(game_state *state, int x, int y, int z)
 {
 	if (state->block_count >= MAX_BLOCKS || x>=LEVEL_SIZE || x<0 || y>=LEVEL_SIZE || y<0 || z>=LEVEL_SIZE || z<0)
 		return;
-	state->block_grid[x][y][z] = state->block_count;
+	state->block_grid[x][y][z] = 1;//state->block_count;
 	state->block_list[state->block_count] = point_create(x,y,z);
 	state->block_count++;
 }

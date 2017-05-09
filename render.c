@@ -95,6 +95,8 @@ surface_data *surface_data_create(int width, int height, float gamma)
   	surf->a_vcoord = glGetAttribLocation(surf->post_shader,"v_coord");
   	surf->u_fbo_texture = glGetUniformLocation(surf->post_shader,"fbo_texture");
   	surf->u_gamma = glGetUniformLocation(surf->post_shader,"gamma");
+  	surf->u_resx = glGetUniformLocation(surf->post_shader,"resx");
+  	surf->u_resy = glGetUniformLocation(surf->post_shader,"resy");
 
   	glDetachShader(surf->post_shader,VertexShaderID);
   	glDetachShader(surf->post_shader,FragmentShaderID);
@@ -152,6 +154,8 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
 	glUniform1i(surf->u_fbo_texture,0);
 	glUniform1f(surf->u_gamma,surf->gamma);
+	glUniform1f(surf->u_resx,surf->width);
+	glUniform1f(surf->u_resy,surf->height);
 	glEnableVertexAttribArray(surf->a_vcoord);
 
 	glBindBuffer(GL_ARRAY_BUFFER,surf->vbo_fbo_verts);
@@ -223,10 +227,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightfv(GL_LIGHT0, GL_DIFFUSE,state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1./(384.0*384.0));
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1.0/(1024.0*1024.0));
 	//glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
 
-	GLfloat spec[4] = {0.f,0.f,0.f,1.f};
+	GLfloat spec[4] = {1.f,1.f,1.f,1.f};
 
 	GLfloat light_pos[4];
 	light_pos[0] = state->camx;
@@ -925,8 +929,8 @@ void draw_sprite(game_state *state, int entity)
 			m[2][1] = 0.f;
 			m[2][2] = 1.f;
 			glLoadMatrixf(&m[0][0]);
-			glBegin(GL_TRIANGLE_FAN);
 			glColor3f(dist,dist,dist);
+			glBegin(GL_TRIANGLE_FAN);
 			glTexCoord2f(xto,y);
 		   	glVertex3f(width,height,0);
 		   	glTexCoord2f(x,y);
@@ -935,8 +939,23 @@ void draw_sprite(game_state *state, int entity)
 		    glVertex3f(-width,-height,0);
 		    glTexCoord2f(xto,yto);
 		    glVertex3f(width,-height,0);
+		    glEnd();
+		    if (entity_has_component(state,entity,c_sprite_background))
+		    {
+		    	glColor3f(0.f,0.f,0.f);
+		    	glBegin(GL_TRIANGLE_FAN);
+		    	glTexCoord2f(xto,y);
+		   		glVertex3f(width,height,-1.f);
+		   		glTexCoord2f(x,y);
+		   		glVertex3f(-width,height,-1.f);
+		   		glTexCoord2f(x,yto);
+		    	glVertex3f(-width,-height,-1.f);
+		    	glTexCoord2f(xto,yto);
+		    	glVertex3f(width,-height,-1.f);
+		    	glEnd();
+		    }
 		    glColor3f(1.f,1.f,1.f);
-			glEnd();
+			
 		glPopMatrix();
 	glPopMatrix();
 }

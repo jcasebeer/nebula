@@ -22,6 +22,8 @@ typedef struct surface_data
 	GLuint u_fbo_texture;
 	GLuint a_vcoord;
 	GLuint u_gamma;
+	GLuint u_resx;
+	GLuint u_resy;
 }surface_data;
 
 texture_data *texture_data_create();

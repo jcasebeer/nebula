@@ -16,6 +16,8 @@ typedef enum
 	c_bullet,
 	c_gun_pickup,
 	c_kill_on_fall,
+	c_sprite_background,
+	c_ground_friction,
 	c_last // special enum, keep at end
 }component_flag;
 

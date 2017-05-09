@@ -484,6 +484,7 @@ static int gun_pickup_create(game_state *state, float x, float y, float z, gun g
 	entity_component_add(state,ent,c_grounded);
 	entity_component_add(state,ent,c_level_collider);
 	entity_component_add(state,ent,c_gun_pickup);
+	entity_component_add(state,ent,c_kill_on_fall);
 
 	state->guns[ent] = g;
 	sprite_add_size(state,ent,29,9,32,32,16,16);
@@ -792,6 +793,14 @@ static void sound_update(game_state *state)
 	sound_listener_set(pos,vel,state->camdir,state->camzdir);
 }
 
+void kill_falling(game_state *state, int ent)
+{
+	if (state->position[ent].z < -256)
+	{
+		entity_kill(state,ent);
+	}
+}
+
 void game_simulate(game_state *state,const Uint8 *key_state)
 {
 	int i;
@@ -832,6 +841,10 @@ void game_simulate(game_state *state,const Uint8 *key_state)
 	ents = get_ec_set(state,c_level_collider);
 	for(i=0; iterate_ec_set(ents,i); i++)
 		move_colliding_with_level(state,ents[i]);
+
+	ents = get_ec_set(state,c_kill_on_fall);
+	for(i=0; iterate_ec_set(ents,i); i++)
+		kill_falling(state,ents[i]);
 
 	// camera update system
 	camera_update(state);

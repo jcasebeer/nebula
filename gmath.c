@@ -8,6 +8,14 @@ const double DEG2RAD = 3.141592655358979323846/180.;
 const double RAD2DEG = 180.f/3.141592655358979323846;
 unsigned int SEED;
 
+void compliment(float color[4], float result[4])
+{
+	result[0] = (1.f - color[0])/2.f;
+	result[1] = (1.f - color[1])/2.f;
+	result[2] = (1.f - color[2])/2.f;
+	result[3] = 1.f;
+}
+
 v3 v3_create(float x, float y, float z)
 {
 	v3 v;

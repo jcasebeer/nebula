@@ -11,7 +11,7 @@ const char *post_shader_v = ""
   		"f_texcoord = (v_coord + 1.0) / 2.0;\n"
 	"}\n";
 
-const char *post_shader_f = ""
+/*const char *post_shader_f = ""
 	"uniform sampler2D fbo_texture;\n"
 	"uniform float gamma;"
 	"uniform float resx;"
@@ -29,6 +29,23 @@ const char *post_shader_f = ""
 	"float b = c.b*255.0;\n"
 	"gl_FragColor = vec4(floor(r/8.0)/31,floor(g/6.0)/42.0,floor(b/8.0)/31.0,1.0);\n"
 	"gl_FragColor.rgb = pow(gl_FragColor.rgb,vec3(gamma))*vec3(m,1.0-m/2.0,1.0-m/2.0);\n"
+	"}\n";*/
+
+const char *post_shader_f = ""
+	"uniform sampler2D fbo_texture;\n"
+	"uniform float gamma;"
+	"uniform float resx;"
+	"uniform float resy;"
+	"varying vec2 f_texcoord;\n"
+
+	"void main(void) {\n"
+	"vec3 c = texture2D(fbo_texture, f_texcoord).rgb;\n"
+	"vec2 uv = gl_FragCoord.xy / vec2(resx,resy);\n"
+	"float xdist = 0.5 - uv.x;\n"
+	"float ydist = 0.5 - uv.y;\n"
+	"float m = 1.0 - sqrt(xdist*xdist+ydist*ydist);\n"
+	"gl_FragColor = vec4(c,1.0);"
+	"gl_FragColor.rgb = pow(gl_FragColor.rgb,vec3(gamma))*vec3(1.0-m/2.0,m,1.0-m/2.0);\n"
 	"}\n";
 
 #endif

@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 
 	// create opengl context
 	SDL_GL_CreateContext(window);
+	printf("OpenGL Version: %s\n",glGetString(GL_VERSION));
 	// turn on vsync
 	//SDL_GL_SetSwapInterval(1);
 
@@ -160,6 +161,7 @@ int main(int argc, char *argv[])
 		}
 
 		game_render_pp(state,window,textures,surf);
+		//game_render(state,window,textures);
 		SDL_GL_SwapWindow(window);
 		frames++;
 
@@ -237,7 +239,7 @@ int main(int argc, char *argv[])
 	sound_free(sounds,sounds->grapple_end);
 	sound_data_destroy(sounds);
 	free(textures);
-	surface_data_destroy(surf);
+	//surface_data_destroy(surf);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;

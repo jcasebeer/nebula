@@ -216,21 +216,25 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	// draw level model
 	glPointSize(2);
+	glShadeModel(GL_FLAT);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	//glLineWidth(4);
 
+	// light push
 	glPushMatrix();
 	
-	GLfloat AmbientGlobal[4] = {0.0f,0.0f,0.0f,1.f};
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,AmbientGlobal);
+	//GLfloat AmbientGlobal[4] = {0.5f,0.125f,0.25f,1.f};
+	GLfloat comp[4];
+	compliment(state->levelColor,comp);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,comp);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE,state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1.0/(1024.0*1024.0));
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1.f/(512.f*512.f));
 	//glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
 
-	GLfloat spec[4] = {1.f,1.f,1.f,1.f};
+	GLfloat spec[4] = {0.f,0.f,0.f,0.f};
 
 	GLfloat light_pos[4];
 	light_pos[0] = state->camx;
@@ -251,27 +255,45 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHT0);
-
+	
+	GLfloat gAmbient[4] = {0.4f,0.5f,0.4f,1.f};
+	GLfloat gDiffuse[4] = {0.5f,0.125f,0.25f,1.f};
+	// grass lighting
 	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.0f);
 	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION,0.f);
 	glLightfv(GL_LIGHT1,GL_POSITION,light_pos);
 	glLightfv(GL_LIGHT1,GL_SPECULAR,spec);
-	GLfloat gAmbient[4] = {0.4f,0.5f,0.4f,1.f};
-	GLfloat gDiffuse[4] = {0.5f,0.125f,0.25f,1.f};
+	//glLightfv(GL_LIGHT1,GL_DIFFUSE,gDiffuse);
 	glLightfv(GL_LIGHT1,GL_DIFFUSE,gDiffuse);
 	glLightfv(GL_LIGHT1,GL_AMBIENT,gAmbient);
 	glEnable(GL_LIGHT1);
-	glPushMatrix();
-	glTranslatef(sin(state->dust_anim)*10,cos(state->dust_anim)*10,sin(state->dust_anim)*10);
-	model_draw(state->dust_model);
-	glPopMatrix();
 	glDisable(GL_CULL_FACE);
 	model_draw(state->grass_model);
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_LIGHT1);
-	glDisable(GL_LIGHTING);
+
+	GLfloat dAmbient[4] = {0.4f,0.5f,0.4f,1.f};
+	GLfloat dDiffuse[4] = {0.5f,0.125f,0.25f,1.f};
+
+	// dust lighting
+	glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1.f);
+	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.0f);
+	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION,0.f);
+	glLightfv(GL_LIGHT2,GL_POSITION,light_pos);
+	glLightfv(GL_LIGHT2,GL_SPECULAR,spec);
+	glLightfv(GL_LIGHT2,GL_DIFFUSE,dDiffuse);
+	glLightfv(GL_LIGHT2,GL_AMBIENT,dAmbient);
+	glEnable(GL_LIGHT2);
+
+	glPushMatrix();
+	glTranslatef(sin(state->dust_anim)*10,cos(state->dust_anim)*10,sin(state->dust_anim)*10);
+	model_draw(state->dust_model);
+	glPopMatrix();
+	glDisable(GL_LIGHT2);
 	
+	glDisable(GL_LIGHTING);
+	// light pop
 	glPopMatrix();
 	
 	if (state->grapple != -1)
@@ -402,12 +424,37 @@ static void vertex(int x, int y, int z, float xnorm, float ynorm, float znorm, f
 {
 	seed_rng(x*y-z);
 	glTexCoord2f(uv_x,uv_y);
+	float NORMAL_OFFSET = random(0.5f);
+	xnorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
+	ynorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
+	znorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
+	float m = sqrt(xnorm*xnorm + ynorm*ynorm +znorm*znorm);
+	if (m!=0.f)
+		m = 1.f/m;
+	else
+		m = 1.f;
+	xnorm*=m;
+	ynorm*=m;
+	znorm*=m;
 	glNormal3f(xnorm,ynorm,znorm);
 	glVertex3i(x+offset(6),y+offset(6),z+offset(6));
 }
 
 static void nvertex(float x, float y, float z, float xnorm, float ynorm, float znorm)
 {
+	seed_rng(x*y-z);
+	float NORMAL_OFFSET = random(3.f);
+	xnorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
+	ynorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
+	znorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
+	float m = sqrt(xnorm*xnorm + ynorm*ynorm +znorm*znorm);
+	if (m!=0.f)
+		m = 1.f/m;
+	else
+		m = 1.f;
+	xnorm*=m;
+	ynorm*=m;
+	znorm*=m;
 	glNormal3f(xnorm,ynorm,znorm);
 	glVertex3f(x,y,z);
 }
@@ -418,6 +465,13 @@ static void block_up(int x1, int y1, int z1, float uv)
 	x2=x1+BLOCK_SIZE;
 	y2=y1+BLOCK_SIZE;
 	z2=z1;
+	/*float r = 0.5;
+	glBegin(GL_TRIANGLE_FAN);
+		vertex(x1,y2,z2,random(r)-r/2.f,random(r)-r/2.f,1.f,uv,uv);
+		vertex(x1,y1,z2,random(r)-r/2.f,random(r)-r/2.f,1.f,uv,uv);
+		vertex(x2,y1,z2,random(r)-r/2.f,random(r)-r/2.f,1.f,uv,uv);
+		vertex(x2,y2,z2,random(r)-r/2.f,random(r)-r/2.f,1.f,uv,uv);
+	glEnd();*/
 
 	glBegin(GL_TRIANGLE_FAN);
 		vertex(x1,y2,z2,0.f,0.f,1.f,uv,uv);
@@ -463,6 +517,14 @@ static void block_right(int x1, int y1, int z1, float uv)
 	x2=x1+BLOCK_SIZE;
 	y2=y1+BLOCK_SIZE;
 	z2=z1-BLOCK_SIZE;
+	/*float r = 0.5;
+
+	glBegin(GL_TRIANGLE_FAN);
+		vertex(x2,y2,z2,1.f,random(r)-r/2.f,random(r)-r/2.f,uv,uv);
+		vertex(x2,y2,z1,1.f,random(r)-r/2.f,random(r)-r/2.f,uv,uv);
+		vertex(x2,y1,z1,1.f,random(r)-r/2.f,random(r)-r/2.f,uv,uv);
+		vertex(x2,y1,z2,1.f,random(r)-r/2.f,random(r)-r/2.f,uv,uv);
+	glEnd();*/
 
 	glBegin(GL_TRIANGLE_FAN);
 		vertex(x2,y2,z2,1.f,0.f,0.f,uv,uv);

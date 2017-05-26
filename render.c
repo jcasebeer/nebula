@@ -424,7 +424,7 @@ static void vertex(int x, int y, int z, float xnorm, float ynorm, float znorm, f
 {
 	seed_rng(x*y-z);
 	glTexCoord2f(uv_x,uv_y);
-	float NORMAL_OFFSET = random(0.5f);
+	float NORMAL_OFFSET = random(1.f);
 	xnorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
 	ynorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
 	znorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;

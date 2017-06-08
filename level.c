@@ -4,6 +4,18 @@
 #include "state.h"
 #include "gmath.h"
 
+static void bit_set(game_state *state, int x, int y, int z)
+{
+	int i = ((x*LEVEL_SIZE)+y)*LEVEL_SIZE+z;
+	state->block_grid[i>>5] = state->block_grid[i>>5] | (1 << i%32);
+}
+
+static int bit_get(game_state *state, int x, int y, int z)
+{
+	int i = ((x*LEVEL_SIZE)+y)*LEVEL_SIZE+z;
+	return (state->block_grid[i>>5] >> (i%32)) & 1;
+}
+
 void level_gen(game_state *state)
 {
 	state->levelColor[0] = 0.5+random(0.3);
@@ -15,10 +27,10 @@ void level_gen(game_state *state)
 	int i;
 
 	// set all initial values in block_grid to -1
-	char *gptr = &(state->block_grid[0][0][0]);
-	for(i=0;i<LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE;i++)
+	int *gptr = &(state->block_grid[0]);
+	for(i=0;i<BLOCK_GRID_SIZE;i++)
 	{
-		*(gptr+i) = -1;
+		*(gptr+i) = 0;
 	}
 
 	state->block_count = 0;
@@ -33,7 +45,7 @@ void level_gen(game_state *state)
 
 	while(blocks>0)
 	{
-		if (state->block_grid[x][y][z] == -1)
+		if (!bit_get(state,x,y,z))
 		{
 			block_create(state,x,y,z);
 		}
@@ -157,19 +169,21 @@ int point_create(int x, int y, int z)
 
 int block_at(game_state *state,int x, int y, int z)
 {
-	return (x<LEVEL_SIZE && x>=0 && y<LEVEL_SIZE && y>=0 && z<LEVEL_SIZE && z>=0 && state->block_grid[x][y][z]>-1);
+	return (x<LEVEL_SIZE && x>=0 && y<LEVEL_SIZE && y>=0 && z<LEVEL_SIZE && z>=0 && bit_get(state,x,y,z));
 }
 
 int block_at_bounded(game_state *state, int x, int y, int z)
 {
-	return (x>=LEVEL_SIZE || x<0 || y>=LEVEL_SIZE || y<0 || z>=LEVEL_SIZE || z<0 || state->block_grid[x][y][z]>-1);
+	return (x>=LEVEL_SIZE || x<0 || y>=LEVEL_SIZE || y<0 || z>=LEVEL_SIZE || z<0 || bit_get(state,x,y,z));
 }
 
 void block_create(game_state *state, int x, int y, int z)
 {
 	if (state->block_count >= MAX_BLOCKS || x>=LEVEL_SIZE || x<0 || y>=LEVEL_SIZE || y<0 || z>=LEVEL_SIZE || z<0)
 		return;
-	state->block_grid[x][y][z] = 1;//state->block_count;
+	//state->block_grid[x][y][z] = 1;//state->block_count;
+	bit_set(state,x,y,z);
 	state->block_list[state->block_count] = point_create(x,y,z);
 	state->block_count++;
 }
+

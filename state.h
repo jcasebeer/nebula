@@ -72,7 +72,10 @@ typedef struct game_state
 	#define LEVEL_SIZE 512
 	#define MAX_BLOCKS 250000
 	#define BLOCK_SIZE 32
-	char block_grid[LEVEL_SIZE][LEVEL_SIZE][LEVEL_SIZE];
+
+	// this is (LEVEL_SIZE CUBED)/BLOCK_SIZE
+	#define BLOCK_GRID_SIZE 4194304
+	int block_grid[BLOCK_GRID_SIZE];
 	int block_list[MAX_BLOCKS];
 	int block_count;
 	int next_level;

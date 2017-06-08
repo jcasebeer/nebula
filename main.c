@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
 	p_state *pstate = p_state_create();
 	 // seed rng
     time_seed_rng();
+
     pstate->weapons[0] = gen_gun();
 	pstate->weapons[1] = gen_gun();
 

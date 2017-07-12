@@ -8,6 +8,9 @@
 #include "state.h"
 #include "sound.h"
 
+//turn off shaders w/ this
+//#define NO_SHADER
+
 int main(int argc, char *argv[])
 {
 	// hide unused parameter warning
@@ -67,8 +70,10 @@ int main(int argc, char *argv[])
 	SDL_Event event;
 	const Uint8 *key_state = SDL_GetKeyboardState(NULL);
 
+	#ifndef NO_SHADER
 	// generate our drawing surface
 	surface_data *surf = surface_data_create(width,height,1.8);
+	#endif
 
 	// init audio and create our audio object
 	sound_data *sounds = sound_data_create();
@@ -145,6 +150,7 @@ int main(int argc, char *argv[])
 						}
 					}
 
+					#ifndef NO_SHADER
 					if (event.key.keysym.sym == SDLK_F6)
 					{
 						if (surf->gamma < 2.6)
@@ -152,6 +158,7 @@ int main(int argc, char *argv[])
 						else
 							surf->gamma = 1.6;
 					}
+					#endif
 				}
 		}
 
@@ -160,9 +167,11 @@ int main(int argc, char *argv[])
 			SDL_PumpEvents();
 			game_simulate(state,key_state);
 		}
-
+		#ifdef NO_SHADER
+		game_render(state,window,textures);
+		#else
 		game_render_pp(state,window,textures,surf);
-		//game_render(state,window,textures);
+		#endif
 		SDL_GL_SwapWindow(window);
 		frames++;
 
@@ -240,7 +249,9 @@ int main(int argc, char *argv[])
 	sound_free(sounds,sounds->grapple_end);
 	sound_data_destroy(sounds);
 	free(textures);
-	//surface_data_destroy(surf);
+	#ifndef NO_SHADER
+	surface_data_destroy(surf);
+	#endif
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;

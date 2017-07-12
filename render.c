@@ -189,7 +189,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
 	glViewport(0,0,width,height);
-	draw_set_frustum(90.f,(float)width/height,1.,32000.);
+	draw_set_frustum(120.f,(float)width/height,1.,32000.);
 
 	// point camera
 	glMatrixMode(GL_MODELVIEW);
@@ -443,7 +443,7 @@ static void vertex(int x, int y, int z, float xnorm, float ynorm, float znorm, f
 static void nvertex(float x, float y, float z, float xnorm, float ynorm, float znorm)
 {
 	seed_rng(x*y-z);
-	float NORMAL_OFFSET = random(3.f);
+	float NORMAL_OFFSET = random(10.f);
 	xnorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
 	ynorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
 	znorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
@@ -900,11 +900,17 @@ void draw_player_gun(game_state *state)
 	float xto = x+32.f;
 	float yto = y+32.f;
 	float width = 4.f;
-	float height = 8.f;
+	float height = 10.f;
 
-	float xpos = 8.5 - g->recoil*0.3333;
+
+	/*
+	float xpos = 8.5 - g->recoil*0.3333f;
 	float ypos = -7;
-	float zpos = -2;
+	float zpos = -2;*/
+
+	float xpos = 7.5 - g->recoil*(0.3333f);
+	float ypos = -8.5;
+	float zpos = -3;
 
 	x/=1024.f;
 	y/=1024.f;

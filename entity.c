@@ -59,7 +59,7 @@ void game_state_print(game_state *state)
 	for(w=0;w<ENTITY_MAX;w++)
 	{
 		printf("Entity %d flags:",w);
-		for(i=0;i<COMPONENT_FLAG_SIZE*32;i++)
+		for(i=0;i<1+c_last/32;i++)
 		{
 			printf("%d ",entity_has_component(state,w,i));
 			if ( i!=0 && i % 32 == 0)
@@ -213,7 +213,7 @@ static int entity_is_empty(game_state *state, int id)
 {
 	int i,clear;
 	clear = 1;
-	for(i=0;i<COMPONENT_FLAG_SIZE;i++)
+	for(i=0;i<1+c_last/32;i++)
 		if(state->flags[id][i]!=0)
 		{
 			clear = 0;

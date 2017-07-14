@@ -28,7 +28,8 @@ void level_gen(game_state *state)
 
 	// set all initial values in block_grid to -1
 	int *gptr = &(state->block_grid[0]);
-	for(i=0;i<BLOCK_GRID_SIZE;i++)
+	int block_grid_size = LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE/BLOCK_SIZE;
+	for(i=0;i<block_grid_size;i++)
 	{
 		*(gptr+i) = 0;
 	}

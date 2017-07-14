@@ -900,7 +900,7 @@ void draw_player_gun(game_state *state)
 	float xto = x+32.f;
 	float yto = y+32.f;
 	float width = 4.f;
-	float height = 10.f;
+	float height = 12.f;
 
 
 	/*

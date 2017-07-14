@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <string.h>
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 #include "gmath.h"
@@ -68,7 +69,9 @@ int main(int argc, char *argv[])
 
 	// sdl variables for handling input
 	SDL_Event event;
-	const Uint8 *key_state = SDL_GetKeyboardState(NULL);
+	int key_state_size;
+	const Uint8 *key_state = SDL_GetKeyboardState(&key_state_size);
+	Uint8 *prev_key_state = malloc(sizeof(Uint8)*key_state_size);
 
 	#ifndef NO_SHADER
 	// generate our drawing surface
@@ -110,63 +113,63 @@ int main(int argc, char *argv[])
 	while(!quit)
 	{
 		time = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency();
-	
+		memcpy(prev_key_state,key_state,sizeof(Uint8)*key_state_size);
+
 		while(SDL_PollEvent(&event))
 		{
 			if (event.type==SDL_QUIT)
 					quit=1;
-				if (event.type == SDL_KEYDOWN)
-				{
-					if (event.key.keysym.sym == SDLK_ESCAPE)
-						quit = 1;
-					
-				}
-				if (event.type == SDL_KEYUP)
-				{
-					if (event.key.keysym.sym == SDLK_RETURN)
-					{
-						state->next_level = 1;
-					}
-					if (event.key.keysym.sym == SDLK_F5)
-					{
-						if (skip_max == 1)
-							skip_max = 2;
-						else
-							skip_max = 1;
-
-						sleeptime = timer_res/(TARGET_FPS/skip_max);
-					}
-					if (event.key.keysym.sym == SDLK_F4)
-					{
-						if (fullscreen)
-						{
-							fullscreen = 0;
-							SDL_SetWindowFullscreen(window,0);
-						}
-						else
-						{
-							fullscreen = 1;
-							SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN_DESKTOP);
-						}
-					}
-
-					#ifndef NO_SHADER
-					if (event.key.keysym.sym == SDLK_F6)
-					{
-						if (surf->gamma < 2.6)
-							surf->gamma += 0.2;
-						else
-							surf->gamma = 1.6;
-					}
-					#endif
-				}
 		}
+
+		if (key_pressed(SDL_SCANCODE_ESCAPE))
+		{
+			quit = 1;
+		}
+
+		if (key_pressed(SDL_SCANCODE_F4))
+		{
+			if (fullscreen)
+			{
+				fullscreen = 0;
+				SDL_SetWindowFullscreen(window,0);
+			}
+			else
+			{
+				fullscreen = 1;
+				SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN_DESKTOP);
+			}
+		}
+
+		if (key_pressed(SDL_SCANCODE_RETURN))
+		{
+			state->next_level = 1;
+		}
+
+		if (key_pressed(SDL_SCANCODE_F5))
+		{
+			if (skip_max == 1)
+				skip_max = 2;
+			else
+				skip_max = 1;
+
+			sleeptime = timer_res/(TARGET_FPS/skip_max);
+		}
+
+		#ifndef NO_SHADER
+		if (key_pressed(SDL_SCANCODE_F6))
+		{
+			if (surf->gamma < 2.6)
+				surf->gamma += 0.2;
+			else
+				surf->gamma = 1.6;
+		}
+		#endif
 
 		for (int i = 0; i<skip_max; i++)
 		{
-			SDL_PumpEvents();
-			game_simulate(state,key_state);
+			game_simulate(state,key_state,prev_key_state);
 		}
+
 		#ifdef NO_SHADER
 		game_render(state,window,textures);
 		#else
@@ -249,6 +252,7 @@ int main(int argc, char *argv[])
 	sound_free(sounds,sounds->grapple_end);
 	sound_data_destroy(sounds);
 	free(textures);
+	free(prev_key_state);
 	#ifndef NO_SHADER
 	surface_data_destroy(surf);
 	#endif

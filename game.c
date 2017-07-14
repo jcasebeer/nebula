@@ -589,7 +589,7 @@ void player_gun_pickup(game_state *state)
 	}
 }
 
-void player_step(game_state *state, const Uint8 *key_state)
+void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state)
 {
 	// check if player exists
 	if (state->player == -1)
@@ -600,15 +600,15 @@ void player_step(game_state *state, const Uint8 *key_state)
 	v3 *vel = &(state->velocity[state->player]);
 	v3i bbox = state->bbox[state->player];
 	float *vmax = &(state->velocity_max[state->player]);
-	if (key_state[SDL_SCANCODE_W])
+	if (key_down(SDL_SCANCODE_W))
 		motion_add(state,state->player,state->camdir,spd);
-	if (key_state[SDL_SCANCODE_S])
+	if (key_down(SDL_SCANCODE_S))
 		motion_add(state,state->player,state->camdir+180.f,spd);
-	if (key_state[SDL_SCANCODE_D])
+	if (key_down(SDL_SCANCODE_D))
 		motion_add(state,state->player,state->camdir+90.f,spd);
-	if (key_state[SDL_SCANCODE_A])
+	if (key_down(SDL_SCANCODE_A))
 		motion_add(state,state->player,state->camdir-90.f,spd);
-	if (key_state[SDL_SCANCODE_Q] && state->gun_change>0.9f && !state->pstate->grapple_out && state->pstate->weapons[state->pstate->weapon].active)
+	if (key_pressed(SDL_SCANCODE_Q) && !state->pstate->grapple_out && state->pstate->weapons[state->pstate->weapon].active)
 	{
 		gun_pickup_create(state,pos->x,pos->y,pos->z+state->vheight,dirToVector(state->camdir,state->camzdir,4.f),state->pstate->weapons[state->pstate->weapon]);
 		state->pstate->weapons[state->pstate->weapon].active = 0;
@@ -628,7 +628,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 			state->pstate->grapple_out = 1;
 	}
 
-	if (key_state[SDL_SCANCODE_E] && (state->gun_change>0.9f || state->pstate->grapple_out) )
+	if (key_down(SDL_SCANCODE_E) && (state->gun_change>0.9f || state->pstate->grapple_out) )
 		player_gun_pickup(state);
 
 
@@ -656,7 +656,7 @@ void player_step(game_state *state, const Uint8 *key_state)
 			state->view_bob+=0.2*(c_speed/2);
 	}
 
-	if (state->jumps>0 && key_state[SDL_SCANCODE_SPACE] && state->can_jump)
+	if (state->jumps>0 && key_down(SDL_SCANCODE_SPACE) && state->can_jump)
 	{
 		state->can_jump = 0;
 		if (!grounded)
@@ -668,10 +668,10 @@ void player_step(game_state *state, const Uint8 *key_state)
 		sound_play(state->sound,state->sound->jump);
 	}
 
-	if (!key_state[SDL_SCANCODE_SPACE])
+	if (!key_down(SDL_SCANCODE_SPACE))
 		state->can_jump = 1;
 
-	if (key_state[SDL_SCANCODE_R] && state->timer % 30 == 0)
+	if (key_down(SDL_SCANCODE_R) && state->timer % 30 == 0)
 	{
 		v3 *pos = &(state->position[state->player]);
 		test_sprite(state,pos->x,pos->y,pos->z);
@@ -683,13 +683,13 @@ void player_step(game_state *state, const Uint8 *key_state)
 	state->camdir+=(state->mouse_x)/20.f;
 	state->camzdir-=(state->mouse_y)/20.f;
 
-	if (key_state[SDL_SCANCODE_LEFT])
+	if (key_down(SDL_SCANCODE_LEFT))
 		state->camdir-=1.f;
-	if (key_state[SDL_SCANCODE_RIGHT])
+	if (key_down(SDL_SCANCODE_RIGHT))
 		state->camdir+=1.f;
-	if (key_state[SDL_SCANCODE_UP])
+	if (key_down(SDL_SCANCODE_UP))
 		state->camzdir+=1.f;
-	if (key_state[SDL_SCANCODE_DOWN])
+	if (key_down(SDL_SCANCODE_DOWN))
 		state->camzdir-=1.f;
 	if (state->camzdir>88.f)
 		state->camzdir = 88.f;
@@ -698,12 +698,12 @@ void player_step(game_state *state, const Uint8 *key_state)
 
 	if (state->pstate->weapons[state->pstate->weapon].recoil == 0.f)
 	{
-		if (key_state[SDL_SCANCODE_1] && state->pstate->weapon != 0 && state->pstate->weapons[0].active)
+		if (key_down(SDL_SCANCODE_1) && state->pstate->weapon != 0 && state->pstate->weapons[0].active)
 		{
 			state->pstate->weapon = 0;
 			state->gun_change = 0.f;
 		}
-		else if (key_state[SDL_SCANCODE_2] && state->pstate->weapon != 1 && state->pstate->weapons[1].active)
+		else if (key_down(SDL_SCANCODE_2) && state->pstate->weapon != 1 && state->pstate->weapons[1].active)
 		{
 			state->pstate->weapon = 1;
 			state->gun_change = 0.f;
@@ -815,7 +815,7 @@ void kill_falling(game_state *state, int ent)
 	}
 }
 
-void game_simulate(game_state *state,const Uint8 *key_state)
+void game_simulate(game_state *state, const Uint8 *key_state, Uint8 *prev_key_state)
 {
 	int i;
 	int *ents;
@@ -828,7 +828,7 @@ void game_simulate(game_state *state,const Uint8 *key_state)
 	// misc
 	state->dust_anim+=0.01;
 	// player stuff
-	player_step(state,key_state);
+	player_step(state,key_state,prev_key_state);
 	grapple_step(state);
 	ents = get_ec_set(state,c_bullet);
 	for(i=0; iterate_ec_set(ents,i); i++)

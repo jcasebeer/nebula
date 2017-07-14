@@ -5,6 +5,10 @@
 #include "comps.h"
 #include "sound.h"
 
+// input macros, require key_state and prev_key_state pointers in scope
+#define key_pressed(key) (key_state[key] && !prev_key_state[key])
+#define key_down(key) (key_state[key])
+
 typedef struct persistent_state
 {
 	int weapon;
@@ -19,9 +23,8 @@ typedef struct game_state
 	/* running total number of entitys*/
 	int entity_count;
 
-	#define COMPONENT_FLAG_SIZE 1 // max component flags = COMPONENT_FLAG_SIZE*32
 	/* bitmask of flags per entity */
-	int flags[ENTITY_MAX][COMPONENT_FLAG_SIZE];
+	int flags[ENTITY_MAX][1+c_last/32];
 
 	/* data structure with lists of entity ids with a given component
 	   ex: ec_list[c_none] is the array of all the entitys with the c_none component flag */
@@ -72,10 +75,9 @@ typedef struct game_state
 	#define LEVEL_SIZE 512
 	#define MAX_BLOCKS 250000
 	#define BLOCK_SIZE 32
-
-	// this is (LEVEL_SIZE CUBED)/BLOCK_SIZE
-	#define BLOCK_GRID_SIZE 4194304
-	int block_grid[BLOCK_GRID_SIZE];
+	
+	// 1 bit per block/air block
+	int block_grid[LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE/BLOCK_SIZE];
 	int block_list[MAX_BLOCKS];
 	int block_count;
 	int next_level;
@@ -128,7 +130,7 @@ int block_at_bounded(game_state *state, int x, int y, int z);
 int block_get_lit(game_state *state,int x, int y, int z);
 
 /***** gameplay stuff *********/
-void game_simulate(game_state *state,const Uint8 *key_state);
+void game_simulate(game_state *state,const Uint8 *key_state, Uint8 *prev_key_state);
 gun gen_gun();
 v3 v3_create(float x, float y, float z);
 

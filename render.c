@@ -180,7 +180,8 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
 	// clear background
 	//glShadeModel(GL_FLAT);
-	glClearColor(0.03f,0.03f,0.03f,1.f);
+	glClearColor(0.1,0.1,0.1,1.f);
+	//glClearColor(0.7f,0.7f,0.7f,1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set up projection matrix and window size

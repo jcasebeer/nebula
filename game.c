@@ -628,6 +628,12 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 			state->pstate->grapple_out = 1;
 	}
 
+	if (key_pressed(SDL_SCANCODE_X) && state->pstate->weapons[state->pstate->weapon].active)
+	{
+		state->pstate->weapons[state->pstate->weapon] = gen_gun();
+	}
+
+
 	if (key_down(SDL_SCANCODE_E) && (state->gun_change>0.9f || state->pstate->grapple_out) )
 		player_gun_pickup(state);
 

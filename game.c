@@ -833,6 +833,7 @@ void game_simulate(game_state *state, const Uint8 *key_state, Uint8 *prev_key_st
 
 	// misc
 	state->dust_anim+=0.01;
+	state->day_night+=0.01;
 	// player stuff
 	player_step(state,key_state,prev_key_state);
 	grapple_step(state);

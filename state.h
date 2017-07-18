@@ -87,6 +87,7 @@ typedef struct game_state
 	GLuint grass_model;
 	GLuint dust_model;
 	float dust_anim;
+	float day_night;
 	float gravity;
 
 	sound_data *sound;

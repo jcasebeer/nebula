@@ -7,7 +7,6 @@
 #include <sndfile.h>
 #include "comps.h"
 
-
 typedef struct sound_data
 {
 	ALCdevice *device;
@@ -21,6 +20,8 @@ typedef struct sound_data
 	unsigned int grapple_buzz;
 	unsigned int grapple_end;
 }sound_data;
+
+extern sound_data *SOUND;
 
 sound_data *sound_data_create();
 void sound_data_destroy(sound_data *data);

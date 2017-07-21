@@ -9,7 +9,8 @@
 #define key_pressed(key) (key_state[key] && !prev_key_state[key])
 #define key_down(key) (key_state[key])
 
-typedef struct persistent_state
+// stuff you want to stay persistent between levels
+typedef struct
 {
 	int weapon;
 	int grapple_out;
@@ -18,7 +19,7 @@ typedef struct persistent_state
 
 typedef struct game_state
 {
-	p_state *pstate;
+	p_state pstate;
 	#define ENTITY_MAX 512 // max number of entitys
 	/* running total number of entitys*/
 	int entity_count;
@@ -89,14 +90,10 @@ typedef struct game_state
 	float dust_anim;
 	float day_night;
 	float gravity;
-
-	sound_data *sound;
 }game_state;
 
-p_state *p_state_create();
-
 // create game state object
-game_state *game_state_create(sound_data *sound);
+game_state *game_state_create();
 void game_state_destroy(game_state *state);
 void game_state_print(game_state *state);
 void game_state_clear(game_state *state);
@@ -119,7 +116,7 @@ int iterate_ec_set(int *set,int id);
 
 /****** LEVEL STUFF **************/
 void level_gen(game_state *state);
-void level_next(game_state *state, int clearModels, p_state *pstate);
+void level_next(game_state *state, int clearModels);
 int point_getx(int block);
 int point_gety(int block);
 int point_getz(int block);

@@ -106,13 +106,13 @@ static void grapple_step(game_state *state)
 
 		if (entity_has_component(state,state->grapple,c_grounded))
 		{
-			sound_play_at(state->sound,state->sound->grapple_stick, *pos);
+			sound_play_at(SOUND,SOUND->grapple_stick, *pos);
 			entity_component_remove(state,state->grapple,c_grounded);
 		}
 
 		if (state->timer % 30 == 0)
 		{
-			//sound_play_at(state->sound,state->sound->grapple_stick,v3_create(state->camx,state->camy,state->camz),*pos,state->camdir);
+			//sound_play_at(SOUND,SOUND->grapple_stick,v3_create(state->camx,state->camy,state->camz),*pos,state->camdir);
 		}
 		
 		sprite->image_speed = 0.25;
@@ -123,7 +123,7 @@ static void grapple_step(game_state *state)
 			state->grapple_state = 1;
 			pvel->z+=zadd;
 			state->grapple_life--;
-			sound_play_loop(state->sound,state->sound->grapple_buzz);
+			sound_play_loop(SOUND,SOUND->grapple_buzz);
 
 			if (!level_collide(state,ppos->x,ppos->y,ppos->z -1,state->bbox[state->player]))
 			{	
@@ -141,7 +141,7 @@ static void grapple_step(game_state *state)
 		}
 		if (state->grapple_life<=0)
 		{
-			sound_play_at(state->sound,state->sound->grapple_end,*pos);
+			sound_play_at(SOUND,SOUND->grapple_end,*pos);
 			if (state->grapple_state == 1)
 				state->jumps = 1;
 			entity_destroy(state,state->grapple);
@@ -432,7 +432,7 @@ static void shoot_gun(game_state *state, int entity, v3 v)
 
 	if (entity == state->player)
 	{
-		g = &(state->pstate->weapons[state->pstate->weapon]);
+		g = &(state->pstate.weapons[state->pstate.weapon]);
 		p.z+=state->vheight;
 	}
 	else
@@ -440,7 +440,7 @@ static void shoot_gun(game_state *state, int entity, v3 v)
 	
 	if (g->recoil == 0)
 	{
-		sound_play(state->sound,state->sound->rifle);
+		sound_play(SOUND,SOUND->rifle);
 		g->recoil = g->rtime;
 		state->gunzdir += g->recoil/2;
 		state->gundir += random(g->recoil) - g->recoil/2;
@@ -574,12 +574,12 @@ void player_gun_pickup(game_state *state)
 		{
 			for(int i = 0; i<2; i++)
 			{
-				if (state->pstate->weapons[i].active == 0)
+				if (state->pstate.weapons[i].active == 0)
 				{
 					g->active = 1;
-					state->pstate->weapons[i] = *g;
-					state->pstate->grapple_out = 0;
-					state->pstate->weapon = i;
+					state->pstate.weapons[i] = *g;
+					state->pstate.grapple_out = 0;
+					state->pstate.weapon = i;
 					state->gun_change = 0.f;
 					entity_kill(state,gun_ent);
 					return;
@@ -608,33 +608,33 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 		motion_add(state,state->player,state->camdir+90.f,spd);
 	if (key_down(SDL_SCANCODE_A))
 		motion_add(state,state->player,state->camdir-90.f,spd);
-	if (key_pressed(SDL_SCANCODE_Q) && !state->pstate->grapple_out && state->pstate->weapons[state->pstate->weapon].active)
+	if (key_pressed(SDL_SCANCODE_Q) && !state->pstate.grapple_out && state->pstate.weapons[state->pstate.weapon].active)
 	{
-		gun_pickup_create(state,pos->x,pos->y,pos->z+state->vheight,dirToVector(state->camdir,state->camzdir,4.f),state->pstate->weapons[state->pstate->weapon]);
-		state->pstate->weapons[state->pstate->weapon].active = 0;
+		gun_pickup_create(state,pos->x,pos->y,pos->z+state->vheight,dirToVector(state->camdir,state->camzdir,4.f),state->pstate.weapons[state->pstate.weapon]);
+		state->pstate.weapons[state->pstate.weapon].active = 0;
 		state->gun_change = 0.f;
 		int no_weapons = 1;
 		for(int i = 0; i<2; i++)
 		{
-			if (state->pstate->weapons[i].active != 0)
+			if (state->pstate.weapons[i].active != 0)
 			{
-				state->pstate->weapon = i;
+				state->pstate.weapon = i;
 				no_weapons = 0;
 				break;
 			}
 		}
 
 		if (no_weapons)
-			state->pstate->grapple_out = 1;
+			state->pstate.grapple_out = 1;
 	}
 
-	if (key_pressed(SDL_SCANCODE_X) && state->pstate->weapons[state->pstate->weapon].active)
+	if (key_pressed(SDL_SCANCODE_X) && state->pstate.weapons[state->pstate.weapon].active)
 	{
-		state->pstate->weapons[state->pstate->weapon] = gen_gun();
+		state->pstate.weapons[state->pstate.weapon] = gen_gun();
 	}
 
 
-	if (key_down(SDL_SCANCODE_E) && (state->gun_change>0.9f || state->pstate->grapple_out) )
+	if (key_down(SDL_SCANCODE_E) && (state->gun_change>0.9f || state->pstate.grapple_out) )
 		player_gun_pickup(state);
 
 
@@ -671,7 +671,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 			state->jumps--;
 		}
 		vel->z = 3.0;
-		sound_play(state->sound,state->sound->jump);
+		sound_play(SOUND,SOUND->jump);
 	}
 
 	if (!key_down(SDL_SCANCODE_SPACE))
@@ -702,16 +702,16 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	if (state->camzdir<-88.f)
 		state->camzdir = -88.f;
 
-	if (state->pstate->weapons[state->pstate->weapon].recoil == 0.f)
+	if (state->pstate.weapons[state->pstate.weapon].recoil == 0.f)
 	{
-		if (key_down(SDL_SCANCODE_1) && state->pstate->weapon != 0 && state->pstate->weapons[0].active)
+		if (key_down(SDL_SCANCODE_1) && state->pstate.weapon != 0 && state->pstate.weapons[0].active)
 		{
-			state->pstate->weapon = 0;
+			state->pstate.weapon = 0;
 			state->gun_change = 0.f;
 		}
-		else if (key_down(SDL_SCANCODE_2) && state->pstate->weapon != 1 && state->pstate->weapons[1].active)
+		else if (key_down(SDL_SCANCODE_2) && state->pstate.weapon != 1 && state->pstate.weapons[1].active)
 		{
-			state->pstate->weapon = 1;
+			state->pstate.weapon = 1;
 			state->gun_change = 0.f;
 		}
 	}
@@ -720,7 +720,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 
 	if (mouseButton & SDL_BUTTON(SDL_BUTTON_LEFT))
 	{
-		if (state->pstate->grapple_out && state->grapple==-1 && state->can_shoot && state->pstate->grapple_out)
+		if (state->pstate.grapple_out && state->grapple==-1 && state->can_shoot && state->pstate.grapple_out)
 		{
 			state->can_shoot = 0;
 			v3 gvel;
@@ -731,9 +731,9 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 			state->grapple_life = 100;
 			state->grapple_state = 0;
 			grapple_create(state,*pos,gvel);
-			sound_play(state->sound,state->sound->grapple_shoot);
+			sound_play(SOUND,SOUND->grapple_shoot);
 		}
-		if (!(state->pstate->grapple_out))
+		if (!(state->pstate.grapple_out))
 		{
 			v3 bvel;
 			bvel.x = lengthdir_x(lengthdir_x(1,-state->camzdir),state->camdir);
@@ -747,7 +747,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 		state->can_shoot = 1;
 		if (state->grapple!=-1)
 		{
-			sound_play_at(state->sound,state->sound->grapple_end,state->position[state->grapple]);
+			sound_play_at(SOUND,SOUND->grapple_end,state->position[state->grapple]);
 			if (state->grapple_state == 1)
 				state->jumps = 1;
 			entity_destroy(state,state->grapple);
@@ -757,9 +757,9 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 
 	if((mouseButton & SDL_BUTTON(SDL_BUTTON_RIGHT)))
 	{
-		if(state->mouse_rb == 0 && state->pstate->weapons[state->pstate->weapon].active == 1)
+		if(state->mouse_rb == 0 && state->pstate.weapons[state->pstate.weapon].active == 1)
 		{
-			state->pstate->grapple_out = !(state->pstate->grapple_out);
+			state->pstate.grapple_out = !(state->pstate.grapple_out);
 		}
 		state->mouse_rb = 1;
 	}
@@ -779,7 +779,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	else
 		*vmax = 2.0;
 
-	if (state->pstate->grapple_out)
+	if (state->pstate.grapple_out)
 	{
 		state->gun_change = lerp(state->gun_change,0.f,0.25);
 	}
@@ -788,7 +788,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 		state->gun_change = lerp(state->gun_change,1.f,0.25);
 	}
 
-	reset_recoil(&(state->pstate->weapons[state->pstate->weapon]));
+	reset_recoil(&(state->pstate.weapons[state->pstate.weapon]));
 }
 
 static void camera_update(game_state *state)

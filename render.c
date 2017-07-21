@@ -899,7 +899,7 @@ void draw_player_gun(game_state *state)
 		return;
 
 	v3 *p = &(state->position[state->player]);
-	gun *g = &(state->pstate->weapons[state->pstate->weapon]);
+	gun *g = &(state->pstate.weapons[state->pstate.weapon]);
 	// gun size is 32 on sprite sheet
 	float x = g->sprite * 32.f;
 	float y = 928.f;

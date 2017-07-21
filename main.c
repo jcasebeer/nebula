@@ -12,6 +12,8 @@
 //turn off shaders w/ this
 //#define NO_SHADER
 
+sound_data *SOUND;
+
 int main(int argc, char *argv[])
 {
 	// hide unused parameter warning
@@ -79,13 +81,13 @@ int main(int argc, char *argv[])
 	#endif
 
 	// init audio and create our audio object
-	sound_data *sounds = sound_data_create();
-	sounds->jump = sound_load("snd/jump.wav");
-	sounds->rifle = sound_load("snd/rifle.wav");
-	sounds->grapple_shoot = sound_load("snd/grapple_shoot.wav");
-	sounds->grapple_stick = sound_load("snd/stick.wav");
-	sounds->grapple_buzz = sound_load("snd/grappling.wav");
-	sounds->grapple_end = sound_load("snd/grapple_end.wav");
+	SOUND = sound_data_create();
+	SOUND->jump = sound_load("snd/jump.wav");
+	SOUND->rifle = sound_load("snd/rifle.wav");
+	SOUND->grapple_shoot = sound_load("snd/grapple_shoot.wav");
+	SOUND->grapple_stick = sound_load("snd/stick.wav");
+	SOUND->grapple_buzz = sound_load("snd/grappling.wav");
+	SOUND->grapple_end = sound_load("snd/grapple_end.wav");
 
 	// create and load our texture data
 	texture_data *textures = texture_data_create();
@@ -93,18 +95,18 @@ int main(int argc, char *argv[])
 	textures->shadow = texture_load("tex/shadow.png",256,256);
 
 	// create our game_state
-	game_state *state = game_state_create(sounds);
-	p_state *pstate = p_state_create();
+	game_state *state = game_state_create(SOUND);
+	//p_state *pstate = p_state_create();
 	 // seed rng
     time_seed_rng();
 
-    pstate->weapons[0] = gen_gun();
-	pstate->weapons[1] = gen_gun();
+    state->pstate.weapons[0] = gen_gun();
+	state->pstate.weapons[1] = gen_gun();
 
 	// generate a level and build its model
 	//level_gen(state);
 	//state->level_model = level_model_build(state);
-	level_next(state,0,pstate);
+	level_next(state,0);
 
 	int error = 1;
 	int frames = 0;
@@ -180,7 +182,7 @@ int main(int argc, char *argv[])
 
 		if (state->next_level)
 		{
-			level_next(state,1,pstate);
+			level_next(state,1);
 			state->next_level = 0;
 		}
 
@@ -239,18 +241,18 @@ int main(int argc, char *argv[])
 			timespent = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency() - time;
 		}
 	}
-	free(pstate);
+	//free(pstate);
 	model_destroy(state->level_model);
 	model_destroy(state->grass_model);
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);
-	sound_free(sounds,sounds->jump); 
-	sound_free(sounds,sounds->rifle); 
-	sound_free(sounds,sounds->grapple_shoot);
-	sound_free(sounds,sounds->grapple_stick); 
-	sound_free(sounds,sounds->grapple_buzz);
-	sound_free(sounds,sounds->grapple_end);
-	sound_data_destroy(sounds);
+	sound_free(SOUND,SOUND->jump); 
+	sound_free(SOUND,SOUND->rifle); 
+	sound_free(SOUND,SOUND->grapple_shoot);
+	sound_free(SOUND,SOUND->grapple_stick); 
+	sound_free(SOUND,SOUND->grapple_buzz);
+	sound_free(SOUND,SOUND->grapple_end);
+	sound_data_destroy(SOUND);
 	free(textures);
 	free(prev_key_state);
 	#ifndef NO_SHADER

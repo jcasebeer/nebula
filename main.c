@@ -169,6 +169,8 @@ int main(int argc, char *argv[])
 
 		for (int i = 0; i<skip_max; i++)
 		{
+			if (i==1)
+				memcpy(prev_key_state,key_state,sizeof(Uint8)*key_state_size);
 			game_simulate(state,key_state,prev_key_state);
 		}
 

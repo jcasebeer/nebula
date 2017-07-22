@@ -140,7 +140,7 @@ void level_next(game_state *state, int clearModels)
 	p_state p = state->pstate;
 	game_state_clear(state);
 	state->pstate = p;
-	//state->pstate = pstate;
+
 	// generate new level data
 	level_gen(state);
 	// build new level model

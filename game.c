@@ -781,11 +781,11 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 
 	if (state->pstate.grapple_out)
 	{
-		state->gun_change = lerp(state->gun_change,0.f,0.25);
+		state->gun_change = lerp(state->gun_change,0.f,0.2);
 	}
 	else
 	{
-		state->gun_change = lerp(state->gun_change,1.f,0.25);
+		state->gun_change = lerp(state->gun_change,1.f,0.2);
 	}
 
 	reset_recoil(&(state->pstate.weapons[state->pstate.weapon]));

@@ -479,13 +479,26 @@ static void block_up(int x1, int y1, int z1, float uv)
 		vertex(x2,y2,z2,random(r)-r/2.f,random(r)-r/2.f,1.f,uv,uv);
 	glEnd();*/
 
-	glBegin(GL_TRIANGLE_FAN);
-		vertex(x1,y2,z2,0.f,0.f,1.f,uv,uv);
-		vertex(x1,y1,z2,0.f,0.f,1.f,uv,uv);
-		vertex(x2,y1,z2,0.f,0.f,1.f,uv,uv);
-		vertex(x2,y2,z2,0.f,0.f,1.f,uv,uv);
-	glEnd();
+	if (choose2(0,1))
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x1,y2,z2,0.f,0.f,1.f,uv,uv);
+			vertex(x1,y1,z2,0.f,0.f,1.f,uv,uv);
+			vertex(x2,y1,z2,0.f,0.f,1.f,uv,uv);
+			vertex(x2,y2,z2,0.f,0.f,1.f,uv,uv);
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x1,y1,z2,0.f,0.f,1.f,uv,uv);
+			vertex(x2,y1,z2,0.f,0.f,1.f,uv,uv);
+			vertex(x2,y2,z2,0.f,0.f,1.f,uv,uv);
+			vertex(x1,y2,z2,0.f,0.f,1.f,uv,uv);
+		glEnd();
+	}
 }
+	
 
 static void block_down(int x1, int y1, int z1, float uv)
 {
@@ -494,12 +507,25 @@ static void block_down(int x1, int y1, int z1, float uv)
 	y2=y1+BLOCK_SIZE;
 	z2=z1;
 
-	glBegin(GL_TRIANGLE_FAN);
-		vertex(x2,y2,z2,0.f,0.f,-1.f,uv,uv);
-		vertex(x2,y1,z2,0.f,0.f,-1.f,uv,uv);
-		vertex(x1,y1,z2,0.f,0.f,-1.f,uv,uv);
-		vertex(x1,y2,z2,0.f,0.f,-1.f,uv,uv);
-	glEnd();
+	if (choose2(0,1))
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x2,y2,z2,0.f,0.f,-1.f,uv,uv);
+			vertex(x2,y1,z2,0.f,0.f,-1.f,uv,uv);
+			vertex(x1,y1,z2,0.f,0.f,-1.f,uv,uv);
+			vertex(x1,y2,z2,0.f,0.f,-1.f,uv,uv);
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x2,y1,z2,0.f,0.f,-1.f,uv,uv);
+			vertex(x1,y1,z2,0.f,0.f,-1.f,uv,uv);
+			vertex(x1,y2,z2,0.f,0.f,-1.f,uv,uv);
+			vertex(x2,y2,z2,0.f,0.f,-1.f,uv,uv);
+		glEnd();
+	}
+	
 }
 
 static void block_left(int x1, int y1, int z1, float uv)
@@ -509,12 +535,26 @@ static void block_left(int x1, int y1, int z1, float uv)
 	y2=y1+BLOCK_SIZE;
 	z2=z1-BLOCK_SIZE;
 
-	glBegin(GL_TRIANGLE_FAN);
-		vertex(x1,y1,z2,-1.f,0.f,0.f,uv,uv);
-		vertex(x1,y1,z1,-1.f,0.f,0.f,uv,uv);
-		vertex(x1,y2,z1,-1.f,0.f,0.f,uv,uv);
-		vertex(x1,y2,z2,-1.f,0.f,0.f,uv,uv);
-	glEnd();
+	if (choose2(0,1))
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x1,y1,z2,-1.f,0.f,0.f,uv,uv);
+			vertex(x1,y1,z1,-1.f,0.f,0.f,uv,uv);
+			vertex(x1,y2,z1,-1.f,0.f,0.f,uv,uv);
+			vertex(x1,y2,z2,-1.f,0.f,0.f,uv,uv);
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x1,y1,z1,-1.f,0.f,0.f,uv,uv);
+			vertex(x1,y2,z1,-1.f,0.f,0.f,uv,uv);
+			vertex(x1,y2,z2,-1.f,0.f,0.f,uv,uv);
+			vertex(x1,y1,z2,-1.f,0.f,0.f,uv,uv);
+		glEnd();
+	}
+
+	
 }
 
 static void block_right(int x1, int y1, int z1, float uv)
@@ -532,12 +572,25 @@ static void block_right(int x1, int y1, int z1, float uv)
 		vertex(x2,y1,z2,1.f,random(r)-r/2.f,random(r)-r/2.f,uv,uv);
 	glEnd();*/
 
-	glBegin(GL_TRIANGLE_FAN);
-		vertex(x2,y2,z2,1.f,0.f,0.f,uv,uv);
-		vertex(x2,y2,z1,1.f,0.f,0.f,uv,uv);
-		vertex(x2,y1,z1,1.f,0.f,0.f,uv,uv);
-		vertex(x2,y1,z2,1.f,0.f,0.f,uv,uv);
-	glEnd();
+	if (choose2(0,1))
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x2,y2,z2,1.f,0.f,0.f,uv,uv);
+			vertex(x2,y2,z1,1.f,0.f,0.f,uv,uv);
+			vertex(x2,y1,z1,1.f,0.f,0.f,uv,uv);
+			vertex(x2,y1,z2,1.f,0.f,0.f,uv,uv);
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x2,y2,z1,1.f,0.f,0.f,uv,uv);
+			vertex(x2,y1,z1,1.f,0.f,0.f,uv,uv);
+			vertex(x2,y1,z2,1.f,0.f,0.f,uv,uv);
+			vertex(x2,y2,z2,1.f,0.f,0.f,uv,uv);
+		glEnd();
+	}
+	
 }
 
 static void block_forward(int x1, int y1, int z1, int diag, int top, int bottom)
@@ -576,13 +629,25 @@ static void block_forward(int x1, int y1, int z1, int diag, int top, int bottom)
 	        blx = 0; bly = 1;
 	    }
 	}
-
-	glBegin(GL_TRIANGLE_FAN);
-		vertex(x1,y1,z2,0.f,-1.f,0.f,blx,bly);
-	    vertex(x2,y1,z2,0.f,-1.f,0.f,brx,bry);
-	    vertex(x2,y1,z1,0.f,-1.f,0.f,trx,try);
-	    vertex(x1,y1,z1,0.f,-1.f,0.f,tlx,tly);
-	glEnd();
+	if (choose2(0,1))
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x1,y1,z2,0.f,-1.f,0.f,blx,bly);
+		    vertex(x2,y1,z2,0.f,-1.f,0.f,brx,bry);
+		    vertex(x2,y1,z1,0.f,-1.f,0.f,trx,try);
+		    vertex(x1,y1,z1,0.f,-1.f,0.f,tlx,tly);
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_TRIANGLE_FAN);
+		    vertex(x2,y1,z2,0.f,-1.f,0.f,brx,bry);
+		    vertex(x2,y1,z1,0.f,-1.f,0.f,trx,try);
+		    vertex(x1,y1,z1,0.f,-1.f,0.f,tlx,tly);
+		    vertex(x1,y1,z2,0.f,-1.f,0.f,blx,bly);
+		glEnd();
+	}
+	
 }
 
 static void block_back(int x1, int y1, int z1, int diag, int top, int bottom)
@@ -621,13 +686,25 @@ static void block_back(int x1, int y1, int z1, int diag, int top, int bottom)
 	        blx = 0; bly = 1;
 	    }
 	}
-
-	glBegin(GL_TRIANGLE_FAN);
-		vertex(x2,y2,z1,0.f,1.f,0.f,blx,bly);
-	    vertex(x2,y2,z2,0.f,1.f,0.f,brx,bry);
-	    vertex(x1,y2,z2,0.f,1.f,0.f,trx,try);
-	    vertex(x1,y2,z1,0.f,1.f,0.f,tlx,tly);
-	glEnd();
+	if (choose2(0,1))
+	{
+		glBegin(GL_TRIANGLE_FAN);
+			vertex(x2,y2,z1,0.f,1.f,0.f,blx,bly);
+		    vertex(x2,y2,z2,0.f,1.f,0.f,brx,bry);
+		    vertex(x1,y2,z2,0.f,1.f,0.f,trx,try);
+		    vertex(x1,y2,z1,0.f,1.f,0.f,tlx,tly);
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_TRIANGLE_FAN);
+		    vertex(x2,y2,z2,0.f,1.f,0.f,brx,bry);
+		    vertex(x1,y2,z2,0.f,1.f,0.f,trx,try);
+		    vertex(x1,y2,z1,0.f,1.f,0.f,tlx,tly);
+		    vertex(x2,y2,z1,0.f,1.f,0.f,blx,bly);
+		glEnd();
+	}
+	
 }
 
 int block_get_lit(game_state *state,int x, int y, int z)

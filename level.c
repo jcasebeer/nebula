@@ -18,9 +18,19 @@ static int bit_get(game_state *state, int x, int y, int z)
 
 void level_gen(game_state *state)
 {
-	state->levelColor[0] = 0.5+random(0.5);
-	state->levelColor[1] = 0.5+random(0.5);
-	state->levelColor[2] = 0.5+random(0.5);
+	/*
+	//add colors to this array as we gind good ones
+	
+	#define COLORCOUNT 3
+	v3i colors[COLORCOUNT] = {
+		{255,128,128},
+		{128,255,128},
+		{128,128,255}
+	};
+	int color = irandom(COLORCOUNT); */
+	state->levelColor[0] = 0.5+random(0.5f);//colors[color].x/255.f;
+	state->levelColor[1] = 0.5+random(0.5f);//colors[color].y/255.f;
+	state->levelColor[2] = 0.5+random(0.5f);//colors[color].z/255.f;
 	state->levelColor[3] = 1.f;
 	int blocks = LEVEL_SIZE * BLOCK_SIZE * 3;
 	int x,y,z;

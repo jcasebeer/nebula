@@ -349,9 +349,22 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glClear(GL_DEPTH_BUFFER_BIT);
 	/* ~~~~~~~~~ hud ~~~~~~~~~~~~~ */
 
+	/*
+		TODO:
+			make string handling for debug and gui stuff way easier.
+	*/
 	char fps_string[16] = "\0";
+	char red_string[4] = "\0";
+	char green_string[4] = "\0";
+	char blue_string[4] = "\0";
+	itoa((int)(state->levelColor[0]*255.f),red_string);
+	itoa((int)(state->levelColor[1]*255.f),green_string);
+	itoa((int)(state->levelColor[2]*255.f),blue_string);
 	itoa(state->frame_time,fps_string);
 	draw_text(0,0,16,fps_string);
+	draw_text(0,16,16,red_string);
+	draw_text(0,32,16,green_string);
+	draw_text(0,48,16,blue_string);
 	//draw_text_br(width,height,16,"Wow! text in the bottom right corner!");
 
 	glBindTexture(GL_TEXTURE_2D,0);

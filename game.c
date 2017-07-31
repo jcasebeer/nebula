@@ -697,10 +697,10 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 		state->camzdir+=1.f;
 	if (key_down(SDL_SCANCODE_DOWN))
 		state->camzdir-=1.f;
-	if (state->camzdir>88.f)
-		state->camzdir = 88.f;
-	if (state->camzdir<-88.f)
-		state->camzdir = -88.f;
+	if (state->camzdir>85.f)
+		state->camzdir = 85.f;
+	if (state->camzdir<-85.f)
+		state->camzdir = -85.f;
 
 	if (state->pstate.weapons[state->pstate.weapon].recoil == 0.f)
 	{

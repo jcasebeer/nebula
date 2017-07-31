@@ -224,7 +224,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glShadeModel(GL_FLAT);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	//glLineWidth(4);
+	glLineWidth(2);
 
 	// light push
 	glPushMatrix();

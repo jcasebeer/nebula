@@ -78,7 +78,8 @@ typedef struct game_state
 	#define LEVEL_SIZE 512
 	#define MAX_BLOCKS 250000
 	#define BLOCK_SIZE 32
-	
+	#define CHUNK_SIZE 1000
+
 	// 1 bit per block/air block
 	int block_grid[LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE/BLOCK_SIZE];
 	int block_list[MAX_BLOCKS];
@@ -86,7 +87,8 @@ typedef struct game_state
 	int next_level;
 	GLfloat levelColor[4];
 	// gl index to display list for level model
-	GLuint level_model;
+	GLuint level_model[MAX_BLOCKS/CHUNK_SIZE];
+	int level_model_count;
 	GLuint grass_model;
 	GLuint dust_model;
 	float dust_anim;
@@ -123,6 +125,7 @@ int point_getx(int block);
 int point_gety(int block);
 int point_getz(int block);
 int point_create(int x, int y, int z);
+void bit_clear(game_state *state, int x, int y, int z);
 
 int block_at(game_state *state,int x, int y, int z);
 void block_create(game_state *state, int x, int y, int z);

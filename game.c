@@ -2,6 +2,7 @@
 #include "state.h"
 #include "gmath.h"
 #include "sound.h"
+#include "render.h"
 
 gun gen_gun()
 {
@@ -68,6 +69,77 @@ static int level_collide(game_state *state, float xx, float yy, float zz, v3i bb
 		block_at(state,(x+bbox.x)>>5,(y-bbox.y)>>5,(z+bbox.z)>>5) ||
 		block_at(state,(x+bbox.x)>>5,(y+bbox.y)>>5,(z+bbox.z)>>5)
 	);
+}
+
+static void delete_block(game_state *state)
+{
+	v3 *pos = &(state->position[state->player]);
+	int x,y,z;
+	x = ((int)pos->x)>> 5;
+	y = ((int)pos->y)>> 5;
+	z = (((int)pos->z)>> 5) -1;
+
+	// point to destroy
+	int targets[7];
+	targets[0] = point_create(x,y,z);
+	targets[1] = point_create(x+1,y,z);
+	targets[2] = point_create(x-1,y,z);
+	targets[3] = point_create(x,y+1,z);
+	targets[4] = point_create(x,y-1,z);
+	targets[5] = point_create(x,y,z+1);
+	targets[6] = point_create(x,y,z-1);
+	int chunks[7];
+	int chunk_count = 0;
+	for(int i = 0; i<state->block_count; i++)
+	{
+		for(int w = 0; w<7; w++)
+		{
+			if (targets[w] == state->block_list[i])
+			{
+				if (w == 0)
+				{
+					state->block_list[i] |= (1<<31);
+					bit_clear(state,x,y,z);
+				}
+				int in_array = 0;
+				int chunk = i/CHUNK_SIZE;
+				for(int q = 0; q<chunk_count; q++)
+				{
+					if (chunks[q] == chunk)
+					{
+						in_array = 1;
+						break;
+					}
+				}
+				if (!in_array)
+					chunks[chunk_count++] = chunk;
+			}
+		}
+	}
+	for (int i = 0; i<chunk_count; i++)
+	{
+		model_destroy(state->level_model[chunks[i]]);
+		level_model_build_part(state,chunks[i]*CHUNK_SIZE);
+	}
+
+	/*for(int i = 0; i<state->block_count; i++)
+	{
+		if (target == state->block_list[i])
+		{
+			int chunk = i/CHUNK_SIZE;
+			state->block_list[i] |= (1<<31);//state->block_list[state->block_count-1];
+			//state->block_count--;
+			bit_clear(state,x,y,z);
+			//model_destroy(state->grass_model);
+			//level_model_destroy(state);
+			//level_model_build(state);
+			printf("chunk %d\n",chunk);
+			model_destroy(state->level_model[chunk]);
+			//level_model_build_part(state,chunk*CHUNK_SIZE);
+			//grass_model_build(state);
+			return;
+		}
+	}*/
 }
 
 static void motion_add(game_state *state, int entity, float dir, float speed)
@@ -640,6 +712,12 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 		}
 	}
 	
+	// delete blocks
+	if (key_pressed(SDL_SCANCODE_Z))
+	{
+		delete_block(state);
+	}
+
 	state->fov = lerp(state->fov,state->fov_target,0.2f);
 
 	if (key_pressed(SDL_SCANCODE_X) && state->pstate.weapons[state->pstate.weapon].active)

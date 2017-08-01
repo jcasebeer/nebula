@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	//free(pstate);
-	model_destroy(state->level_model);
+	level_model_destroy(state);
 	model_destroy(state->grass_model);
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);

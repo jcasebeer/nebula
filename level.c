@@ -10,6 +10,12 @@ static void bit_set(game_state *state, int x, int y, int z)
 	state->block_grid[i>>5] = state->block_grid[i>>5] | (1 << i%32);
 }
 
+void bit_clear(game_state *state, int x, int y, int z)
+{
+	int i = ((x*LEVEL_SIZE)+y)*LEVEL_SIZE+z;
+	state->block_grid[i>>5] = state->block_grid[i>>5] & ~(1 << i%32);
+}
+
 static int bit_get(game_state *state, int x, int y, int z)
 {
 	int i = ((x*LEVEL_SIZE)+y)*LEVEL_SIZE+z;
@@ -142,7 +148,7 @@ void level_next(game_state *state, int clearModels)
 	if (clearModels)
 	{
 		// destory level model
-		model_destroy(state->level_model);
+		level_model_destroy(state);
 		model_destroy(state->grass_model);
 		model_destroy(state->dust_model);
 	}
@@ -154,7 +160,7 @@ void level_next(game_state *state, int clearModels)
 	// generate new level data
 	level_gen(state);
 	// build new level model
-	state->level_model = level_model_build(state);	
+	level_model_build(state);	
 	state->grass_model = grass_model_build(state);
 	state->dust_model = dust_model_build(state);
 }

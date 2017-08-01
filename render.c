@@ -255,7 +255,8 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textures->shadow);
 	//glEnable(GL_COLOR_MATERIAL);
-	model_draw(state->level_model);
+	//model_draw(state->level_model);
+	level_model_draw(state);
 	//glDisable(GL_COLOR_MATERIAL);
 	
 	glBindTexture(GL_TEXTURE_2D,0);
@@ -732,49 +733,75 @@ int block_get_lit(game_state *state,int x, int y, int z)
 	return 1;
 }
 
-
-GLuint level_model_build(game_state *state)
+GLuint level_model_build_part(game_state *state,int start)
 {
 	GLuint list = glGenLists(1);
 	glNewList(list,GL_COMPILE);
 	int x,y,z,xb,yb,zb,lit;
 	// save rng state
 	unsigned int seed = SEED;
-	for(int i = 0; i<state->block_count;i++)
+	for(int i = start; i<start+CHUNK_SIZE && i<state->block_count;i++)
 	{
-		x = point_getx(state->block_list[i]);
-		y = point_gety(state->block_list[i]);
-		z = point_getz(state->block_list[i]);
+		if (!(state->block_list[i]>>31 & 1))
+		{
+			x = point_getx(state->block_list[i]);
+			y = point_gety(state->block_list[i]);
+			z = point_getz(state->block_list[i]);
 
-		xb = x << 5;
-		yb = y << 5;
-		zb = z << 5;
+			xb = x << 5;
+			yb = y << 5;
+			zb = z << 5;
 
-		lit = block_get_lit(state,x,y,z);
+			lit = block_get_lit(state,x,y,z);
 
-		// up
-		if (!block_at(state,x,y,z+1))
-			block_up(xb,yb,zb+BLOCK_SIZE,(float)(block_get_lit(state,x,y,z+1) && lit));
-		// left 
-		if (!block_at(state,x-1,y,z))
-			block_left(xb,yb,zb+BLOCK_SIZE,0.f);
-		// right
-		if (!block_at(state,x+1,y,z))
-			block_right(xb,yb,zb+BLOCK_SIZE,(float)(block_get_lit(state,x+1,y,z) && lit));
-		//forward
-		if (!block_at(state,x,y-1,z))
-			block_forward(xb,yb,zb+BLOCK_SIZE,!block_get_lit(state,x,y-1,z),!block_get_lit(state,x,y-1,z+1) || block_at(state,x,y-1,z+1),!block_get_lit(state,x,y-1,z-1));
-		//back
-		if (!block_at(state,x,y+1,z))
-			block_back(xb,yb,zb+BLOCK_SIZE,!block_get_lit(state,x,y+1,z),!block_get_lit(state,x,y+1,z+1) || block_at(state,x,y+1,z+1),!block_get_lit(state,x,y+1,z-1));
-		// down
-		if (!block_at(state,x,y,z-1))
-			block_down(xb,yb,zb,0.f);
+			// up
+			if (!block_at(state,x,y,z+1))
+				block_up(xb,yb,zb+BLOCK_SIZE,(float)(block_get_lit(state,x,y,z+1) && lit));
+			// left 
+			if (!block_at(state,x-1,y,z))
+				block_left(xb,yb,zb+BLOCK_SIZE,0.f);
+			// right
+			if (!block_at(state,x+1,y,z))
+				block_right(xb,yb,zb+BLOCK_SIZE,(float)(block_get_lit(state,x+1,y,z) && lit));
+			//forward
+			if (!block_at(state,x,y-1,z))
+				block_forward(xb,yb,zb+BLOCK_SIZE,!block_get_lit(state,x,y-1,z),!block_get_lit(state,x,y-1,z+1) || block_at(state,x,y-1,z+1),!block_get_lit(state,x,y-1,z-1));
+			//back
+			if (!block_at(state,x,y+1,z))
+				block_back(xb,yb,zb+BLOCK_SIZE,!block_get_lit(state,x,y+1,z),!block_get_lit(state,x,y+1,z+1) || block_at(state,x,y+1,z+1),!block_get_lit(state,x,y+1,z-1));
+			// down
+			if (!block_at(state,x,y,z-1))
+				block_down(xb,yb,zb,0.f);
+		}
 	}
 	// restore rng state
 	seed_rng(seed);
 	glEndList();
 	return list;
+}
+
+void level_model_build(game_state *state)
+{
+	for(int i = 0; i<MAX_BLOCKS/CHUNK_SIZE; i++)
+	{
+		state->level_model[i] = level_model_build_part(state,i*CHUNK_SIZE);
+	}
+}
+
+void level_model_destroy(game_state *state)
+{
+	for(int i = 0; i<MAX_BLOCKS/CHUNK_SIZE; i++)
+	{
+		model_destroy(state->level_model[i]);
+	}
+}
+
+void level_model_draw(game_state *state)
+{
+	for(int i = 0; i<MAX_BLOCKS/CHUNK_SIZE; i++)
+	{
+		model_draw(state->level_model[i]);
+	}
 }
 
 GLuint grass_model_build(game_state *state)
@@ -787,45 +814,48 @@ GLuint grass_model_build(game_state *state)
 	
 	for(int i = 0; i<state->block_count;i++)
 	{
-		x = point_getx(state->block_list[i]);
-		y = point_gety(state->block_list[i]);
-		z = point_getz(state->block_list[i]);
-
-		xb = x << 5;
-		yb = y << 5;
-		zb = z << 5;
-
-		seed_rng(x*y-z);
-		
-		if (irandom(10)>5 && !block_at(state,x,y,z+1))
+		if (!(state->block_list[i]>>31 & 1))
 		{
-			glBegin(GL_QUADS);
-			for(int w = 0; w<16; w++)
-			{
-				int gx, gy, gz,gx2,gy2,gz2;
-				gx = xb + random(32);
-				gy = yb + random(32);
-				gz = zb + 28+random(4);
-				gx2 = gx + random(16) - 8;
-				gy2 = gy + random(16) - 8;
-				gz2 = gz + 6+random(8);
+			x = point_getx(state->block_list[i]);
+			y = point_gety(state->block_list[i]);
+			z = point_getz(state->block_list[i]);
 
-				if (irandom(2) == 0)
+			xb = x << 5;
+			yb = y << 5;
+			zb = z << 5;
+
+			seed_rng(x*y-z);
+			
+			if (irandom(10)>5 && !block_at(state,x,y,z+1))
+			{
+				glBegin(GL_QUADS);
+				for(int w = 0; w<16; w++)
 				{
-					nvertex(gx-gsize,gy,gz,0.70710678118,0,0.70710678118);
-					nvertex(gx+gsize,gy,gz,0.70710678118,0,0.70710678118);
-					nvertex(gx2+gsize,gy2,gz2,0.70710678118,0,0.70710678118);
-					nvertex(gx2-gsize,gy2,gz2,0.70710678118,0,0.70710678118);
+					int gx, gy, gz,gx2,gy2,gz2;
+					gx = xb + random(32);
+					gy = yb + random(32);
+					gz = zb + 28+random(4);
+					gx2 = gx + random(16) - 8;
+					gy2 = gy + random(16) - 8;
+					gz2 = gz + 6+random(8);
+
+					if (irandom(2) == 0)
+					{
+						nvertex(gx-gsize,gy,gz,0.70710678118,0,0.70710678118);
+						nvertex(gx+gsize,gy,gz,0.70710678118,0,0.70710678118);
+						nvertex(gx2+gsize,gy2,gz2,0.70710678118,0,0.70710678118);
+						nvertex(gx2-gsize,gy2,gz2,0.70710678118,0,0.70710678118);
+					}
+					else
+					{
+						nvertex(gx,gy-gsize,gz,0.70710678118,0,0.70710678118);
+						nvertex(gx,gy+gsize,gz,0.70710678118,0,0.70710678118);
+						nvertex(gx2,gy2+gsize,gz2,0.70710678118,0,0.70710678118);
+						nvertex(gx2,gy2-gsize,gz2,0.70710678118,0,0.70710678118);
+					}
 				}
-				else
-				{
-					nvertex(gx,gy-gsize,gz,0.70710678118,0,0.70710678118);
-					nvertex(gx,gy+gsize,gz,0.70710678118,0,0.70710678118);
-					nvertex(gx2,gy2+gsize,gz2,0.70710678118,0,0.70710678118);
-					nvertex(gx2,gy2-gsize,gz2,0.70710678118,0,0.70710678118);
-				}
+				glEnd();
 			}
-			glEnd();
 		}
 	}
 	

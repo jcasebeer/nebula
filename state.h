@@ -44,6 +44,8 @@ typedef struct game_state
 	float can_shoot;
 	float gun_change;
 	float in_shadow;
+	float fov;
+	float fov_target;
 	/* camera vars */
 	float camx;
 	float camy;

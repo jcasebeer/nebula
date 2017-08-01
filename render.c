@@ -194,7 +194,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
 	glViewport(0,0,width,height);
-	draw_set_frustum(120.f,(float)width/height,1.,32000.);
+	draw_set_frustum(state->fov,(float)width/height,1.,32000.);
 
 	// point camera
 	glMatrixMode(GL_MODELVIEW);

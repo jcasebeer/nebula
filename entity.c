@@ -34,6 +34,8 @@ void game_state_clear(game_state *state)
 	state->vheight = 6;
 	state->jumps = 1;
 	state->can_jump = 1;
+	state->fov = 120.f;
+	state->fov_target = 120.f;
 }
 
 void game_state_destroy(game_state *state)

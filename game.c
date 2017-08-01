@@ -628,6 +628,20 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 			state->pstate.grapple_out = 1;
 	}
 
+	if (key_pressed(SDL_SCANCODE_LCTRL))
+	{
+		if (state->fov_target == 120.f)
+		{
+			state->fov_target = 90.f;
+		}
+		else
+		{
+			state->fov_target = 120.f;
+		}
+	}
+	
+	state->fov = lerp(state->fov,state->fov_target,0.2f);
+
 	if (key_pressed(SDL_SCANCODE_X) && state->pstate.weapons[state->pstate.weapon].active)
 	{
 		state->pstate.weapons[state->pstate.weapon] = gen_gun();

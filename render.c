@@ -180,11 +180,13 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
 	// clear background
 	//glShadeModel(GL_FLAT);
+	GLfloat comp[4];
+	compliment(state->levelColor,comp);
 	float cycleSpeed = 8.f;
 	float am = clamp(sin(state->day_night/cycleSpeed)*cycleSpeed,-1.f,1.f);
 	am = (am+1.f)/2.f;
-	float bg = am*0.1;
-	glClearColor(bg,bg,bg,1.f);
+	float bg = 0.09+(am*0.1);
+	glClearColor(bg,bg*1.1,bg,1.f);
 	//glClearColor(0.7f,0.7f,0.7f,1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -230,13 +232,12 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glPushMatrix();
 	
 	//GLfloat AmbientGlobal[4] = {0.5f,0.125f,0.25f,1.f};
-	GLfloat comp[4];
-	compliment(state->levelColor,comp);
+	
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,comp);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE,state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f);
-	float polyLight = lerp(256.f,512.f,am);
+	float polyLight = lerp(512.f,1024.f,am);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1.f/(polyLight*polyLight));
 	//glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
 

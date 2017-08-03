@@ -78,6 +78,8 @@ static void delete_block(game_state *state)
 	x = ((int)pos->x)>> 5;
 	y = ((int)pos->y)>> 5;
 	z = (((int)pos->z)>> 5) -1;
+	if (!block_at(state,x,y,z))
+		return;
 
 	// point to destroy
 	int targets[7];
@@ -917,7 +919,6 @@ void game_simulate(game_state *state, const Uint8 *key_state, Uint8 *prev_key_st
 {
 	int i;
 	int *ents;
-
 	// entity destroy system
 	ents = get_ec_set(state,c_dead);
 	while(iterate_ec_set(ents,0))

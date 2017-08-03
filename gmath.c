@@ -47,7 +47,7 @@ float roundf(float x)
 
 float frac(float x)
 {
-	return x - floor(x);
+	return x - sign(x)*floor(abs(x));
 }
 
 float sign(float x)

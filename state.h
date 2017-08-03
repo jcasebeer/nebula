@@ -81,7 +81,7 @@ typedef struct game_state
 	#define CHUNK_SIZE 1000
 
 	// 1 bit per block/air block
-	int block_grid[LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE/BLOCK_SIZE];
+	int block_grid[LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE/BLOCK_SIZE +1];
 	int block_list[MAX_BLOCKS];
 	int block_count;
 	int next_level;

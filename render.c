@@ -845,14 +845,12 @@ GLuint grass_model_build_part(game_state *state,int start)
 						nvertex(gx-gsize,gy,gz,0.70710678118,0,0.70710678118);
 						nvertex(gx+gsize,gy,gz,0.70710678118,0,0.70710678118);
 						nvertex(gx2,gy2,gz2,0.70710678118,0,0.70710678118);
-						
 					}
 					else
 					{
 						nvertex(gx,gy-gsize,gz,0.70710678118,0,0.70710678118);
 						nvertex(gx,gy+gsize,gz,0.70710678118,0,0.70710678118);
 						nvertex(gx2,gy2,gz2,0.70710678118,0,0.70710678118);
-						
 					}
 				}
 				glEnd();

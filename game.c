@@ -120,9 +120,9 @@ static void delete_block(game_state *state)
 	}
 	for (int i = 0; i<chunk_count; i++)
 	{
-		model_destroy(state->grass_model[chunks[i]]);
 		model_destroy(state->level_model[chunks[i]]);
 		level_model_build_part(state,chunks[i]*CHUNK_SIZE);
+		model_destroy(state->grass_model[chunks[i]]);
 		grass_model_build_part(state,chunks[i]*CHUNK_SIZE);
 	}
 

@@ -151,7 +151,6 @@ void level_next(game_state *state, int clearModels)
 		// destroy grass/level model
 		level_model_destroy(state);
 		grass_model_destroy(state);
-
 		model_destroy(state->dust_model);
 	}
 	// clear old game_states memory

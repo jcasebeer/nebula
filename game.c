@@ -120,28 +120,12 @@ static void delete_block(game_state *state)
 	}
 	for (int i = 0; i<chunk_count; i++)
 	{
+		model_destroy(state->grass_model[chunks[i]]);
 		model_destroy(state->level_model[chunks[i]]);
 		level_model_build_part(state,chunks[i]*CHUNK_SIZE);
+		grass_model_build_part(state,chunks[i]*CHUNK_SIZE);
 	}
 
-	/*for(int i = 0; i<state->block_count; i++)
-	{
-		if (target == state->block_list[i])
-		{
-			int chunk = i/CHUNK_SIZE;
-			state->block_list[i] |= (1<<31);//state->block_list[state->block_count-1];
-			//state->block_count--;
-			bit_clear(state,x,y,z);
-			//model_destroy(state->grass_model);
-			//level_model_destroy(state);
-			//level_model_build(state);
-			printf("chunk %d\n",chunk);
-			model_destroy(state->level_model[chunk]);
-			//level_model_build_part(state,chunk*CHUNK_SIZE);
-			//grass_model_build(state);
-			return;
-		}
-	}*/
 }
 
 static void motion_add(game_state *state, int entity, float dir, float speed)

@@ -89,7 +89,7 @@ typedef struct game_state
 	// gl index to display list for level model
 	GLuint level_model[MAX_BLOCKS/CHUNK_SIZE];
 	int level_model_count;
-	GLuint grass_model;
+	GLuint grass_model[MAX_BLOCKS/CHUNK_SIZE];
 	GLuint dust_model;
 	float dust_anim;
 	float day_night;

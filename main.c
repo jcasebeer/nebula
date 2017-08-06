@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	// create our game_state
 	game_state *state = game_state_create(SOUND);
 	//p_state *pstate = p_state_create();
-	 // seed rng
+	// seed rng
     time_seed_rng();
 
     state->pstate.weapons[0] = gen_gun();
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
 	}
 	//free(pstate);
 	level_model_destroy(state);
-	model_destroy(state->grass_model);
+	grass_model_destroy(state);
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);
 	sound_free(SOUND,SOUND->jump); 

@@ -277,7 +277,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightfv(GL_LIGHT1,GL_AMBIENT,gAmbient);
 	glEnable(GL_LIGHT1);
 	glDisable(GL_CULL_FACE);
-	model_draw(state->grass_model);
+	grass_model_draw(state);
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_LIGHT1);
 
@@ -805,15 +805,14 @@ void level_model_draw(game_state *state)
 	}
 }
 
-GLuint grass_model_build(game_state *state)
+GLuint grass_model_build_part(game_state *state,int start)
 {
 	GLuint list = glGenLists(1);
 	glNewList(list,GL_COMPILE);
 	unsigned int seed = SEED;
 	int x,y,z,xb,yb,zb;
-	float gsize = 1;
 	
-	for(int i = 0; i<state->block_count;i++)
+	for(int i = start; i<start+CHUNK_SIZE;i++)
 	{
 		if (!(state->block_list[i]>>31 & 1))
 		{
@@ -829,30 +828,31 @@ GLuint grass_model_build(game_state *state)
 			
 			if (irandom(10)>5 && !block_at(state,x,y,z+1))
 			{
-				glBegin(GL_QUADS);
+				glBegin(GL_TRIANGLES);
 				for(int w = 0; w<16; w++)
 				{
 					int gx, gy, gz,gx2,gy2,gz2;
+					float gsize = 1.0+random(1.0);
 					gx = xb + random(32);
 					gy = yb + random(32);
-					gz = zb + 28+random(4);
+					gz = zb + 28.f;
 					gx2 = gx + random(16) - 8;
 					gy2 = gy + random(16) - 8;
-					gz2 = gz + 6+random(8);
+					gz2 = gz + 8.f+random(10.f);
 
 					if (irandom(2) == 0)
 					{
 						nvertex(gx-gsize,gy,gz,0.70710678118,0,0.70710678118);
 						nvertex(gx+gsize,gy,gz,0.70710678118,0,0.70710678118);
-						nvertex(gx2+gsize,gy2,gz2,0.70710678118,0,0.70710678118);
-						nvertex(gx2-gsize,gy2,gz2,0.70710678118,0,0.70710678118);
+						nvertex(gx2,gy2,gz2,0.70710678118,0,0.70710678118);
+						
 					}
 					else
 					{
 						nvertex(gx,gy-gsize,gz,0.70710678118,0,0.70710678118);
 						nvertex(gx,gy+gsize,gz,0.70710678118,0,0.70710678118);
-						nvertex(gx2,gy2+gsize,gz2,0.70710678118,0,0.70710678118);
-						nvertex(gx2,gy2-gsize,gz2,0.70710678118,0,0.70710678118);
+						nvertex(gx2,gy2,gz2,0.70710678118,0,0.70710678118);
+						
 					}
 				}
 				glEnd();
@@ -863,6 +863,30 @@ GLuint grass_model_build(game_state *state)
 	seed_rng(seed);
 	glEndList();
 	return list;
+}
+
+void grass_model_build(game_state *state)
+{
+	for(int i = 0; i<MAX_BLOCKS/CHUNK_SIZE; i++)
+	{
+		state->grass_model[i] = grass_model_build_part(state,i*CHUNK_SIZE);
+	}
+}
+
+void grass_model_destroy(game_state *state)
+{
+	for(int i = 0; i<MAX_BLOCKS/CHUNK_SIZE; i++)
+	{
+		model_destroy(state->grass_model[i]);
+	}
+}
+
+void grass_model_draw(game_state *state)
+{
+	for(int i = 0; i<MAX_BLOCKS/CHUNK_SIZE; i++)
+	{
+		model_draw(state->grass_model[i]);
+	}
 }
 
 GLuint dust_model_build(game_state *state)

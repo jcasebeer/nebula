@@ -148,9 +148,10 @@ void level_next(game_state *state, int clearModels)
 {
 	if (clearModels)
 	{
-		// destory level model
+		// destroy grass/level model
 		level_model_destroy(state);
-		model_destroy(state->grass_model);
+		grass_model_destroy(state);
+
 		model_destroy(state->dust_model);
 	}
 	// clear old game_states memory
@@ -162,7 +163,7 @@ void level_next(game_state *state, int clearModels)
 	level_gen(state);
 	// build new level model
 	level_model_build(state);	
-	state->grass_model = grass_model_build(state);
+	grass_model_build(state);
 	state->dust_model = dust_model_build(state);
 }
 

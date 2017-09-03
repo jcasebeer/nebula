@@ -42,9 +42,9 @@ void level_gen(game_state *state)
 	red/=csum;
 	green/=csum;
 	blue/=csum;
-	state->levelColor[0] = red;//colors[color].x/255.f;
-	state->levelColor[1] = green;//colors[color].y/255.f;
-	state->levelColor[2] = blue;//colors[color].z/255.f;
+	state->levelColor[0] = red*1.2;//colors[color].x/255.f;
+	state->levelColor[1] = green*1.2;//colors[color].y/255.f;
+	state->levelColor[2] = blue*1.2;//colors[color].z/255.f;
 	state->levelColor[3] = 1.f;
 	int blocks = LEVEL_SIZE * BLOCK_SIZE * 3;
 	int x,y,z;

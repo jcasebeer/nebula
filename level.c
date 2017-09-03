@@ -34,9 +34,17 @@ void level_gen(game_state *state)
 		{128,128,255}
 	};
 	int color = irandom(COLORCOUNT); */
-	state->levelColor[0] = 0.5+random(0.5f);//colors[color].x/255.f;
-	state->levelColor[1] = 0.5+random(0.5f);//colors[color].y/255.f;
-	state->levelColor[2] = 0.5+random(0.5f);//colors[color].z/255.f;
+	float red,green,blue,csum;
+	red = 1.f+random(10.f);
+	green = 1.f+random(10.f);
+	blue = 1.f+random(10.f);
+	csum = red+green+blue;
+	red/=csum;
+	green/=csum;
+	blue/=csum;
+	state->levelColor[0] = red;//colors[color].x/255.f;
+	state->levelColor[1] = green;//colors[color].y/255.f;
+	state->levelColor[2] = blue;//colors[color].z/255.f;
 	state->levelColor[3] = 1.f;
 	int blocks = LEVEL_SIZE * BLOCK_SIZE * 3;
 	int x,y,z;

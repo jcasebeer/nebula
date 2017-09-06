@@ -19,6 +19,7 @@ typedef struct sound_data
 	unsigned int grapple_stick;
 	unsigned int grapple_buzz;
 	unsigned int grapple_end;
+	unsigned int reload;
 }sound_data;
 
 extern sound_data *SOUND;

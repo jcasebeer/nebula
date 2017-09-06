@@ -61,6 +61,7 @@ typedef struct gun
 	int damage;
 	int range;
 	int bullets;
+	float reload;
 }gun;
 
 #endif

@@ -25,7 +25,7 @@ gun gen_gun()
 
 		case 1: // shotgun
 		g.sprite = choose2(6,7);
-		g.rtime = 40+random(16)-8;
+		g.rtime = 32.f+random(8);
 		g.bullets = 8+irandom(8) - 4;
 		g.accuracy = 32 + random(16) - 8;
 		break;
@@ -481,6 +481,20 @@ static void reset_recoil(gun *g)
 		g->recoil-=2;
 	else
 		g->recoil = 0;
+
+
+
+	if (g->recoil == 0.f)
+	{
+		if (g->type ==1 && fabs(g->reload - 3.14f) < 0.01f)
+			sound_play(SOUND,SOUND->reload);
+
+		if (g->reload > 0)
+			g->reload -= 0.125f;
+		else
+			g->reload = 0.f;
+	}
+	
 }
 
 static void shoot_gun(game_state *state, int entity, v3 v)
@@ -496,8 +510,12 @@ static void shoot_gun(game_state *state, int entity, v3 v)
 	else
 		g = &(state->guns[entity]);
 	
-	if (g->recoil == 0)
+	if (g->recoil == 0 && g->reload == 0)
 	{
+		if (g->type == 1) // shotgun
+		{
+			g->reload = 3.14f;
+		}
 		sound_play(SOUND,SOUND->rifle);
 		g->recoil = g->rtime;
 		state->gunzdir += g->recoil/2;

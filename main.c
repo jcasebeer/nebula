@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
 	SOUND->grapple_stick = sound_load("snd/stick.wav");
 	SOUND->grapple_buzz = sound_load("snd/grappling.wav");
 	SOUND->grapple_end = sound_load("snd/grapple_end.wav");
+	SOUND->reload = sound_load("snd/reload.wav");
 
 	// create and load our texture data
 	texture_data *textures = texture_data_create();

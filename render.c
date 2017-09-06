@@ -1057,7 +1057,7 @@ void draw_player_gun(game_state *state)
 	float ypos = -7;
 	float zpos = -2;*/
 
-	float xpos = 7.5 - g->recoil*(0.3333f);
+	float xpos = 7.5 - g->recoil*(0.3333f) - sin(g->reload)*5.f;
 	float ypos = -8.5;
 	float zpos = -3;
 

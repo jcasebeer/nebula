@@ -14,6 +14,7 @@ gun gen_gun()
 
 	g.recoil = 0;
 	g.damage = 0;
+	g.reload = 0.f;
 	switch(g.type)
 	{
 		case 0: // machinegun

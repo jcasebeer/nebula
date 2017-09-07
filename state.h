@@ -94,6 +94,7 @@ typedef struct game_state
 	float dust_anim;
 	float day_night;
 	float gravity;
+	float frust_length;
 }game_state;
 
 // create game state object

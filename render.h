@@ -47,4 +47,5 @@ GLuint dust_model_build(game_state *state);
 GLuint level_model_build_part(game_state *state,int start);
 void level_model_destroy(game_state *state);
 void level_model_draw(game_state *state);
+void load_screen_draw(int *time);
 #endif

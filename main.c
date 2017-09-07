@@ -13,6 +13,7 @@
 //#define NO_SHADER
 
 sound_data *SOUND;
+SDL_Window *window;
 
 int main(int argc, char *argv[])
 {
@@ -33,7 +34,7 @@ int main(int argc, char *argv[])
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 
 	// create our window
-	SDL_Window *window = SDL_CreateWindow(
+	window = SDL_CreateWindow(
 		"Nebula",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
@@ -143,7 +144,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		if (key_pressed(SDL_SCANCODE_RETURN))
+		if (key_pressed(SDL_SCANCODE_RETURN) && state->next_level == 0)
 		{
 			state->next_level = 1;
 		}
@@ -185,6 +186,8 @@ int main(int argc, char *argv[])
 
 		if (state->next_level)
 		{
+			int ltime = 30;
+			load_screen_draw(&ltime);
 			level_next(state,1);
 			state->next_level = 0;
 		}
@@ -255,6 +258,7 @@ int main(int argc, char *argv[])
 	sound_free(SOUND,SOUND->grapple_stick); 
 	sound_free(SOUND,SOUND->grapple_buzz);
 	sound_free(SOUND,SOUND->grapple_end);
+	sound_free(SOUND,SOUND->reload);
 	sound_data_destroy(SOUND);
 	free(textures);
 	free(prev_key_state);

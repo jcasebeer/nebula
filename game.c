@@ -557,7 +557,7 @@ int player_create(game_state *state, v3 position)
 	v3i *bbox = &(state->bbox[ent]);
 	bbox->x = 6;
 	bbox->y = 6;
-	bbox->z = 10;
+	bbox->z = 12;
 	return ent;
 }
 
@@ -608,15 +608,10 @@ int test_sprite(game_state *state,float x, float y, float z)
 	entity_component_add(state,ent,c_position);
 	//entity_component_add(state,ent,c_sprite_background);
 
-	v3 *pos = &(state->position[ent]);
-	pos->x = x;
-	pos->y = y;
-	pos->z = z+state->vheight;
-
 	switch(irandom(5))
 	{
 		case 0:
-			sprite_add(state,ent,0,8,16,16);
+			sprite_add_size(state,ent,0,8,16,16,16,16);
 		break;
 		case 1:
 			sprite_add(state,ent,1,3,16,16);
@@ -631,9 +626,15 @@ int test_sprite(game_state *state,float x, float y, float z)
 			sprite_add(state,ent,4,4,16,16);
 		break;
 	}
-	
+
 	spr *sprite = &(state->sprite[ent]);
 	sprite->image_speed = 0.25f;
+	
+	v3 *pos = &(state->position[ent]);
+	pos->x = x;
+	pos->y = y;
+	pos->z = z + sprite->qheight;
+
 	return ent;
 } 
 
@@ -777,7 +778,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	if (key_down(SDL_SCANCODE_R) && state->timer % 30 == 0)
 	{
 		v3 *pos = &(state->position[state->player]);
-		test_sprite(state,pos->x,pos->y,pos->z);
+		test_sprite(state,pos->x,pos->y,pos->z - bbox.z);
 	}
 
 	int mouseButton = SDL_GetMouseState(NULL,NULL);
@@ -983,4 +984,7 @@ void game_simulate(game_state *state, const Uint8 *key_state, Uint8 *prev_key_st
 		state->cam_shake -= 2.f;
 	else
 		state->cam_shake = 0.f;
+
+	if (state->frust_length < (32000.f))
+		state->frust_length += 32.f;
 }

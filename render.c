@@ -196,7 +196,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
 	glViewport(0,0,width,height);
-	draw_set_frustum(state->fov,(float)width/height,1.,32000.);
+	draw_set_frustum(state->fov,(float)width/height,1.f,state->frust_length);
 
 	// point camera
 	glMatrixMode(GL_MODELVIEW);
@@ -1175,4 +1175,19 @@ void draw_sprite(game_state *state, int entity)
 			
 		glPopMatrix();
 	glPopMatrix();
+}
+
+void load_screen_draw(int *time)
+{
+	while ((*time) > 0)
+	{
+		(*time)--;
+		extern SDL_Window *window;
+		//unsigned long int ltime = SDL_GetPerformanceCounter()*1000/SDL_GetPerformanceFrequency();
+		float c = random(0.2f);
+		glClearColor(c,c,c,1.f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		SDL_GL_SwapWindow(window);
+		SDL_Delay(1);
+	}
 }

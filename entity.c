@@ -31,11 +31,12 @@ void game_state_clear(game_state *state)
 	state->grapple_state = 0;
 	state->can_shoot = 1;
 	state->gravity = 0.1;
-	state->vheight = 6;
+	state->vheight = 8;
 	state->jumps = 1;
 	state->can_jump = 1;
 	state->fov = 120.f;
 	state->fov_target = 120.f;
+	state->frust_length = 0.f;
 }
 
 void game_state_destroy(game_state *state)

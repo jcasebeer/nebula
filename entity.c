@@ -31,7 +31,7 @@ void game_state_clear(game_state *state)
 	state->grapple_state = 0;
 	state->can_shoot = 1;
 	state->gravity = 0.1;
-	state->vheight = 8;
+	state->vheight = 14.f;
 	state->jumps = 1;
 	state->can_jump = 1;
 	state->fov = 120.f;

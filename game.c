@@ -557,7 +557,7 @@ int player_create(game_state *state, v3 position)
 	v3i *bbox = &(state->bbox[ent]);
 	bbox->x = 6;
 	bbox->y = 6;
-	bbox->z = 12;
+	bbox->z = 10;
 	return ent;
 }
 
@@ -885,6 +885,15 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	{
 		state->gun_change = lerp(state->gun_change,1.f,0.2);
 	}
+
+	if (!grounded)
+	{
+		//state->view_bob = fmod(state->view_bob,6.28318530718);
+		state->vheight = lerp(state->vheight,0.f,0.125f);
+		//state->view_bob = lerp(state->view_bob,4.71238898038f,0.2f);
+	}
+	else		
+		state->vheight = lerp(state->vheight,14.f,0.1f);
 
 	reset_recoil(&(state->pstate.weapons[state->pstate.weapon]));
 }

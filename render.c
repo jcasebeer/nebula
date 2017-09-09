@@ -205,7 +205,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	float dir_shake = state->camdir+(random(state->cam_shake) - state->cam_shake*0.5)/10.f;
 	float zdir_shake = -clamp(state->camzdir+(random(state->cam_shake) - state->cam_shake*0.5)/10.f,-89,89);
 
-
 	float xto = state->camx+lengthdir_x(lengthdir_x(1,zdir_shake),dir_shake);
 	float yto = state->camy+lengthdir_y(lengthdir_x(1,zdir_shake),dir_shake);
 	float zbob = state->camz+state->vheight+sin(state->view_bob)*2;
@@ -307,17 +306,17 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	if (state->grapple != -1)
 	{
 		v3 *gpos = &(state->position[state->grapple]);
-		v3 *ppos = &(state->position[state->player]);
+		//v3 *ppos = &(state->position[state->player]);
 		glBegin(GL_LINE_STRIP);
-		glVertex3f(ppos->x,ppos->y,ppos->z);
+		glVertex3f(xto,yto,zto-4.f);
 		for(int i = 0; i<16; i++)
 		{
 			if (state->grapple_state == 0)
 			{
 				glVertex3f(
-					lerp(ppos->x,gpos->x,i/16.0)+random(i*2.0)-i,
-					lerp(ppos->y,gpos->y,i/16.0)+random(i*2.0)-i,
-					lerp(ppos->z,gpos->z,i/16.0)+random(i*2.0)-i-sin(i/16.f*3.14)*32
+					lerp(xto,gpos->x,i/16.0)+random(i*2.0)-i,
+					lerp(yto,gpos->y,i/16.0)+random(i*2.0)-i,
+					lerp(zto-4.f,gpos->z,i/16.0)+random(i*2.0)-i-sin(i/16.f*3.14)*32
 				);
 			}
 		}

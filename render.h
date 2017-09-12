@@ -26,6 +26,12 @@ typedef struct surface_data
 	GLuint u_resy;
 }surface_data;
 
+
+typedef struct
+{
+	int progress;
+}load_state;
+
 texture_data *texture_data_create();
 void draw_position_camera(float x, float y, float z, float xto, float yto, float zto);
 void draw_set_frustum(float fov, float ar,float znear, float zfar);
@@ -47,5 +53,5 @@ GLuint dust_model_build(game_state *state);
 GLuint level_model_build_part(game_state *state,int start);
 void level_model_destroy(game_state *state);
 void level_model_draw(game_state *state);
-void load_screen_draw(int *time);
+void load_screen_draw(int time);
 #endif

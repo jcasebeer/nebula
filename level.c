@@ -67,14 +67,13 @@ void level_gen(game_state *state)
 	xstart = x;
 	ystart = y;
 	zstart = z; 
-
+	load_screen_draw(15);
 	while(blocks>0)
 	{
 		if (!bit_get(state,x,y,z))
 		{
 			block_create(state,x,y,z);
 		}
-
 		x+=choose3(1,0,-1);
 		y+=choose3(1,0,-1);
 		z+=choose3(1,0,-1);
@@ -91,6 +90,7 @@ void level_gen(game_state *state)
 	int b,w;
 	for(w = 0; w<2; w++)
 	{
+		load_screen_draw(15);
 		blocks = state->block_count;
 		for(i = 0; i<blocks;i++)
 		{
@@ -108,9 +108,10 @@ void level_gen(game_state *state)
 				block_create(state,x,y,z-1);
 		}
 	}
-
+	
 	for(w=0; w<2; w++)
 	{
+		load_screen_draw(15);
 		blocks = state->block_count;
 		for(i=0; i<blocks; i++)
 		{
@@ -123,7 +124,6 @@ void level_gen(game_state *state)
 				block_create(state,x,y+1,z);
 		}
 	}
-
 
 	// find suitable collision-free place to spawn player
 	while(block_at(state,xstart,ystart,zstart) || block_at(state,xstart,ystart,zstart+1))
@@ -156,8 +156,11 @@ void level_next(game_state *state, int clearModels)
 	// generate new level data
 	level_gen(state);
 	// build new level model
-	level_model_build(state);	
+	load_screen_draw(10);
+	level_model_build(state);
+	load_screen_draw(10);	
 	grass_model_build(state);
+	load_screen_draw(10);
 	state->dust_model = dust_model_build(state);
 }
 

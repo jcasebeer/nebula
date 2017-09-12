@@ -1,5 +1,7 @@
 Nebula
-bin
+gunswinger
+
+*.zip
 # Object files
 *.o
 *.ko

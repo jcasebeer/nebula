@@ -1176,17 +1176,53 @@ void draw_sprite(game_state *state, int entity)
 	glPopMatrix();
 }
 
-void load_screen_draw(int *time)
+void load_screen_draw(int time)
 {
-	while ((*time) > 0)
+	extern load_state LOAD_STATE;
+	extern SDL_Window *window;
+	while (time > 0)
 	{
-		(*time)--;
-		extern SDL_Window *window;
+		time--;
+		LOAD_STATE.progress++;
 		//unsigned long int ltime = SDL_GetPerformanceCounter()*1000/SDL_GetPerformanceFrequency();
-		float c = random(0.2f);
-		glClearColor(c,c,c,1.f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//float c = random(0.2f);
+		//glClearColor(c,c,c,1.f);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0,105,105,0,-1,1);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		glColor3f(1.f,1.f,1.f);
+		glBegin(GL_LINES);
+		glVertex2i(0,0);
+		glVertex2i(LOAD_STATE.progress/2,LOAD_STATE.progress/2);
+
+		glVertex2i(0,105);
+		glVertex2i(LOAD_STATE.progress/2,105-LOAD_STATE.progress/2);
+
+		glVertex2i(105,0);
+		glVertex2i(105-LOAD_STATE.progress/2,LOAD_STATE.progress/2);
+
+		glVertex2i(105,105);
+		glVertex2i(105-LOAD_STATE.progress/2,105-LOAD_STATE.progress/2);
+		glEnd();
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glColor4f(0.f,0.f,0.f,0.2f);
+		glBegin(GL_TRIANGLE_FAN);
+		glVertex2i(0,105);
+		glVertex2i(105,105);
+		glVertex2i(105,0);
+		glVertex2i(0,0);
+		glEnd();
+		glDisable(GL_BLEND);
+
 		SDL_GL_SwapWindow(window);
 		SDL_Delay(1);
+
 	}
 }

@@ -14,6 +14,7 @@
 
 sound_data *SOUND;
 SDL_Window *window;
+load_state LOAD_STATE;
 
 int main(int argc, char *argv[])
 {
@@ -186,8 +187,7 @@ int main(int argc, char *argv[])
 
 		if (state->next_level)
 		{
-			int ltime = 30;
-			load_screen_draw(&ltime);
+			memset(&LOAD_STATE,0,sizeof(LOAD_STATE));
 			level_next(state,1);
 			state->next_level = 0;
 		}

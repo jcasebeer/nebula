@@ -686,7 +686,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 		motion_add(state,state->player,state->camdir+90.f,spd);
 	if (key_down(SDL_SCANCODE_A))
 		motion_add(state,state->player,state->camdir-90.f,spd);
-	if (key_pressed(SDL_SCANCODE_Q) && !state->pstate.grapple_out && state->pstate.weapons[state->pstate.weapon].active)
+	if (key_pressed(SDL_SCANCODE_TAB) && !state->pstate.grapple_out && state->pstate.weapons[state->pstate.weapon].active)
 	{
 		gun_pickup_create(state,pos->x,pos->y,pos->z+state->vheight,dirToVector(state->camdir,state->camzdir,4.f),state->pstate.weapons[state->pstate.weapon]);
 		state->pstate.weapons[state->pstate.weapon].active = 0;
@@ -800,9 +800,16 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	if (state->camzdir<-85.f)
 		state->camzdir = -85.f;
 
-	if (state->pstate.weapons[state->pstate.weapon].recoil == 0.f)
+	if (state->pstate.weapons[state->pstate.weapon].recoil == 0.f &&
+		state->pstate.weapons[state->pstate.weapon].reload == 0.f
+	)
 	{
-		if (key_down(SDL_SCANCODE_1) && state->pstate.weapon != 0 && state->pstate.weapons[0].active)
+		if (key_pressed(SDL_SCANCODE_Q) && state->pstate.weapons[0].active)
+		{
+			state->pstate.weapon = !state->pstate.weapon;
+			state->gun_change = 0.f;
+		}
+		/*if (key_down(SDL_SCANCODE_1) && state->pstate.weapon != 0 && state->pstate.weapons[0].active)
 		{
 			state->pstate.weapon = 0;
 			state->gun_change = 0.f;
@@ -811,7 +818,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 		{
 			state->pstate.weapon = 1;
 			state->gun_change = 0.f;
-		}
+		}*/
 	}
 	state->gundir += (state->camdir - state->gundir)/4.f;
 	state->gunzdir += (state->camzdir - state->gunzdir)/3.f;

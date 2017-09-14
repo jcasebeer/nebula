@@ -96,6 +96,7 @@ void entity_destroy(game_state *state, int id)
 			entity_component_remove(state,id,i);
 		}
 	}
+	state->active[id] = 0;
 	state->entity_count--;
 }
 

@@ -24,12 +24,27 @@ typedef struct game_state
 	/* running total number of entitys*/
 	int entity_count;
 
+	/* whether entity is actived or not*/
+	int active[ENTITY_MAX];
+
+	/* how many components of a type exist */
+	int comp_count[c_last];
+
+	/* arrays of entitys organized by which components they have */
+	int comp_lists[c_last][ENTITY_MAX];
+
+	/* sparse array indicating whether an entity has a component
+	   stores the location of the given entity id in comp_lists
+	   stores -1 for an entity without that component */
+	int has_comp[ENTITY_MAX][c_last];
+
+
 	/* bitmask of flags per entity */
-	int flags[ENTITY_MAX][1+c_last/32];
+	//int flags[ENTITY_MAX][1+c_last/32];
 
 	/* data structure with lists of entity ids with a given component
 	   ex: ec_list[c_none] is the array of all the entitys with the c_none component flag */
-	int ec_list[c_last][ENTITY_MAX];
+	//int ec_list[c_last][ENTITY_MAX];
 
 	/* player data */
 	// player entity id

@@ -2,11 +2,6 @@
 #include <stdlib.h>
 #include "state.h"
 
-static void ec_set_add_entity(game_state *state, int id, component_flag flag);
-static void ec_set_remove_entity(game_state *state, int id, component_flag flag);
-static void entity_set_component_flag(game_state *state,int id,component_flag flag, int value);
-static int entity_is_empty(game_state *state, int id);
-
 // create game state object
 game_state *game_state_create()
 {
@@ -23,8 +18,10 @@ void game_state_clear(game_state *state)
 	for(i=0;i<c_last;i++)
 		for(w=0;w<ENTITY_MAX;w++)
 		{
-			state->ec_list[i][w] = -1;
+			state->comp_lists[i][w] = -1;
+			state->has_comp[w][i] = -1;
 		}
+
 	state->player = -1;
 	state->grapple = -1;
 	state->grapple_life = 100;
@@ -52,24 +49,23 @@ void game_state_print(game_state *state)
 	for(w=0;w<ENTITY_MAX;w++)
 	{
 		printf("Entity %d flags:",w);
-		for(i=0;i<1+c_last/32;i++)
+		for(i=0;i<c_last;i++)
 		{
 			printf("%d ",entity_has_component(state,w,i));
-			if ( i!=0 && i % 32 == 0)
-				printf("\t");
 		}
 		printf("\n");
 	}
+	/*
 	printf("ec_list:\n");
 	for(i=0;i<c_last;i++)
 	{
 		printf("ec_list[%d]:",i);
 		for(w=0;w<ENTITY_MAX;w++)
 		{
-			printf(" %d",state->ec_list[i][w]);
+			printf(" %d",state->comp_lists[i][w]);
 		}
 		printf("\n");
-	}
+	}*/
 }
 
 int entity_create(game_state *state)
@@ -79,8 +75,9 @@ int entity_create(game_state *state)
 	int i;
 	for(i=0; i<ENTITY_MAX; i++)
 	{
-		if (entity_is_empty(state,i))
+		if (!state->active[i])
 		{
+			state->active[i] = 1;
 			state->entity_count++;
 			return i;
 		}
@@ -105,7 +102,7 @@ void entity_destroy(game_state *state, int id)
 // manage entity components
 int entity_has_component(game_state *state, int id, component_flag flag)
 {
-	return (state->flags[id][flag/32] >> (flag%32)) & 0x1;
+	return (state->has_comp[id][flag] != -1);
 }
 
 void entity_kill(game_state *state,int entity)
@@ -122,11 +119,14 @@ void entity_component_add(game_state *state, int id, component_flag flag)
 	*/
 	if (entity_has_component(state,id,flag))
 	{
-		printf("ERROR: Entity already has component!\n");
+		printf("ERROR: Entity %d already has component %d!\n",id,flag);
+		game_state_print(state);
 		exit(1);
 	}
-	entity_set_component_flag(state,id,flag,1);
-	ec_set_add_entity(state,id,flag);
+
+	state->comp_lists[flag][state->comp_count[flag]] = id;
+	state->has_comp[id][flag] = state->comp_count[flag];
+	state->comp_count[flag]++;
 }
 
 void entity_component_remove(game_state *state, int id, component_flag flag)
@@ -135,82 +135,26 @@ void entity_component_remove(game_state *state, int id, component_flag flag)
 		set the flag f in entity e to false and 
 		remove entity from ec_list for the component flag
 	*/
-	entity_set_component_flag(state,id,flag,0);
-	ec_set_remove_entity(state,id,flag);
+	int last_pos = state->comp_count[flag]-1;
+	int last_id = state->comp_lists[flag][last_pos];
+	int id_pos = state->has_comp[id][flag];
+
+	state->comp_lists[flag][id_pos] = last_id;
+	state->has_comp[last_id][flag] = id_pos;
+
+	state->comp_lists[flag][last_pos] = -1;
+	state->has_comp[id][flag] = -1;
+	state->comp_count[flag]--;
 }
 
 // get array of entitys with a certain component
 int *get_ec_set(game_state *state, component_flag component)
 {
-	return (int *)&(state->ec_list[component]);
+	return (int *)&(state->comp_lists[component]);
 }
 
 // use to iterate over set of entitys
 int iterate_ec_set(int *set,int id)
 {
 	return (id<ENTITY_MAX && set[id]!=-1);
-}
-
-static void ec_set_add_entity(game_state *state, int id, component_flag flag)
-{
-	/* add entity id to ec_list[flag] */
-	int i;
-	for(i=0; i<ENTITY_MAX; i++)
-	{
-		if (state->ec_list[flag][i] == -1)
-		{
-			state->ec_list[flag][i] = id;
-			return;
-		}
-	}
-	printf("ERROR: Too many entitys!\n");
-	exit(1);
-}
-
-static void ec_set_remove_entity(game_state *state, int id, component_flag flag)
-{
-	/* remove entity id from ec_list[flag] */
-	int i, entity, last;
-	entity = -1;
-	last = ENTITY_MAX-1;
-	for(i=0; i<ENTITY_MAX; i++)
-	{
-		if (state->ec_list[flag][i] == id)
-			entity = i;
-		if (i<ENTITY_MAX-1 && state->ec_list[flag][i+1] == -1)
-		{
-			last = i;
-			break;
-		}
-	}
-	if (entity == -1)
-	{
-		printf("ERROR: Entity not found in list!\n");
-		exit(1);
-	}
-
-	state->ec_list[flag][entity] = state->ec_list[flag][last];
-	state->ec_list[flag][last] = -1;
-}
-
-static void entity_set_component_flag(game_state *state,int id,component_flag flag, int value)
-{
-	/* set the flag of entity id to value (0 or 1) */
-	if (value)
-		state->flags[id][flag/32] = (state->flags[id][flag/32]) | (0x1 << (flag%32));
-	else
-		state->flags[id][flag/32] = (state->flags[id][flag/32]) & ~(0x1 <<(flag%32));
-}
-
-static int entity_is_empty(game_state *state, int id)
-{
-	int i,clear;
-	clear = 1;
-	for(i=0;i<1+c_last/32;i++)
-		if(state->flags[id][i]!=0)
-		{
-			clear = 0;
-			break;
-		}
-	return clear;
 }

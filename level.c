@@ -46,7 +46,7 @@ void level_gen(game_state *state)
 	state->levelColor[1] = clamp(green*1.5,0.f,1.f);//colors[color].y/255.f;
 	state->levelColor[2] = clamp(blue*1.5,0.f,1.f);//colors[color].z/255.f;
 	state->levelColor[3] = 1.f;
-	hsv_to_rgb(random(360.f),0.5,0.5,state->levelColor);
+	hsv_to_rgb(-30.f+random(180.f),0.7,1.0,state->levelColor);
 	int blocks = LEVEL_SIZE * BLOCK_SIZE * 3;
 	int x,y,z;
 	int i;

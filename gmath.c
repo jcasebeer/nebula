@@ -39,6 +39,8 @@ void hsv_to_rgb(float hue,float sat, float val, float *out)
 	{
 		int i;
 		float f, p, q, t;
+		if (hue < 0.f)
+			hue+=360.f;
 		if (hue == 360.f)
 			hue = 0.f;
 		else

@@ -27,5 +27,6 @@ float frac(float x);
 float lerp(float a, float b, float f);
 int choose2(int x1, int x2);
 void itoa(int num, char *buff);
+void hsv_to_rgb(float hue,float sat, float val, float *out);
 
 #endif

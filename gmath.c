@@ -25,6 +25,75 @@ v3 v3_create(float x, float y, float z)
 	return v;
 }
 
+// thank you! https://www.programmingalgorithms.com/algorithm/hsv-to-rgb
+void hsv_to_rgb(float hue,float sat, float val, float *out)
+{
+	float r = 0.f,g = 0.f,b = 0.f;
+	if (sat == 0.f)
+	{
+		r = val;
+		g = val;
+		b = val;
+	}
+	else
+	{
+		int i;
+		float f, p, q, t;
+		if (hue == 360.f)
+			hue = 0.f;
+		else
+			hue = hue / 60.f;
+		i = (int)hue;
+		f = hue - i;
+		p = val * (1.f - sat);
+		q = val * (1.f - (sat*f));
+		t = val * (1.f - (sat*(1.f - f)));
+
+		switch(i)
+		{
+			case 0:
+				r = val;
+				g = t;
+				b = p;
+			break;
+
+			case 1:
+				r = q;
+				g = val;
+				b = p;
+			break;
+
+			case 2:
+				r = p;
+				g = val;
+				b = t;
+			break;
+
+			case 3:
+				r = p;
+				g = q;
+				b = val;
+			break;
+
+			case 4:
+				r = t;
+				g = p;
+				b = val;
+			break;
+
+			default:
+				r = val;
+				g = p;
+				b = q;
+			break;
+		}
+	}
+
+	out[0] = r;
+	out[1] = g;
+	out[2] = b;
+}
+
 float lerp(float a, float b, float f)
 {
     return a + f * (b - a);

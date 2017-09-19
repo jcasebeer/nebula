@@ -893,7 +893,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 		state->gun_change = lerp(state->gun_change,1.f,0.2);
 	}
 
-	if (!grounded)
+	if (!grounded || level_collide(state,pos->x,pos->y,pos->z + 16,bbox))
 	{
 		//state->view_bob = fmod(state->view_bob,6.28318530718);
 		state->vheight = lerp(state->vheight,0.f,0.125f);

@@ -273,7 +273,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	light_pos[3] = 1.f;
 	glLightfv(GL_LIGHT3,GL_POSITION,light_pos);
 	glLightfv(GL_LIGHT3,GL_SPECULAR,spec);
-*/
+	*/
 	//l3
 	
 	glEnable(GL_LIGHTING);
@@ -403,8 +403,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
-
-
 }
 
 texture_data *texture_data_create()
@@ -621,19 +619,19 @@ static void block_right(int x1, int y1, int z1, float uv)
 	if (choose2(0,1))
 	{
 		glBegin(GL_TRIANGLE_FAN);
-			vertex(x2,y2,z2,1.f,0.f,0.f,uv,uv,1.f);
-			vertex(x2,y2,z1,1.f,0.f,0.f,uv,uv,1.f);
-			vertex(x2,y1,z1,1.f,0.f,0.f,uv,uv,1.f);
-			vertex(x2,y1,z2,1.f,0.f,0.f,uv,uv,1.f);
+			vertex(x2,y2,z2,1.f,0.f,0.f,uv,uv,0.5f);
+			vertex(x2,y2,z1,1.f,0.f,0.f,uv,uv,0.5f);
+			vertex(x2,y1,z1,1.f,0.f,0.f,uv,uv,0.5f);
+			vertex(x2,y1,z2,1.f,0.f,0.f,uv,uv,0.5f);
 		glEnd();
 	}
 	else
 	{
 		glBegin(GL_TRIANGLE_FAN);
-			vertex(x2,y2,z1,1.f,0.f,0.f,uv,uv,1.f);
-			vertex(x2,y1,z1,1.f,0.f,0.f,uv,uv,1.f);
-			vertex(x2,y1,z2,1.f,0.f,0.f,uv,uv,1.f);
-			vertex(x2,y2,z2,1.f,0.f,0.f,uv,uv,1.f);
+			vertex(x2,y2,z1,1.f,0.f,0.f,uv,uv,0.5f);
+			vertex(x2,y1,z1,1.f,0.f,0.f,uv,uv,0.5f);
+			vertex(x2,y1,z2,1.f,0.f,0.f,uv,uv,0.5f);
+			vertex(x2,y2,z2,1.f,0.f,0.f,uv,uv,0.5f);
 		glEnd();
 	}
 	

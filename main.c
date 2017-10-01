@@ -9,9 +9,6 @@
 #include "state.h"
 #include "sound.h"
 
-//turn off shaders w/ this
-//#define NO_SHADER
-
 sound_data *SOUND;
 SDL_Window *window;
 load_state LOAD_STATE;
@@ -54,11 +51,13 @@ int main(int argc, char *argv[])
 	// create opengl context
 	SDL_GL_CreateContext(window);
 	printf("OpenGL Version: %s\n",glGetString(GL_VERSION));
-	// turn on vsync
-	//SDL_GL_SetSwapInterval(1);
+	// turn off vsync
+	SDL_GL_SetSwapInterval(0);
 
 	// get our extensions
+	#ifndef NO_SHADER
 	glewInit();
+	#endif
 	glDisable(GL_DITHER);
 
 	// initialze some variables for the main loop
@@ -101,7 +100,8 @@ int main(int argc, char *argv[])
 	game_state *state = game_state_create(SOUND);
 	//p_state *pstate = p_state_create();
 	// seed rng
-    time_seed_rng();
+	seed_rng(0);
+    //time_seed_rng();
 
     state->pstate.weapons[0] = gen_gun();
 	state->pstate.weapons[1] = gen_gun();
@@ -110,6 +110,9 @@ int main(int argc, char *argv[])
 	//level_gen(state);
 	//state->level_model = level_model_build(state);
 	level_next(state,0);
+
+	// turn on vsync
+	SDL_GL_SetSwapInterval(1);
 
 	int error = 1;
 	int frames = 0;
@@ -182,14 +185,18 @@ int main(int argc, char *argv[])
 		#else
 		game_render_pp(state,window,textures,surf);
 		#endif
+
+		draw_hud(state,window,textures);
 		SDL_GL_SwapWindow(window);
 		frames++;
 
 		if (state->next_level)
 		{
+			SDL_GL_SetSwapInterval(0);
 			memset(&LOAD_STATE,0,sizeof(LOAD_STATE));
 			level_next(state,1);
 			state->next_level = 0;
+			SDL_GL_SetSwapInterval(1);
 		}
 
 		// opengl error reporting

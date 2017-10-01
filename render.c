@@ -14,6 +14,8 @@ void draw_text(float xstart, float ystart, float size, const char *text);
 void draw_text_br(float xstart, float ystart, float size, const char *text);
 void draw_player_gun(game_state *state);
 
+
+#ifndef NO_SHADER
 surface_data *surface_data_create(int width, int height, float gamma)
 {
 	surface_data *surf = malloc(sizeof(surface_data));
@@ -176,12 +178,19 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	//glDisable(GL_TEXTURE_2D);
 }
 
+#endif
+
 void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
 	// clear background
 	//glShadeModel(GL_FLAT);
 	GLfloat comp[4];
+	GLfloat gcomp[4];
+	GLfloat ldark[4];
 	compliment(state->levelColor,comp);
+	compliment(state->levelColor,gcomp);
+	darken(comp,comp);
+	darken(state->levelColor,ldark);
 	float cycleSpeed = 8.f;
 	float am = clamp(sin(state->day_night/cycleSpeed)*cycleSpeed,-1.f,1.f);
 	am = (am+1.f)/2.f;
@@ -229,19 +238,17 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	// light push
 	glPushMatrix();
-	
-	//GLfloat AmbientGlobal[4] = {0.5f,0.125f,0.25f,1.f};
+	GLfloat white[4] = {1.0,1.0,1.0,1.0};
+	GLfloat black[4] = {0.0,0.0,0.0,1.0};
+	GLfloat zero[4] = {0.0,0.0,0.0,0.0};
 	
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,comp);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, (float [4]){0.f,0.f,0.f,1.f});
 	glLightfv(GL_LIGHT0, GL_DIFFUSE,state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f);
 	float polyLight = 512.f;//lerp(512.f,1024.f,am);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1.f/(polyLight*polyLight));
-	//glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
-
-
-	GLfloat spec[4] = {0.f,0.f,0.f,0.f};
 
 	GLfloat light_pos[4];
 	light_pos[0] = state->camx;
@@ -249,90 +256,70 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	light_pos[2] = state->camz;
 	light_pos[3] = 1.f;
 	glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
-	glLightfv(GL_LIGHT0,GL_SPECULAR,spec);
+	glLightfv(GL_LIGHT0,GL_SPECULAR,(float [4]){0.f,0.f,0.f,0.f});
 
-
-
-	//l3
-	/*
-	GLfloat low_light[4] = {0.0,0.0,0.0,1.f};
-
-	low_light[0]= state->levelColor[0]/10.f;
-	low_light[1]= state->levelColor[1]/10.f;
-	low_light[2]= state->levelColor[2]/10.f;
-	low_light[3]= 1.f;
-
-	glLightfv(GL_LIGHT3, GL_DIFFUSE,low_light);
-	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 1.f);
-	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.0f);
-	glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION,0.f);
-
-	light_pos[0] = LEVEL_SIZE*BLOCK_SIZE;
-	light_pos[1] = LEVEL_SIZE*BLOCK_SIZE/2.f;
-	light_pos[2] = LEVEL_SIZE*BLOCK_SIZE;
-	light_pos[3] = 1.f;
-	glLightfv(GL_LIGHT3,GL_POSITION,light_pos);
-	glLightfv(GL_LIGHT3,GL_SPECULAR,spec);
-	*/
-	//l3
-	
 	glEnable(GL_LIGHTING);
+
+	//draw level model
 	glEnable(GL_LIGHT0);
-	//
-	//glEnable(GL_LIGHT3);
-	//
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textures->shadow);
-	//glEnable(GL_COLOR_MATERIAL);
-	//model_draw(state->level_model);
 	level_model_draw(state);
-	//glDisable(GL_COLOR_MATERIAL);
-	
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHT0);
-	//l3
-	//glDisable(GL_LIGHT3);
-	//l3
-	
-	GLfloat gAmbient[4] = {0.4f,0.5f,0.4f,1.f};
-	GLfloat gDiffuse[4] = {0.5f,0.125f,0.25f,1.f};
+
 	// grass lighting
-	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.f);
+	/*glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.0f);
 	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION,0.f);
 	glLightfv(GL_LIGHT1,GL_POSITION,light_pos);
-	glLightfv(GL_LIGHT1,GL_SPECULAR,spec);
-	//glLightfv(GL_LIGHT1,GL_DIFFUSE,gDiffuse);
-	glLightfv(GL_LIGHT1,GL_DIFFUSE,gDiffuse);
-	glLightfv(GL_LIGHT1,GL_AMBIENT,gAmbient);
+	glLightfv(GL_LIGHT1,GL_SPECULAR,zero);
+	glLightfv(GL_LIGHT1,GL_DIFFUSE,gcomp);//(float [4]){0.5f,0.125f,0.25f,1.f});
+	glLightfv(GL_LIGHT1,GL_AMBIENT,ldark);//(float [4]){0.4f,0.5f,0.4f,1.f});
 	glEnable(GL_LIGHT1);
 	glDisable(GL_CULL_FACE);
 	grass_model_draw(state);
 	glEnable(GL_CULL_FACE);
-	glDisable(GL_LIGHT1);
-
-	GLfloat dAmbient[4] = {0.4f,0.5f,0.4f,1.f};
-	GLfloat dDiffuse[4] = {0.5f,0.125f,0.25f,1.f};
+	glDisable(GL_LIGHT1);*/
 
 	// dust lighting
-	glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1.f);
+	/*glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.0f);
 	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION,0.f);
 	glLightfv(GL_LIGHT2,GL_POSITION,light_pos);
-	glLightfv(GL_LIGHT2,GL_SPECULAR,spec);
-	glLightfv(GL_LIGHT2,GL_DIFFUSE,dDiffuse);
-	glLightfv(GL_LIGHT2,GL_AMBIENT,dAmbient);
+	glLightfv(GL_LIGHT2,GL_SPECULAR,(float [4]){0.f,0.f,0.f,0.f});
+	glLightfv(GL_LIGHT2,GL_DIFFUSE,(float [4]){0.5f,0.125f,0.25f,1.f});
+	glLightfv(GL_LIGHT2,GL_AMBIENT,(float [4]){0.4f,0.5f,0.4f,1.f});
 	glEnable(GL_LIGHT2);
 
 	glPushMatrix();
 	glTranslatef(sin(state->dust_anim)*10,cos(state->dust_anim)*10,sin(state->dust_anim)*10);
-	model_draw(state->dust_model);
+	//model_draw(state->dust_model);
 	glPopMatrix();
-	glDisable(GL_LIGHT2);
+	glDisable(GL_LIGHT2);*/
 	
 	glDisable(GL_LIGHTING);
 	// light pop
+	glPopMatrix();
+
+	glPushMatrix();
+	glFogf(GL_FOG_START,0.f);
+	glFogf(GL_FOG_END,256.f);
+	glFogf(GL_FOG_DENSITY,0.5f);
+	glFogi(GL_FOG_MODE,GL_LINEAR);
+	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
+	glFogfv(GL_FOG_COLOR,(float [4]){0.2f,0.3f,0.3f,1.f});
+	glEnable(GL_FOG);
+	glDisable(GL_CULL_FACE);
+	
+	glColor3f(0.9,0.9,0.8);
+	grass_model_draw(state);
+	model_draw(state->dust_model);
+	glColor3f(1.f,1.f,1.f);
+	
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_FOG);
 	glPopMatrix();
 	
 	if (state->grapple != -1)
@@ -362,7 +349,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	
 	// test drawing textures
-	//glDisable(GL_CULL_FACE);
 	glBindTexture(GL_TEXTURE_2D,textures->sprites);
 	
 	int *sprites = get_ec_set(state,c_sprite);
@@ -372,12 +358,24 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	}
 	draw_player_gun(state);
 
+	glBindTexture(GL_TEXTURE_2D,0);
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
+}
 
+void draw_hud(game_state *state, SDL_Window *window, texture_data *textures)
+{
+	int width, height;
+	SDL_GetWindowSize(window, &width, &height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0,width,height,0,-1,1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,textures->sprites);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	/* ~~~~~~~~~ hud ~~~~~~~~~~~~~ */
@@ -861,7 +859,7 @@ GLuint grass_model_build_part(game_state *state,int start)
 				for(int w = 0; w<16; w++)
 				{
 					int gx, gy, gz,gx2,gy2,gz2;
-					float gsize = 1.0+random(1.0);
+					float gsize = 1.0+random(2.0);
 					gx = xb + random(32);
 					gy = yb + random(32);
 					gz = zb + 28.f;

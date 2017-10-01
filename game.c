@@ -729,6 +729,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	if (key_pressed(SDL_SCANCODE_X) && state->pstate.weapons[state->pstate.weapon].active)
 	{
 		state->pstate.weapons[state->pstate.weapon] = gen_gun();
+		state->gun_change = 0.f;
 	}
 
 

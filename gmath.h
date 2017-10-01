@@ -14,7 +14,7 @@ void move_to(float *x, float *y,float dir, float speed);
 int sphere_collide(v3 *s1, v3 *s2, float s1_radius, float s2_radius);
 v3 dirToVector(float dir, float zdir, float m);
 void compliment(float color[4], float result[4]);
-
+void darken(float color[4], float result[4]);
 void seed_rng(unsigned int seed);
 void time_seed_rng();
 float random(float range);

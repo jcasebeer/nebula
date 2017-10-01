@@ -3,6 +3,9 @@
 #include <SDL2/SDL_opengl.h>
 #include "state.h"
 
+//turn off shaders w/ this
+//#define NO_SHADER
+
 typedef struct texture_data
 {
 	GLuint sprites;
@@ -54,4 +57,5 @@ GLuint level_model_build_part(game_state *state,int start);
 void level_model_destroy(game_state *state);
 void level_model_draw(game_state *state);
 void load_screen_draw(int time);
+void draw_hud(game_state *state, SDL_Window *window, texture_data *textures);
 #endif

@@ -10,10 +10,17 @@ unsigned int SEED;
 
 void compliment(float color[4], float result[4])
 {
-	result[0] = (1.f - color[0])/2.f;
-	result[1] = (1.f - color[1])/2.f;
-	result[2] = (1.f - color[2])/2.f;
+	result[0] = (1.f - color[0]);
+	result[1] = (1.f - color[1]);
+	result[2] = (1.f - color[2]);
 	result[3] = 1.f;
+}
+
+void darken(float color[4], float result[4])
+{
+	result[0] = color[0]/2.f;
+	result[1] = color[1]/2.f;
+	result[2] = color[2]/2.f;
 }
 
 v3 v3_create(float x, float y, float z)

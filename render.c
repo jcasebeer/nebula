@@ -315,7 +315,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	
 	glColor3f(0.9,0.9,0.8);
 	grass_model_draw(state);
+	glPushMatrix();
+	glTranslatef(sin(state->dust_anim)*10,cos(state->dust_anim)*10,sin(state->dust_anim)*10);
 	model_draw(state->dust_model);
+	glPopMatrix();
 	glColor3f(1.f,1.f,1.f);
 	
 	glEnable(GL_CULL_FACE);
@@ -869,15 +872,15 @@ GLuint grass_model_build_part(game_state *state,int start)
 
 					if (irandom(2) == 0)
 					{
-						nvertex(gx-gsize,gy,gz,0.70710678118,0,0.70710678118);
-						nvertex(gx+gsize,gy,gz,0.70710678118,0,0.70710678118);
-						nvertex(gx2,gy2,gz2,0.70710678118,0,0.70710678118);
+						glVertex3f(gx-gsize,gy,gz);
+						glVertex3f(gx+gsize,gy,gz);
+						glVertex3f(gx2,gy2,gz2);					
 					}
 					else
 					{
-						nvertex(gx,gy-gsize,gz,0.70710678118,0,0.70710678118);
-						nvertex(gx,gy+gsize,gz,0.70710678118,0,0.70710678118);
-						nvertex(gx2,gy2,gz2,0.70710678118,0,0.70710678118);
+						glVertex3f(gx,gy-gsize,gz);
+						glVertex3f(gx,gy+gsize,gz);
+						glVertex3f(gx2,gy2,gz2);					
 					}
 				}
 				glEnd();

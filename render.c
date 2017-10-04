@@ -840,7 +840,7 @@ GLuint grass_model_build_part(game_state *state,int start)
 	GLuint list = glGenLists(1);
 	glNewList(list,GL_COMPILE);
 	unsigned int seed = SEED;
-	int x,y,z,xb,yb,zb;
+	int x,y,z,xb,yb,zb,range;
 	
 	for(int i = start; i<start+CHUNK_SIZE;i++)
 	{
@@ -853,6 +853,7 @@ GLuint grass_model_build_part(game_state *state,int start)
 			xb = x << 5;
 			yb = y << 5;
 			zb = z << 5;
+			range = random(32.f);
 
 			seed_rng(x*y-z);
 			
@@ -866,8 +867,8 @@ GLuint grass_model_build_part(game_state *state,int start)
 					gx = xb + random(32);
 					gy = yb + random(32);
 					gz = zb + 28.f;
-					gx2 = gx + random(32) - 16;
-					gy2 = gy + random(32) - 16;
+					gx2 = gx + random(range) - range/2.f;
+					gy2 = gy + random(range) - range/2.f;
 					gz2 = gz + 8.f+random(10.f);
 
 					if (irandom(2) == 0)

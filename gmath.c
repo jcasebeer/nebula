@@ -101,6 +101,7 @@ void hsv_to_rgb(float hue,float sat, float val, float *out)
 	out[0] = r;
 	out[1] = g;
 	out[2] = b;
+	out[3] = 1.f;
 }
 
 float lerp(float a, float b, float f)

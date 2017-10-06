@@ -93,6 +93,8 @@ typedef struct game_state
 	int block_count;
 	int next_level;
 	GLfloat levelColor[4];
+	GLfloat levelFogColor[4];
+	GLfloat levelGrassColor[4];
 	// gl index to display list for level model
 	GLuint level_model[MAX_BLOCKS/CHUNK_SIZE];
 	int level_model_count;

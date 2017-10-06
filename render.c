@@ -309,11 +309,13 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	//glFogf(GL_FOG_DENSITY,0.5f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
-	glFogfv(GL_FOG_COLOR,(float [4]){0.2f,0.3f,0.3f,1.f});
+	//glFogfv(GL_FOG_COLOR,(float [4]){0.2f,0.3f,0.3f,1.f});
+	glFogfv(GL_FOG_COLOR,state->levelFogColor);
 	glEnable(GL_FOG);
 	glDisable(GL_CULL_FACE);
 	
-	glColor3f(0.9,0.9,0.8);
+	//glColor3f(0.9,0.9,0.8);
+	glColor3f(state->levelGrassColor[0],state->levelGrassColor[1],state->levelGrassColor[2]);
 	grass_model_draw(state);
 	glPushMatrix();
 	glTranslatef(sin(state->dust_anim)*10,cos(state->dust_anim)*10,sin(state->dust_anim)*10);
@@ -1163,9 +1165,9 @@ void draw_sprite(game_state *state, int entity)
 	if (!entity_has_component(state,entity,c_sprite_fullbright))
 	{
 		dist = 1.f - clamp(mdist(state,pos->x,pos->y,pos->z),0.f,maxdist)/maxdist;
-		red = lerp(0.2,1.f,dist);
-		green = lerp(0.3,1.f,dist);
-		blue = lerp(0.3,1.f,dist);
+		red = lerp(state->levelFogColor[0],1.f,dist);
+		green = lerp(state->levelFogColor[1],1.f,dist);
+		blue = lerp(state->levelFogColor[2],1.f,dist);
 	}
 
 	glPushMatrix();

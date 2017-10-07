@@ -4,6 +4,7 @@
 #include "stdlib.h"
 //#include "comps.h"
 
+const double PI = 3.141592655358979323846;
 const double DEG2RAD = 3.141592655358979323846/180.;
 const double RAD2DEG = 180.f/3.141592655358979323846;
 unsigned int SEED;

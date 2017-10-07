@@ -6,6 +6,7 @@
 extern const double DEG2RAD;
 extern const double RAD2DEG;
 extern unsigned int SEED;
+extern const double PI;
 float lengthdir_x(float len, float dir);
 float lengthdir_y(float len, float dir);
 void normalize(float *v);

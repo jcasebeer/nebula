@@ -182,6 +182,7 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 
 void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	// clear background
 	//glShadeModel(GL_FLAT);
 	GLfloat comp[4];
@@ -191,13 +192,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	compliment(state->levelColor,gcomp);
 	darken(comp,comp);
 	darken(state->levelColor,ldark);
-	float cycleSpeed = 8.f;
-	float am = clamp(sin(state->day_night/cycleSpeed)*cycleSpeed,-1.f,1.f);
-	am = (am+1.f)/2.f;
-	float bg = 0.09+(am*0.1);
-	glClearColor(bg,bg*1.1,bg,1.f);
-	//glClearColor(0.7f,0.7f,0.7f,1.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// set up projection matrix and window size
 	glMatrixMode(GL_PROJECTION);
@@ -214,12 +208,31 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	float dir_shake = state->camdir+(random(state->cam_shake) - state->cam_shake*0.5)/10.f;
 	float zdir_shake = -clamp(state->camzdir+(random(state->cam_shake) - state->cam_shake*0.5)/10.f,-89,89);
 
-	float xto = state->camx+lengthdir_x(lengthdir_x(1,zdir_shake),dir_shake);
-	float yto = state->camy+lengthdir_y(lengthdir_x(1,zdir_shake),dir_shake);
+	float xdir = lengthdir_x(lengthdir_x(1,zdir_shake),dir_shake);
+	float ydir = lengthdir_y(lengthdir_x(1,zdir_shake),dir_shake);
+	float zdir = lengthdir_y(1,zdir_shake);
+
+	float xto = state->camx+xdir;
+	float yto = state->camy+ydir;
 	float zbob = state->camz+state->vheight+sin(state->view_bob)*2;
-	float zto = zbob+lengthdir_y(1,zdir_shake);
+	float zto = zbob+zdir;
 	
-		
+	// calculate difference between viewing angle and sun direction
+	float sunx = 0.707107;
+	float suny = 0.0;
+	float sunz = 0.707107;
+
+	float m = sqrtf(xdir*xdir + ydir*ydir + zdir*zdir);
+
+	sunx -= xdir/m;
+	suny -= ydir/m;
+	sunz -= zdir/m;
+
+	m = (sqrtf(sunx*sunx + suny*suny + sunz*sunz)/2.f)*0.19;
+
+	glClearColor(m,m,m,1.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	draw_position_camera(
 		state->camx,
         state->camy,
@@ -233,14 +246,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glPointSize(2);
 	glShadeModel(GL_FLAT);
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
 	glLineWidth(2);
 
 	// light push
 	glPushMatrix();
-	GLfloat white[4] = {1.0,1.0,1.0,1.0};
-	GLfloat black[4] = {0.0,0.0,0.0,1.0};
-	GLfloat zero[4] = {0.0,0.0,0.0,0.0};
 	
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,comp);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, (float [4]){0.f,0.f,0.f,1.f});
@@ -258,7 +267,13 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
 	glLightfv(GL_LIGHT0,GL_SPECULAR,(float [4]){0.f,0.f,0.f,0.f});
 
+	glDisable(GL_DEPTH_TEST);
+	drawSphere(state->camx + 32, state->camy, zbob + 32, 4, 12);
+	glEnable(GL_DEPTH_TEST);
+
 	glEnable(GL_LIGHTING);
+
+	
 
 	//draw level model
 	glEnable(GL_LIGHT0);
@@ -306,15 +321,12 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glPushMatrix();
 	glFogf(GL_FOG_START,0.f);
 	glFogf(GL_FOG_END,256.f);
-	//glFogf(GL_FOG_DENSITY,0.5f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
-	//glFogfv(GL_FOG_COLOR,(float [4]){0.2f,0.3f,0.3f,1.f});
 	glFogfv(GL_FOG_COLOR,state->levelFogColor);
 	glEnable(GL_FOG);
 	glDisable(GL_CULL_FACE);
 	
-	//glColor3f(0.9,0.9,0.8);
 	glColor3f(state->levelGrassColor[0],state->levelGrassColor[1],state->levelGrassColor[2]);
 	grass_model_draw(state);
 	glPushMatrix();
@@ -366,6 +378,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 }
 
 void draw_hud(game_state *state, SDL_Window *window, texture_data *textures)
@@ -1218,6 +1231,35 @@ void draw_sprite(game_state *state, int entity)
 	glPopMatrix();
 }
 
+void drawSphere(float x, float y, float z, float r, int sides) 
+{
+	int i, j;
+	for(i = 0; i <= sides; i++) 
+	{
+		float lat0 = PI * (-0.5 + (float) (i - 1) / sides);
+		float z0  = sin(lat0)*r;
+		float zr0 =  cos(lat0)*r;
+
+		float lat1 = PI * (-0.5 + (float) i / sides);
+		float z1 = sin(lat1)*r;
+		float zr1 = cos(lat1)*r;
+		glPushMatrix();
+			glTranslatef(x,y,z);
+				glBegin(GL_QUAD_STRIP);
+				for(j = 0; j <= sides; j++) 
+				{
+					float lng = 2 * PI * (float) (j - 1) / sides;
+					float x = cos(lng);
+					float y = sin(lng);
+
+					glVertex3f(x * zr0, y * zr0, z0);
+					glVertex3f(x * zr1, y * zr1, z1);
+				}
+				glEnd();
+		glPopMatrix();
+	}
+}
+
 void load_screen_draw(int time)
 {
 	extern load_state LOAD_STATE;
@@ -1268,3 +1310,4 @@ void load_screen_draw(int time)
 
 	}
 }
+

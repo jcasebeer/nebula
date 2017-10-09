@@ -97,6 +97,7 @@ surface_data *surface_data_create(int width, int height, float gamma)
   	surf->a_vcoord = glGetAttribLocation(surf->post_shader,"v_coord");
   	surf->u_fbo_texture = glGetUniformLocation(surf->post_shader,"fbo_texture");
   	surf->u_gamma = glGetUniformLocation(surf->post_shader,"gamma");
+  	surf->u_lines = glGetUniformLocation(surf->post_shader,"lines");
   	surf->u_resx = glGetUniformLocation(surf->post_shader,"resx");
   	surf->u_resy = glGetUniformLocation(surf->post_shader,"resy");
 
@@ -155,6 +156,7 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
 	glUniform1i(surf->u_fbo_texture,0);
+	glUniform1i(surf->u_lines,surf->lines);
 	glUniform1f(surf->u_gamma,surf->gamma);
 	glUniform1f(surf->u_resx,surf->width);
 	glUniform1f(surf->u_resy,surf->height);

@@ -171,6 +171,11 @@ int main(int argc, char *argv[])
 			else
 				surf->gamma = 1.6;
 		}
+
+		if (key_pressed(SDL_SCANCODE_F7))
+		{
+			surf->lines = !(surf->lines);
+		}
 		#endif
 
 		for (int i = 0; i<skip_max; i++)

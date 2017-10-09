@@ -17,6 +17,7 @@ typedef struct surface_data
 	int width;
 	int height;
 	float gamma;
+	int lines;
 	GLuint fbo;
 	GLuint fbo_texture;
 	GLuint rbo_depth;
@@ -25,6 +26,7 @@ typedef struct surface_data
 	GLuint u_fbo_texture;
 	GLuint a_vcoord;
 	GLuint u_gamma;
+	GLuint u_lines;
 	GLuint u_resx;
 	GLuint u_resy;
 }surface_data;

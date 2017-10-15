@@ -72,13 +72,12 @@ static int level_collide(game_state *state, float xx, float yy, float zz, v3i bb
 	);
 }
 
-static void delete_block(game_state *state)
+static void delete_block(game_state *state, int point)
 {
-	v3 *pos = &(state->position[state->player]);
 	int x,y,z;
-	x = ((int)pos->x)>> 5;
-	y = ((int)pos->y)>> 5;
-	z = (((int)pos->z)>> 5) -1;
+	x = point_getx(point);
+	y = point_gety(point);
+	z = point_getz(point);
 	if (!block_at(state,x,y,z))
 		return;
 
@@ -457,10 +456,13 @@ static void bullet_step(game_state *state, int entity)
 				y = y >> 5;
 				z = z >> 5;
 			}
+			x = (int)(p->x + v->x)>> 5;
+			y = (int)(p->y + v->y)>> 5;
+			z = (int)(p->z + v->z)>> 5; 
 			p->x -= v->x;
 			p->y -= v->y;
 			p->z -= v->z;
-			
+			delete_queue_enter(state,point_create(x,y,z));
 			entity_kill(state,entity);
 			return;
 		}
@@ -721,7 +723,13 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	// delete blocks
 	if (key_pressed(SDL_SCANCODE_Z))
 	{
-		delete_block(state);
+		delete_queue_enter(state,
+			point_create(
+				((int)pos->x)>> 5,
+				((int)pos->y)>> 5,
+				(((int)pos->z)>> 5)-1
+			)
+		);
 	}
 
 	state->fov = lerp(state->fov,state->fov_target,0.2f);
@@ -1004,4 +1012,9 @@ void game_simulate(game_state *state, const Uint8 *key_state, Uint8 *prev_key_st
 
 	if (state->frust_length < (32000.f))
 		state->frust_length += 32.f;
+
+	if (!delete_queue_is_empty(state))
+	{
+		delete_block(state,delete_queue_remove(state));
+	}
 }

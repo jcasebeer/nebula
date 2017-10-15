@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
 	texture_data *textures = texture_data_create();
 	textures->sprites = texture_load("tex/sprites.png",1024,1024);
 	textures->shadow = texture_load("tex/shadow.png",1024,1024);
+	textures->grass = texture_load("tex/grass.png",1024,1024);
 
 	// create our game_state
 	game_state *state = game_state_create(SOUND);
@@ -264,6 +265,8 @@ int main(int argc, char *argv[])
 	grass_model_destroy(state);
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);
+	texture_destroy(textures->shadow);
+	texture_destroy(textures->grass);
 	sound_free(SOUND,SOUND->jump); 
 	sound_free(SOUND,SOUND->rifle); 
 	sound_free(SOUND,SOUND->grapple_shoot);

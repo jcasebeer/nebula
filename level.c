@@ -213,3 +213,19 @@ void block_create(game_state *state, int x, int y, int z)
 	state->block_count++;
 }
 
+
+void delete_queue_enter(game_state *state, int point)
+{
+	state->delete_queue[state->dq_end] = point;
+	state->dq_end = (state->dq_end+1) % DELETE_QUEUE_SIZE;
+}
+int delete_queue_remove(game_state *state)
+{
+	int result = state->delete_queue[state->dq_front];
+	state->dq_front = (state->dq_front+1) % DELETE_QUEUE_SIZE;
+	return result;
+}
+int delete_queue_is_empty(game_state *state)
+{
+	return (state->dq_front == state->dq_end);
+}

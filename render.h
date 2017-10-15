@@ -10,6 +10,7 @@ typedef struct texture_data
 {
 	GLuint sprites;
 	GLuint shadow;
+	GLuint grass;
 }texture_data;
 
 typedef struct surface_data

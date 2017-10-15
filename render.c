@@ -232,7 +232,8 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	suny -= ydir/m;
 	sunz -= zdir/m;
 
-	m = (sqrtf(sunx*sunx + suny*suny + sunz*sunz)/2.f)*0.19;
+	m = (sqrtf(sunx*sunx + suny*suny + sunz*sunz)/2.f)*0.1;
+
 
 	glClearColor(m,m,m,1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -332,7 +333,14 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glDisable(GL_CULL_FACE);
 	
 	glColor3f(state->levelGrassColor[0],state->levelGrassColor[1],state->levelGrassColor[2]);
+	glEnable(GL_TEXTURE_2D);
+	glAlphaFunc(GL_GREATER,0.f);
+	glEnable(GL_ALPHA_TEST);
+	glBindTexture(GL_TEXTURE_2D,textures->grass);
 	grass_model_draw(state);
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,0);
 	glPushMatrix();
 	glTranslatef(sin(state->dust_anim)*10,cos(state->dust_anim)*10,sin(state->dust_anim)*10);
 	model_draw(state->dust_model);
@@ -494,7 +502,7 @@ static void vertex(int x, int y, int z, float xnorm, float ynorm, float znorm, f
 {
 	seed_rng(x*y-z);
 	glTexCoord2f((uv_x+tex_id_x(tex_id))/16.f,(uv_y+tex_id_y(tex_id))/16.f);
-	float NORMAL_OFFSET = random(norm_offs);//random(1.f);
+	float NORMAL_OFFSET = 0.f;//random(norm_offs);//random(1.f);
 	xnorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
 	ynorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
 	znorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
@@ -856,12 +864,20 @@ void level_model_draw(game_state *state)
 	}
 }
 
+void gvertex(float x, float y, float z, float uvx, float uvy, int tex_id)
+{
+	float idx = (float)(tex_id & 0x1f);
+	float idy = (float)((tex_id >> 5 ) & 0x1f);
+	glTexCoord2f((uvx+idx)/32.f,(uvy+idy)/32.f);
+	glVertex3f(x,y,z);
+}
+
 GLuint grass_model_build_part(game_state *state,int start)
 {
 	GLuint list = glGenLists(1);
 	glNewList(list,GL_COMPILE);
 	unsigned int seed = SEED;
-	int x,y,z,xb,yb,zb,range;
+	int x,y,z,xb,yb,zb,range,tex_id;
 	
 	for(int i = start; i<start+CHUNK_SIZE;i++)
 	{
@@ -870,39 +886,45 @@ GLuint grass_model_build_part(game_state *state,int start)
 			x = point_getx(state->block_list[i]);
 			y = point_gety(state->block_list[i]);
 			z = point_getz(state->block_list[i]);
+			
 
 			xb = x << 5;
 			yb = y << 5;
 			zb = z << 5;
-			range = random(32.f);
-
-			seed_rng(x*y-z);
+			seed_rng(point_create(x,y,z));
+			range = 16.f+random(16.f);
+			tex_id = irandom(6);
+			
 			
 			if (irandom(10)>5 && !block_at(state,x,y,z+1))
 			{
-				glBegin(GL_TRIANGLES);
-				for(int w = 0; w<16; w++)
+				
+				glBegin(GL_QUADS);
+				for(int w = 0; w<8; w++)
 				{
 					int gx, gy, gz,gx2,gy2,gz2;
-					float gsize = 1.0+random(2.0);
+					float gsize = 16.f;
 					gx = xb + random(32);
 					gy = yb + random(32);
-					gz = zb + 28.f;
+					gz = zb + 32.f;
 					gx2 = gx + random(range) - range/2.f;
 					gy2 = gy + random(range) - range/2.f;
-					gz2 = gz + 8.f+random(10.f);
-
+					gz2 = gz + 32.f;
+					
 					if (irandom(2) == 0)
 					{
-						glVertex3f(gx-gsize,gy,gz);
-						glVertex3f(gx+gsize,gy,gz);
-						glVertex3f(gx2,gy2,gz2);					
+
+						gvertex(gx-gsize,gy,gz,0.f,1.f,tex_id);
+						gvertex(gx2-gsize,gy2,gz2,0.f,0.f,tex_id);
+						gvertex(gx2+gsize,gy2,gz2,1.f,0.f,tex_id);
+						gvertex(gx+gsize,gy,gz,1.f,1.f,tex_id);
 					}
 					else
 					{
-						glVertex3f(gx,gy-gsize,gz);
-						glVertex3f(gx,gy+gsize,gz);
-						glVertex3f(gx2,gy2,gz2);					
+						gvertex(gx,gy-gsize,gz,0.f,1.f,tex_id);
+						gvertex(gx2,gy2-gsize,gz2,0.f,0.f,tex_id);
+						gvertex(gx2,gy2+gsize,gz2,1.f,0.f,tex_id);
+						gvertex(gx,gy+gsize,gz,1.f,1.f,tex_id);
 					}
 				}
 				glEnd();

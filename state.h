@@ -85,11 +85,17 @@ typedef struct game_state
 	#define LEVEL_SIZE 512
 	#define MAX_BLOCKS 250000
 	#define BLOCK_SIZE 32
-	#define CHUNK_SIZE 1000
+	#define CHUNK_SIZE 250
+	#define DELETE_QUEUE_SIZE 250
+
+	int block_destroyer;
 
 	// 1 bit per block/air block
 	int block_grid[LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE/BLOCK_SIZE +1];
 	int block_list[MAX_BLOCKS];
+	int delete_queue[DELETE_QUEUE_SIZE];
+	int dq_front;
+	int dq_end;
 	int block_count;
 	int next_level;
 	GLfloat levelColor[4];
@@ -137,6 +143,9 @@ int point_getz(int block);
 int point_create(int x, int y, int z);
 void bit_clear(game_state *state, int x, int y, int z);
 
+void delete_queue_enter(game_state *state, int point);
+int delete_queue_remove(game_state *state);
+int delete_queue_is_empty(game_state *state);
 int block_at(game_state *state,int x, int y, int z);
 void block_create(game_state *state, int x, int y, int z);
 int block_at_bounded(game_state *state, int x, int y, int z);

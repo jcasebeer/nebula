@@ -189,6 +189,41 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	// clear background
 	//glShadeModel(GL_FLAT);
+	glPolygonStipple((const GLubyte[128]){
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55,
+		0x55, 0x55, 0x55, 0x55
+		
+	});
 	GLfloat comp[4];
 	GLfloat gcomp[4];
 	GLfloat ldark[4];
@@ -234,7 +269,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	m = (sqrtf(sunx*sunx + suny*suny + sunz*sunz)/2.f)*0.1;
 
-
 	glClearColor(m,m,m,1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -248,10 +282,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	);
 
 	// draw level model
-	glPointSize(2);
+	glPointSize(1);
 	glShadeModel(GL_FLAT);
 	glEnable(GL_CULL_FACE);
-	glLineWidth(2);
+	glLineWidth(1);
 
 	// light push
 	glPushMatrix();
@@ -273,12 +307,12 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightfv(GL_LIGHT0,GL_SPECULAR,(float [4]){0.f,0.f,0.f,0.f});
 
 	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_POLYGON_STIPPLE);
 	drawSphere(state->camx + 32, state->camy, zbob + 32, 4, 12);
+	glDisable(GL_POLYGON_STIPPLE);
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_LIGHTING);
-
-	
 
 	//draw level model
 	glEnable(GL_LIGHT0);
@@ -288,37 +322,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHT0);
-
-	// grass lighting
-	/*glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.f);
-	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.0f);
-	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION,0.f);
-	glLightfv(GL_LIGHT1,GL_POSITION,light_pos);
-	glLightfv(GL_LIGHT1,GL_SPECULAR,zero);
-	glLightfv(GL_LIGHT1,GL_DIFFUSE,gcomp);//(float [4]){0.5f,0.125f,0.25f,1.f});
-	glLightfv(GL_LIGHT1,GL_AMBIENT,ldark);//(float [4]){0.4f,0.5f,0.4f,1.f});
-	glEnable(GL_LIGHT1);
-	glDisable(GL_CULL_FACE);
-	grass_model_draw(state);
-	glEnable(GL_CULL_FACE);
-	glDisable(GL_LIGHT1);*/
-
-	// dust lighting
-	/*glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1.f);
-	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.0f);
-	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION,0.f);
-	glLightfv(GL_LIGHT2,GL_POSITION,light_pos);
-	glLightfv(GL_LIGHT2,GL_SPECULAR,(float [4]){0.f,0.f,0.f,0.f});
-	glLightfv(GL_LIGHT2,GL_DIFFUSE,(float [4]){0.5f,0.125f,0.25f,1.f});
-	glLightfv(GL_LIGHT2,GL_AMBIENT,(float [4]){0.4f,0.5f,0.4f,1.f});
-	glEnable(GL_LIGHT2);
-
-	glPushMatrix();
-	glTranslatef(sin(state->dust_anim)*10,cos(state->dust_anim)*10,sin(state->dust_anim)*10);
-	//model_draw(state->dust_model);
-	glPopMatrix();
-	glDisable(GL_LIGHT2);*/
-	
 	glDisable(GL_LIGHTING);
 	// light pop
 	glPopMatrix();
@@ -337,7 +340,9 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glAlphaFunc(GL_GREATER,0.f);
 	glEnable(GL_ALPHA_TEST);
 	glBindTexture(GL_TEXTURE_2D,textures->grass);
+	glEnable(GL_POLYGON_STIPPLE);
 	grass_model_draw(state);
+	glDisable(GL_POLYGON_STIPPLE);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,0);
@@ -376,7 +381,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glEnable(GL_ALPHA_TEST);
 	glEnable(GL_TEXTURE_2D);
 
-	
 	// test drawing textures
 	glBindTexture(GL_TEXTURE_2D,textures->sprites);
 	
@@ -385,11 +389,13 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	{
 		draw_sprite(state,sprites[i]);
 	}
+
 	draw_player_gun(state);
 
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_TEXTURE_2D);
+	
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 }
 
@@ -887,14 +893,12 @@ GLuint grass_model_build_part(game_state *state,int start)
 			y = point_gety(state->block_list[i]);
 			z = point_getz(state->block_list[i]);
 			
-
 			xb = x << 5;
 			yb = y << 5;
 			zb = z << 5;
 			seed_rng(point_create(x,y,z));
 			range = 16.f+random(16.f);
-			tex_id = irandom(6);
-			
+			tex_id = irandom(8);
 			
 			if (irandom(10)>5 && !block_at(state,x,y,z+1))
 			{

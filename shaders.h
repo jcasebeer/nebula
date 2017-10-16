@@ -45,22 +45,22 @@ const char *post_shader_f = ""
 	"uniform int lines;\n"
 	"varying vec2 f_texcoord;\n"
 
-	"float mod(float a,float b)\n"
+	/*"float mod(float a,float b)\n"
 	"{\n"
 	"	return a - (b*floor(a/b));\n"
-	"}\n"
+	"}\n"*/
 
 	"void main(void) {\n"
 	"vec3 c = texture2D(fbo_texture, f_texcoord).rgb;\n"
 	"float lum = dot(c,vec3(0.299,0.587,0.114));\n"
 	"vec2 uv = gl_FragCoord.xy / vec2(resx,resy);\n"
-	"if (lines)\n{"
+	/*"if (lines)\n{"
 	"	if (lum<0.2){\n"
 	"	if (mod(gl_FragCoord.x+gl_FragCoord.y,3.0)>0.0)"
 	"	c = vec3(0.0,0.0,0.0);}\n"
 	"	else {if (mod(gl_FragCoord.x+gl_FragCoord.y,2.0)==1.0)\n"
 	"	c = vec3(0.0,0.0,0.0);}\n"
-	"}\n"
+	"}\n"*/
 	
 	"float xdist = 0.5 - uv.x;\n"
 	"float ydist = 0.5 - uv.y;\n"

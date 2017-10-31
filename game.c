@@ -162,6 +162,8 @@ static void grapple_step(game_state *state)
 		vel->y = 0;
 		vel->z = 0;
 
+
+
 		if (entity_has_component(state,state->grapple,c_grounded))
 		{
 			sound_play_at(SOUND,SOUND->grapple_stick, *pos);
@@ -206,6 +208,75 @@ static void grapple_step(game_state *state)
 			state->grapple = -1;
 		}	
 		
+	}
+
+}
+
+static void grapple_step_new(game_state *state)
+{
+	if (state->grapple==-1 || state->player == -1)
+		return;
+	v3 *pos = &(state->position[state->grapple]);
+	v3 *vel = &(state->velocity[state->grapple]);
+	spr *sprite = &(state->sprite[state->grapple]);
+
+	v3 *ppos = &(state->position[state->player]);
+	v3 *pvel = &(state->velocity[state->player]);
+	float *vmax = &(state->velocity_max[state->player]);
+	float *fric = &(state->friction[state->player]);
+
+	if (level_collide(state,pos->x,pos->y,pos->z,state->bbox[state->grapple]))
+	{
+		vel->x = 0;
+		vel->y = 0;
+		vel->z = 0;
+		//pvel->z-=state->gravity;
+		*fric = 0.f;
+		//*vmax = 32.f;
+
+		if (entity_has_component(state,state->grapple,c_grounded))
+		{
+			sound_play_at(SOUND,SOUND->grapple_stick, *pos);
+			entity_component_remove(state,state->grapple,c_grounded);
+			state->grapple_dist = distance(pos,ppos);
+			sprite->image_speed = 0.25;
+			state->grapple_state = 1;
+		}
+		else
+		{
+			*vmax = 32.f;
+			if (distance(ppos,pos)>state->grapple_dist)
+			{
+				v3 dnormal = {};
+				dnormal.x = ppos->x - pos->x;
+				dnormal.y = ppos->y - pos->y;
+				dnormal.z = ppos->z - pos->z;
+				dnormal = noz(dnormal);
+
+				v3 old_ppos = {ppos->x, ppos->y,ppos->z};
+
+				ppos->x = pos->x+dnormal.x*state->grapple_dist;
+				ppos->y = pos->y+dnormal.y*state->grapple_dist;
+				ppos->z = pos->z+dnormal.z*state->grapple_dist;
+
+				while(level_collide(state,ppos->x,ppos->y,ppos->z,state->bbox[state->player]))
+					ppos->x -= dnormal.x;
+				while(level_collide(state,ppos->x,ppos->y,ppos->z,state->bbox[state->player]))
+					ppos->y -= dnormal.y;
+				while(level_collide(state,ppos->x,ppos->y,ppos->z,state->bbox[state->player]))
+					ppos->z -= dnormal.z;
+
+				v3 nv = {ppos->x - old_ppos.x,ppos->y - old_ppos.y,ppos->z - old_ppos.z};
+
+				pvel->x += nv.x;
+				pvel->y += nv.y;
+				pvel->z += nv.z;
+
+			}
+
+		}
+		
+
 	}
 
 }
@@ -344,7 +415,7 @@ static void clamp_speed(game_state *state, int entity)
 		v->y *= vmax;
 		//v->z *= vmax;
 	}
-	v->z = clamp(v->z,-24,24);
+	v->z = clamp(v->z,-32,32);
 }
 
 static void update_sprites(game_state *state, int entity)
@@ -680,14 +751,20 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	v3 *vel = &(state->velocity[state->player]);
 	v3i bbox = state->bbox[state->player];
 	float *vmax = &(state->velocity_max[state->player]);
-	if (key_down(SDL_SCANCODE_W))
-		motion_add(state,state->player,state->camdir,spd);
-	if (key_down(SDL_SCANCODE_S))
-		motion_add(state,state->player,state->camdir+180.f,spd);
-	if (key_down(SDL_SCANCODE_D))
-		motion_add(state,state->player,state->camdir+90.f,spd);
-	if (key_down(SDL_SCANCODE_A))
-		motion_add(state,state->player,state->camdir-90.f,spd);
+	float *fric = &(state->friction[state->player]);
+
+	
+		if (key_down(SDL_SCANCODE_W))
+			motion_add(state,state->player,state->camdir,spd);
+		if (key_down(SDL_SCANCODE_S))
+			motion_add(state,state->player,state->camdir+180.f,spd);
+		if (key_down(SDL_SCANCODE_D))
+			motion_add(state,state->player,state->camdir+90.f,spd);
+		if (key_down(SDL_SCANCODE_A))
+			motion_add(state,state->player,state->camdir-90.f,spd);
+
+	
+
 	if (key_pressed(SDL_SCANCODE_TAB) && !state->pstate.grapple_out && state->pstate.weapons[state->pstate.weapon].active)
 	{
 		gun_pickup_create(state,pos->x,pos->y,pos->z+state->vheight,dirToVector(state->camdir,state->camzdir,4.f),state->pstate.weapons[state->pstate.weapon]);
@@ -764,11 +841,12 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	int grounded = level_collide(state,pos->x,pos->y,pos->z - 1,bbox);
 	if (grounded)
 	{
+
 		state->jumps = 1;
 		if (c_speed > 1.f)
 			state->view_bob+=0.2*(c_speed/2);
 	}
-
+	
 	if (state->jumps>0 && key_down(SDL_SCANCODE_SPACE) && state->can_jump)
 	{
 		state->can_jump = 0;
@@ -866,6 +944,8 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 				state->jumps = 1;
 			entity_destroy(state,state->grapple);
 			state->grapple = -1;
+			state->grapple_state = 0;
+			state->grapple_dist = 0.f;
 		}
 	}
 
@@ -892,6 +972,16 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 		(*vmax) -= drag;
 	else
 		*vmax = 2.0;
+
+	
+	if (*fric < 0.2)
+	{
+		(*fric)+=0.01;
+	}
+	else
+	{
+		*fric = 0.2;
+	}
 
 	if (state->pstate.grapple_out)
 	{
@@ -958,11 +1048,11 @@ void game_simulate(game_state *state, const Uint8 *key_state, Uint8 *prev_key_st
 	state->day_night+=0.01;
 	// player stuff
 	player_step(state,key_state,prev_key_state);
-	grapple_step(state);
+
+	
 	ents = get_ec_set(state,c_bullet);
 	for(i=0; iterate_ec_set(ents,i); i++)
 		bullet_step(state,ents[i]);
-	clamp_speed(state,state->player);
 
 	// gravity system
 	ents = get_ec_set(state,c_grounded);
@@ -977,6 +1067,10 @@ void game_simulate(game_state *state, const Uint8 *key_state, Uint8 *prev_key_st
 	ents = get_ec_set(state,c_ground_friction);
 	for(i=0; iterate_ec_set(ents,i); i++)
 		add_ground_friction(state,ents[i]);
+
+	grapple_step(state);
+
+	clamp_speed(state,state->player);
 
 	// physics down here
 	ents = get_ec_set(state,c_velocity);

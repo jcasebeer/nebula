@@ -44,6 +44,7 @@ typedef struct game_state
 	int grapple;
 	int grapple_life;
 	int grapple_state;
+	float grapple_dist;
 	float vheight;
 	float view_bob;
 	float jumps;

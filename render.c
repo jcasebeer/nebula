@@ -270,6 +270,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	m = (sqrtf(sunx*sunx + suny*suny + sunz*sunz)/2.f)*0.1;
 
 	glClearColor(m,m,m,1.f);
+	//glClearColor(0.f,0.f,0.f,1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	draw_position_camera(

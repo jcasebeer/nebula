@@ -146,6 +146,27 @@ void normalize(float *v)
 	v[2]/=m;
 }
 
+v3 noz(v3 v)
+{
+	float m;
+	m = sqrt(v.x*v.x+v.y*v.y+v.z*v.z);
+	if (m==0)
+		return v;
+	v.x/=m;
+	v.y/=m;
+	v.z/=m;
+	return v;
+}
+
+float dot(v3 *v1, v3 *v2)
+{
+	float xdiff, ydiff, zdiff;
+	xdiff = v1->x - v2->x;
+	ydiff = v1->y - v2->y;
+	zdiff = v1->z - v2->z;
+	return xdiff*xdiff+ydiff*ydiff+zdiff*zdiff;
+}
+
 void cross(float *result, float *v1, float *v2)
 {
 	result[0] = v1[1]*v2[2] - v1[2]*v2[1];                                      
@@ -228,6 +249,14 @@ int sphere_collide(v3 *s1, v3 *s2, float s1_radius, float s2_radius)
 
 	//return sqrt(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff) < rsum
 	return (xdiff*xdiff + ydiff*ydiff + zdiff*zdiff) < rsum*rsum;
+}
+
+float distance(v3 *s1, v3 *s2)
+{
+	float xdiff = s1->x - s2->x;
+	float ydiff = s1->y - s2->y;
+	float zdiff = s1->z - s2->z;
+	return sqrt(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
 }
 
 v3 dirToVector(float dir, float zdir, float m)

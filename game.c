@@ -162,35 +162,30 @@ static void grapple_step(game_state *state)
 		vel->y = 0;
 		vel->z = 0;
 
-
-
 		if (entity_has_component(state,state->grapple,c_grounded))
 		{
 			sound_play_at(SOUND,SOUND->grapple_stick, *pos);
 			entity_component_remove(state,state->grapple,c_grounded);
+			sprite->image_speed = 0.25;
+			state->grapple_dist = distance(pos,ppos);
 		}
 
-		if (state->timer % 30 == 0)
-		{
-			//sound_play_at(SOUND,SOUND->grapple_stick,v3_create(state->camx,state->camy,state->camz),*pos,state->camdir);
-		}
 		
-		sprite->image_speed = 0.25;
-
 		float zadd = clamp((pos->z+32.f - ppos->z)/1000.f,0.f,2.f);
 		if (ppos->z < pos->z)
 		{
 			state->grapple_state = 1;
 			pvel->z+=zadd;
+			state->friction[state->player] = 0.f;
 			state->grapple_life--;
 			sound_play_loop(SOUND,SOUND->grapple_buzz);
 
 			if (!level_collide(state,ppos->x,ppos->y,ppos->z -1,state->bbox[state->player]))
 			{	
-				if (*vmax < 16.0)
+				if (*vmax < 24.0)
 					(*vmax)+=0.125;
 				else
-					*vmax = 16.0;
+					*vmax = 24.0;
 			}
 			
 		}
@@ -199,15 +194,46 @@ static void grapple_step(game_state *state)
 			if (state->grapple_state == 1)
 				state->grapple_life = 0;
 		}
-		if (state->grapple_life<=0)
+		if (distance(ppos,pos)>state->grapple_dist)
 		{
-			sound_play_at(SOUND,SOUND->grapple_end,*pos);
-			if (state->grapple_state == 1)
-				state->jumps = 1;
-			entity_destroy(state,state->grapple);
-			state->grapple = -1;
-		}	
-		
+				v3 dnormal = {};
+				dnormal.x = ppos->x - pos->x;
+				dnormal.y = ppos->y - pos->y;
+				dnormal.z = ppos->z - pos->z;
+				dnormal = noz(dnormal);
+
+				v3 old_ppos = {ppos->x, ppos->y,ppos->z};
+
+				ppos->x = pos->x+dnormal.x*state->grapple_dist;
+				ppos->y = pos->y+dnormal.y*state->grapple_dist;
+				ppos->z = pos->z+dnormal.z*state->grapple_dist;
+
+				v3 nv = {ppos->x - old_ppos.x,ppos->y - old_ppos.y,ppos->z - old_ppos.z};
+
+				while(level_collide(state,ppos->x,ppos->y,ppos->z,state->bbox[state->player]))
+				{
+					ppos->x += dnormal.x;
+					ppos->y += dnormal.y;
+					ppos->z += dnormal.z;
+				}
+			pvel->x += nv.x;
+			pvel->y += nv.y;
+			pvel->z += nv.z;
+		}		
+	}
+	else
+	{
+		if (!entity_has_component(state,state->grapple,c_grounded))
+			state->grapple_life = 0;
+	}
+
+	if (state->grapple_life<=0)
+	{
+		sound_play_at(SOUND,SOUND->grapple_end,*pos);
+		if (state->grapple_state == 1)
+			state->jumps = 1;
+		entity_destroy(state,state->grapple);
+		state->grapple = -1;
 	}
 
 }
@@ -896,16 +922,6 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 			state->pstate.weapon = !state->pstate.weapon;
 			state->gun_change = 0.f;
 		}
-		/*if (key_down(SDL_SCANCODE_1) && state->pstate.weapon != 0 && state->pstate.weapons[0].active)
-		{
-			state->pstate.weapon = 0;
-			state->gun_change = 0.f;
-		}
-		else if (key_down(SDL_SCANCODE_2) && state->pstate.weapon != 1 && state->pstate.weapons[1].active)
-		{
-			state->pstate.weapon = 1;
-			state->gun_change = 0.f;
-		}*/
 	}
 	state->gundir += (state->camdir - state->gundir)/4.f;
 	state->gunzdir += (state->camzdir - state->gunzdir)/3.f;
@@ -976,7 +992,7 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	
 	if (*fric < 0.2)
 	{
-		(*fric)+=0.01;
+		(*fric)+=0.05;
 	}
 	else
 	{

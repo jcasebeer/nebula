@@ -84,7 +84,7 @@ typedef struct game_state
 
 	/* level data */
 	#define LEVEL_SIZE 512
-	#define MAX_BLOCKS 250000
+	#define MAX_BLOCKS 500000
 	#define BLOCK_SIZE 32
 	#define CHUNK_SIZE 250
 	#define DELETE_QUEUE_SIZE 250

@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
 	game_state *state = game_state_create(SOUND);
 	//p_state *pstate = p_state_create();
 	// seed rng
-	seed_rng(0);
-    //time_seed_rng();
+	//seed_rng(0);
+    time_seed_rng();
 
     state->pstate.weapons[0] = gen_gun();
 	state->pstate.weapons[1] = gen_gun();
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
 			frames = 0;
 			second_counter = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency();
 		}
-			
+		//SDL_Delay(1);
 		// limit framerate
 		timespent = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency() - time;
 		while (timespent<sleeptime)

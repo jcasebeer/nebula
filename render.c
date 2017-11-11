@@ -903,34 +903,27 @@ GLuint grass_model_build_part(game_state *state,int start)
 			
 			if (irandom(10)>5 && !block_at(state,x,y,z+1))
 			{
-				
+				int count = 8;
 				glBegin(GL_QUADS);
-				for(int w = 0; w<8; w++)
+				for(int w = 0; w<count; w++)
 				{
 					int gx, gy, gz,gx2,gy2,gz2;
 					float gsize = 16.f;
+					float dir = random(360.f);
 					gx = xb + random(32);
 					gy = yb + random(32);
 					gz = zb + 32.f;
 					gx2 = gx + random(range) - range/2.f;
 					gy2 = gy + random(range) - range/2.f;
 					gz2 = gz + 32.f;
-					
-					if (irandom(2) == 0)
-					{
 
-						gvertex(gx-gsize,gy,gz,0.f,1.f,tex_id);
-						gvertex(gx2-gsize,gy2,gz2,0.f,0.f,tex_id);
-						gvertex(gx2+gsize,gy2,gz2,1.f,0.f,tex_id);
-						gvertex(gx+gsize,gy,gz,1.f,1.f,tex_id);
-					}
-					else
-					{
-						gvertex(gx,gy-gsize,gz,0.f,1.f,tex_id);
-						gvertex(gx2,gy2-gsize,gz2,0.f,0.f,tex_id);
-						gvertex(gx2,gy2+gsize,gz2,1.f,0.f,tex_id);
-						gvertex(gx,gy+gsize,gz,1.f,1.f,tex_id);
-					}
+					float xsize = lengthdir_x(gsize,dir);
+					float ysize = lengthdir_y(gsize,dir);
+					
+					gvertex(gx-xsize,gy-ysize,gz,0.f,1.f,tex_id);
+					gvertex(gx2-xsize,gy2-ysize,gz2,0.f,0.f,tex_id);
+					gvertex(gx2+xsize,gy2+ysize,gz2,1.f,0.f,tex_id);
+					gvertex(gx+xsize,gy+ysize,gz,1.f,1.f,tex_id);
 				}
 				glEnd();
 			}
@@ -982,7 +975,7 @@ GLuint dust_model_build(game_state *state)
 		yb = y << 5;
 		zb = z << 5;
 		if (irandom(2)==0)
-			nvertex(xb+irandom(512)-256,yb+irandom(512)-256,zb+irandom(512)-256,-0.70710678118,0,0.70710678118);
+			nvertex(xb+irandom(1024)-512,yb+irandom(1024)-512,zb+irandom(1024)-512,-0.70710678118,0,0.70710678118);
 	}
 	glEnd();
 	glEndList();

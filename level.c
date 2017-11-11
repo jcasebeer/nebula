@@ -54,7 +54,7 @@ void level_gen(game_state *state)
 	hsv_to_rgb(hue,0.35,0.30,state->levelFogColor);
 
 
-	int blocks = LEVEL_SIZE * BLOCK_SIZE * 3;
+	int blocks = LEVEL_SIZE * BLOCK_SIZE * 4;
 	int x,y,z;
 	int i;
 
@@ -81,6 +81,7 @@ void level_gen(game_state *state)
 		if (!bit_get(state,x,y,z))
 		{
 			block_create(state,x,y,z);
+			blocks--;
 		}
 		x+=choose3(1,0,-1);
 		y+=choose3(1,0,-1);
@@ -92,7 +93,6 @@ void level_gen(game_state *state)
 			y = point_gety(point);
 			z = point_getz(point);
 		}
-		blocks--;
 	}
 	// fatten blocks
 	int b,w;

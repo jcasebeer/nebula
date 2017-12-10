@@ -25,8 +25,11 @@ const char *post_shader_f = ""
 	"float r = c.r*255.0;\n"
 	"float g = c.g*255.0;\n"
 	"float b = c.b*255.0;\n"
+	"float xdist = 0.5 - uv.x;\n"
+	"float ydist = 0.5 - uv.y;\n"
+	"float m = 1.0 - sqrt(xdist*xdist+ydist*ydist);\n"
 	"gl_FragColor = vec4(floor(r/8.0)/31,floor(g/6.0)/42.0,floor(b/8.0)/31.0,1.0);\n"
-	"gl_FragColor.rgb = pow(gl_FragColor.rgb,vec3(gamma));\n"
+	"gl_FragColor.rgb = pow(gl_FragColor.rgb,vec3(gamma))*vec3(1.0-m/2.0,m,1.0-m/2.0);\n"
 	"}\n";
 
 /*const char *post_shader_f = ""

@@ -36,7 +36,7 @@ void level_gen(game_state *state)
 	int color = irandom(COLORCOUNT); */
 
     float hue = -30.f+random(180.f);
-	hsv_to_rgb(hue,0.3+random(0.7),1.0,state->levelColor);
+	hsv_to_rgb(hue,0.3+random(0.4),1.0,state->levelColor);
 	hsv_to_rgb(hue,0.1,0.9,state->levelGrassColor);
 	hue-=180.f;
 	hsv_to_rgb(hue,0.35,0.30,state->levelFogColor);

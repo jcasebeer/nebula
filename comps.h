@@ -18,6 +18,7 @@ typedef enum
 	c_kill_on_fall,
 	c_sprite_background,
 	c_ground_friction,
+	c_light,
 
 	c_last // special enum, keep at end
 }component_flag;
@@ -63,5 +64,12 @@ typedef struct gun
 	int bullets;
 	float reload;
 }gun;
+
+typedef struct pLight 
+{
+	float attenuation;
+	float distSquared;
+	float radius;
+}pLight;
 
 #endif

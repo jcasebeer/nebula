@@ -259,6 +259,14 @@ float distance(v3 *s1, v3 *s2)
 	return sqrt(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
 }
 
+float distanceSquared(v3 *s1, v3 *s2)
+{
+	float xdiff = s1->x - s2->x;
+	float ydiff = s1->y - s2->y;
+	float zdiff = s1->z - s2->z;
+	return xdiff*xdiff + ydiff*ydiff + zdiff*zdiff;
+}
+
 v3 dirToVector(float dir, float zdir, float m)
 {
 	v3 v;

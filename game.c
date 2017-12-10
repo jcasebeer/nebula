@@ -170,7 +170,6 @@ static void grapple_step(game_state *state)
 			state->grapple_dist = distance(pos,ppos);
 		}
 
-		
 		float zadd = clamp((pos->z+32.f - ppos->z)/1000.f,0.f,2.f);
 		if (ppos->z < pos->z)
 		{
@@ -397,6 +396,7 @@ static int grapple_create(game_state *state, v3 position, v3 velocity)
 	entity_component_add(state,ent,c_position);
 	entity_component_add(state,ent,c_grounded);
 	entity_component_add(state,ent,c_velocity);
+	entity_component_add(state,ent,c_light);
 	//entity_component_add(state,ent,c_level_collider);
 	//entity_component_add(state,ent,c_sprite);
 	sprite_add(state,ent,62,3,16,16);
@@ -412,6 +412,19 @@ static int grapple_create(game_state *state, v3 position, v3 velocity)
 	bbox->y = 8;
 	bbox->z = 8;
 
+	state->lights[ent].radius = 8.f;
+	state->lights[ent].attenuation = 256.f;
+
+	return ent;
+}
+
+int light_create(game_state *state, v3 position, float radius)
+{
+	int ent = entity_create(state);
+	entity_component_add(state,ent,c_light);
+	state->position[ent] = position;
+	state->lights[ent].radius = radius;
+	state->lights[ent].attenuation = 32.f+random(256.f);
 	return ent;
 }
 
@@ -420,6 +433,7 @@ static int bullet_create(game_state *state, v3 position, v3 v, int damage, float
 	int ent = entity_create(state);
 	entity_component_add(state,ent,c_bullet);
 	entity_component_add(state,ent,c_sprite_fullbright);
+	
 	sprite_add_size(state,ent,60,8,16,16,32,32);
 	spr *sprite = &(state->sprite[ent]);
 	sprite->play_once = 1;
@@ -429,6 +443,11 @@ static int bullet_create(game_state *state, v3 position, v3 v, int damage, float
 	state->life[ent] = range;
 	state->radius[ent] = 16.f;
 	state->velocity_max[ent] = speed;
+
+	entity_component_add(state,ent,c_light);
+	state->lights[ent].radius = 8.f;
+	state->lights[ent].attenuation = 64.f;
+
 
 	v.x *= 100.f;
 	v.y *= 100.f;
@@ -603,6 +622,10 @@ static int gun_pickup_create(game_state *state, float x, float y, float z, v3 ve
 	entity_component_add(state,ent,c_kill_on_fall);
 	entity_component_add(state,ent,c_sprite_background);
 	entity_component_add(state,ent,c_ground_friction);
+
+	entity_component_add(state,ent,c_light);
+	state->lights[ent].radius = 8.f;
+	state->lights[ent].attenuation = 64.f;
 
 	state->guns[ent] = g;
 	state->velocity[ent] = velocity;

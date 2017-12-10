@@ -20,7 +20,7 @@ typedef struct
 typedef struct game_state
 {
 	p_state pstate;
-	#define ENTITY_MAX 512 // max number of entitys
+	#define ENTITY_MAX 1024 // max number of entitys
 	/* running total number of entitys*/
 	int entity_count;
 
@@ -81,6 +81,7 @@ typedef struct game_state
 	v3i bbox[ENTITY_MAX];
 	spr sprite[ENTITY_MAX];
 	gun guns[ENTITY_MAX];
+	pLight lights[ENTITY_MAX];
 
 	/* level data */
 	#define LEVEL_SIZE 512
@@ -131,6 +132,7 @@ void entity_component_remove(game_state *state, int id, component_flag flag);
 
 // get array of entitys with a certain component
 int *get_ec_set(game_state *state, component_flag component);
+void ec_set_swap(game_state *state,component_flag flag, int i, int w);
 
 // use to iterate over set of entitys
 int iterate_ec_set(int *set,int id);
@@ -143,7 +145,7 @@ int point_gety(int block);
 int point_getz(int block);
 int point_create(int x, int y, int z);
 void bit_clear(game_state *state, int x, int y, int z);
-
+int light_create(game_state *state, v3 position, float radius);
 void delete_queue_enter(game_state *state, int point);
 int delete_queue_remove(game_state *state);
 int delete_queue_is_empty(game_state *state);

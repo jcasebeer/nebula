@@ -16,6 +16,7 @@ void cross(float *result, float *v1, float *v2);
 void move_to(float *x, float *y,float dir, float speed);
 int sphere_collide(v3 *s1, v3 *s2, float s1_radius, float s2_radius);
 float distance(v3 *s1, v3 *s2);
+float distanceSquared(v3 *s1, v3 *s2);
 v3 dirToVector(float dir, float zdir, float m);
 void compliment(float color[4], float result[4]);
 void darken(float color[4], float result[4]);

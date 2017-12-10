@@ -34,21 +34,9 @@ void level_gen(game_state *state)
 		{128,128,255}
 	};
 	int color = irandom(COLORCOUNT); */
-	float red,green,blue,csum;
-	red = 5.f+random(10.f);
-	green = 5.f+random(10.f);
-	blue = 5.f+random(10.f);
-	csum = red+green+blue;
-	red/=csum;
-	green/=csum;
-	blue/=csum;
-	state->levelColor[0] = clamp(red*1.5,0.f,1.f);//colors[color].x/255.f;
-	state->levelColor[1] = clamp(green*1.5,0.f,1.f);//colors[color].y/255.f;
-	state->levelColor[2] = clamp(blue*1.5,0.f,1.f);//colors[color].z/255.f;
-	state->levelColor[3] = 1.f;
 
     float hue = -30.f+random(180.f);
-	hsv_to_rgb(hue,0.7,1.0,state->levelColor);
+	hsv_to_rgb(hue,0.3+random(0.7),1.0,state->levelColor);
 	hsv_to_rgb(hue,0.1,0.9,state->levelGrassColor);
 	hue-=180.f;
 	hsv_to_rgb(hue,0.35,0.30,state->levelFogColor);
@@ -93,6 +81,16 @@ void level_gen(game_state *state)
 			y = point_gety(point);
 			z = point_getz(point);
 		}
+		/*if (irandom(1000)<1 && state->comp_count[c_light]<256)
+		{
+			v3 lp;
+			float radius;
+			lp.x = x*BLOCK_SIZE+random(1024)-512;
+			lp.y = y*BLOCK_SIZE+random(1024)-512;
+			lp.z = z*BLOCK_SIZE+random(1024)-512;
+			radius = 8;
+			light_create(state,lp,radius);
+		}*/
 	}
 	// fatten blocks
 	int b,w;

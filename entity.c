@@ -154,6 +154,19 @@ int *get_ec_set(game_state *state, component_flag component)
 	return (int *)&(state->comp_lists[component]);
 }
 
+void ec_set_swap(game_state *state,component_flag flag, int i, int w)
+{
+	int ie = state->comp_lists[flag][i];
+	int we = state->comp_lists[flag][w];
+	
+	state->comp_lists[flag][i] = we;
+	state->comp_lists[flag][w] = ie;
+
+	int temp = state->has_comp[ie][flag];
+	state->has_comp[ie][flag] = state->has_comp[we][flag];
+	state->has_comp[we][flag] = temp;
+}
+
 // use to iterate over set of entitys
 int iterate_ec_set(int *set,int id)
 {

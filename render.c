@@ -9,12 +9,15 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "shaders.h"
+#include "comps.h"
 
 void draw_text(float xstart, float ystart, float size, const char *text);
 void draw_text_br(float xstart, float ystart, float size, const char *text);
 void draw_player_gun(game_state *state);
 float tex_id_x(int id);
 float tex_id_y(int id);
+
+static void drawLightBalls(game_state *state);
 
 #ifndef NO_SHADER
 surface_data *surface_data_create(int width, int height, float gamma)
@@ -184,12 +187,18 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 
 #endif
 
-void game_render(game_state *state, SDL_Window *window, texture_data *textures)
-{
-	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-	// clear background
-	//glShadeModel(GL_FLAT);
-	glPolygonStipple((const GLubyte[128]){
+static void ProjectLights(game_state *state);
+const GLuint LightID[7] = {
+	GL_LIGHT1,
+	GL_LIGHT2,
+	GL_LIGHT3,
+	GL_LIGHT4,
+	GL_LIGHT5,
+	GL_LIGHT6,
+	GL_LIGHT7
+};
+
+const GLubyte Stipple0[128] = {
 		0x55, 0x55, 0x55, 0x55,
 		0x55, 0x55, 0x55, 0x55,
 		0x55, 0x55, 0x55, 0x55,
@@ -222,8 +231,47 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 		0x55, 0x55, 0x55, 0x55,
 		0x55, 0x55, 0x55, 0x55,
 		0x55, 0x55, 0x55, 0x55
-		
-	});
+};
+const GLubyte Stipple1[128] = {
+		0x33, 0x33, 0x33, 0x33,
+		0x33, 0x33, 0x33, 0x33,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0x33, 0x33, 0x33, 0x33,
+		0x33, 0x33, 0x33, 0x33,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0x33, 0x33, 0x33, 0x33,
+		0x33, 0x33, 0x33, 0x33,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0x33, 0x33, 0x33, 0x33,
+		0x33, 0x33, 0x33, 0x33,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0x33, 0x33, 0x33, 0x33,
+		0x33, 0x33, 0x33, 0x33,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0x33, 0x33, 0x33, 0x33,
+		0x33, 0x33, 0x33, 0x33,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0x33, 0x33, 0x33, 0x33,
+		0x33, 0x33, 0x33, 0x33,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0x33, 0x33, 0x33, 0x33,
+		0x33, 0x33, 0x33, 0x33,
+		0xCC, 0xCC, 0xCC, 0xCC,
+		0xCC, 0xCC, 0xCC, 0xCC 
+};
+void game_render(game_state *state, SDL_Window *window, texture_data *textures)
+{
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+	// clear background
+	//glShadeModel(GL_FLAT);
+	glPolygonStipple(Stipple0);
 	GLfloat comp[4];
 	GLfloat gcomp[4];
 	GLfloat ldark[4];
@@ -255,7 +303,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	float yto = state->camy+ydir;
 	float zbob = state->camz+state->vheight+sin(state->view_bob)*2;
 	float zto = zbob+zdir;
-	
+/*	
 	// calculate difference between viewing angle and sun direction
 	float sunx = 0.707107;
 	float suny = 0.0;
@@ -268,9 +316,9 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	sunz -= zdir/m;
 
 	m = (sqrtf(sunx*sunx + suny*suny + sunz*sunz)/2.f)*0.1;
-
-	glClearColor(m,m,m,1.f);
-	//glClearColor(0.f,0.f,0.f,1.f);
+*/
+	//glClearColor(m,m,m,1.f);
+	glClearColor(0.f,0.f,0.f,1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	draw_position_camera(
@@ -284,7 +332,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	// draw level model
 	glPointSize(1);
-	glShadeModel(GL_FLAT);
+	glShadeModel(GL_SMOOTH);
 	glEnable(GL_CULL_FACE);
 	glLineWidth(1);
 
@@ -293,9 +341,9 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,comp);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, (float [4]){0.f,0.f,0.f,1.f});
-	glLightfv(GL_LIGHT0, GL_DIFFUSE,state->levelColor);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.f);
 	float polyLight = 512.f;//lerp(512.f,1024.f,am);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1.f/(polyLight*polyLight));
 
@@ -310,19 +358,31 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_POLYGON_STIPPLE);
 	drawSphere(state->camx + 32, state->camy, zbob + 32, 4, 12);
-	glDisable(GL_POLYGON_STIPPLE);
 	glEnable(GL_DEPTH_TEST);
+	glPolygonStipple(Stipple1);
+	//drawLightBalls(state);
 
+	glDisable(GL_POLYGON_STIPPLE);
+	glPolygonStipple(Stipple0);
 	glEnable(GL_LIGHTING);
 
 	//draw level model
 	glEnable(GL_LIGHT0);
+
+	ProjectLights(state);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textures->shadow);
 	level_model_draw(state);
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHT0);
+	glDisable(GL_LIGHT1);
+	glDisable(GL_LIGHT2);
+	glDisable(GL_LIGHT3);
+	glDisable(GL_LIGHT4);
+	glDisable(GL_LIGHT5);
+	glDisable(GL_LIGHT6);
+	glDisable(GL_LIGHT7);
 	glDisable(GL_LIGHTING);
 	// light pop
 	glPopMatrix();
@@ -1169,6 +1229,61 @@ void drawSphere(float x, float y, float z, float r, int sides)
 				glEnd();
 		glPopMatrix();
 	}
+}
+
+static void drawLightBall(game_state *state, int ent)
+{
+	v3 *p = &(state->position[ent]);
+	pLight *l = &(state->lights[ent]);
+	drawSphere(p->x,p->y,p->z,l->radius,8);
+}
+
+static void drawLightBalls(game_state *state)
+{
+	int *ents=get_ec_set(state,c_light);
+	for(int i=0; iterate_ec_set(ents,i); i++)
+		drawLightBall(state,ents[i]);
+}
+
+static void ProjectLights(game_state *state)
+{
+	int i;
+	v3 *pos = &(state->position[state->player]);
+	int *ents=get_ec_set(state,c_light);
+	for(i=0; iterate_ec_set(ents,i); i++)
+		state->lights[ents[i]].distSquared = distanceSquared(pos,&(state->position[ents[i]]));
+	for(i=0; i<state->comp_count[c_light]-1; i++)
+	{
+		if (state->lights[ents[i]].distSquared > state->lights[ents[i+1]].distSquared)
+			ec_set_swap(state,c_light,i,i+1);
+	}
+
+	int c = 0;
+	for(i=0; iterate_ec_set(ents,i); i++)
+	{
+		v3 *pos = &(state->position[ents[i]]);
+		pLight *light = &(state->lights[ents[i]]);
+		GLuint lid = LightID[c];
+
+		glLightfv(lid, GL_AMBIENT, (float [4]){0.f,0.f,0.f,1.f});
+		glLightfv(lid, GL_DIFFUSE, state->levelColor);
+		glLightf(lid, GL_CONSTANT_ATTENUATION, 1.f);
+		glLightf(lid, GL_LINEAR_ATTENUATION, 0.0f);
+		//float polyLight = 256.f;
+		glLightf(lid, GL_QUADRATIC_ATTENUATION,1.f/(light->attenuation*light->attenuation));
+
+		GLfloat light_pos[4];
+		light_pos[0] = pos->x;
+		light_pos[1] = pos->y;
+		light_pos[2] = pos->z;
+		light_pos[3] = 1.f;
+		glLightfv(lid,GL_POSITION,light_pos);
+		glLightfv(lid,GL_SPECULAR,(float [4]){0.f,0.f,0.f,0.f});
+		glEnable(lid);
+		c++;
+		if (c>=7)
+			break;
+	}	
 }
 
 void load_screen_draw(int time)

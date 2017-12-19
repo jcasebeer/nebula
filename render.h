@@ -9,7 +9,7 @@
 typedef struct texture_data
 {
 	GLuint sprites;
-	GLuint shadow;
+	GLuint shadow_1024;
 	GLuint grass;
 }texture_data;
 
@@ -45,6 +45,7 @@ void level_model_build(game_state *state);
 void model_draw(GLuint model);
 void model_destroy(GLuint model);
 GLuint texture_load(const char *file, int width, int height);
+GLuint texture_load_mipmapped(const char *file, int width, int height);
 void texture_destroy(GLuint texture);
 surface_data *surface_data_create(int width, int height, float gamma);
 void surface_data_destroy(surface_data *surf);

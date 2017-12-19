@@ -55,6 +55,12 @@ void level_gen(game_state *state)
 	}
 
 	state->block_count = 0;
+	/*for (x=0; x<LEVEL_SIZE; x++)
+		for(y=0; y<LEVEL_SIZE; y++)
+		{
+			block_create(state,x,y,idist2d(x,y,LEVEL_SIZE>>1,LEVEL_SIZE>>1));
+		}*/
+	
 	x = LEVEL_SIZE / 2;
 	y = x;
 	z = x;
@@ -64,6 +70,7 @@ void level_gen(game_state *state)
 	ystart = y;
 	zstart = z; 
 	load_screen_draw(15);
+
 	while(blocks>0)
 	{
 		if (!bit_get(state,x,y,z))

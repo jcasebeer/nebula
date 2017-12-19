@@ -316,8 +316,8 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	sunz -= zdir/m;
 
 	m = (sqrtf(sunx*sunx + suny*suny + sunz*sunz)/2.f)*0.1;
-*/
-	//glClearColor(m,m,m,1.f);
+
+	glClearColor(m,m,m,1.f);*/
 	glClearColor(0.f,0.f,0.f,1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -344,7 +344,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.f);
-	float polyLight = 512.f;//lerp(512.f,1024.f,am);
+	float polyLight = 512;//lerp(512.f,1024.f,am);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1.f/(polyLight*polyLight));
 
 	GLfloat light_pos[4];
@@ -371,8 +371,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	ProjectLights(state);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D,textures->shadow);
+	
+	glBindTexture(GL_TEXTURE_2D,textures->shadow_1024);
 	level_model_draw(state);
+
 	glBindTexture(GL_TEXTURE_2D,0);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHT0);
@@ -728,7 +730,6 @@ static void block_back(int x1, int y1, int z1, int diag, int top, int bottom, in
 	    vertex(x1,y2,z2,0.f,1.f,0.f,blx,bly,0.f,tex_id);
 	    vertex(x1,y2,z1,0.f,1.f,0.f,tlx,tly,0.f,tex_id);
 	glEnd();
-
 }
 
 int block_get_lit(game_state *state,int x, int y, int z)
@@ -946,6 +947,7 @@ GLuint texture_load(const char *file, int width, int height)
 	GLuint tid;
 	glGenTextures(1,&tid);
 	glBindTexture(GL_TEXTURE_2D,tid);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -954,6 +956,29 @@ GLuint texture_load(const char *file, int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
+    glBindTexture(GL_TEXTURE_2D,0);
+    free(data);
+    return tid;
+}
+
+GLuint texture_load_mipmapped(const char *file, int width, int height)
+{
+	int n = 4;
+	int w = width;
+	int h = height;
+	unsigned char *data = stbi_load(file,&w,&h,&n,0);
+	GLuint tid;
+	glGenTextures(1,&tid);
+	glBindTexture(GL_TEXTURE_2D,tid);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
     glBindTexture(GL_TEXTURE_2D,0);
     free(data);
     return tid;

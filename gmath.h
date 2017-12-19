@@ -22,6 +22,7 @@ void compliment(float color[4], float result[4]);
 void darken(float color[4], float result[4]);
 void seed_rng(unsigned int seed);
 void time_seed_rng();
+int idist2d(int x1, int y1, int x2, int y2);
 float random(float range);
 int irandom(int range);
 int choose3(int x1, int x2, int x3);

@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	// create and load our texture data
 	texture_data *textures = texture_data_create();
 	textures->sprites = texture_load("tex/sprites.png",1024,1024);
-	textures->shadow = texture_load("tex/shadow.png",1024,1024);
+	textures->shadow_1024 = texture_load_mipmapped("tex/shadow.png",1024,1024);
 	textures->grass = texture_load("tex/grass.png",1024,1024);
 
 	// create our game_state
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 	grass_model_destroy(state);
 	game_state_destroy(state);
 	texture_destroy(textures->sprites);
-	texture_destroy(textures->shadow);
+	texture_destroy(textures->shadow_1024);
 	texture_destroy(textures->grass);
 	sound_free(SOUND,SOUND->jump); 
 	sound_free(SOUND,SOUND->rifle); 

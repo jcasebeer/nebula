@@ -32,7 +32,6 @@ typedef struct surface_data
 	GLuint u_resy;
 }surface_data;
 
-
 typedef struct
 {
 	int progress;

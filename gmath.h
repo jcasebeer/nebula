@@ -2,6 +2,7 @@
 #define GMATH_H
 #include <math.h>
 #include "comps.h"
+#include "state.h"
 
 extern const double DEG2RAD;
 extern const double RAD2DEG;
@@ -34,5 +35,7 @@ float lerp(float a, float b, float f);
 int choose2(int x1, int x2);
 void itoa(int num, char *buff);
 void hsv_to_rgb(float hue,float sat, float val, float *out);
+void quickSort(int *arr, int elements);
+int bListGetBlock(game_state *state, int block);
 
 #endif

@@ -74,7 +74,7 @@ static int level_collide(game_state *state, float xx, float yy, float zz, v3i bb
 
 static void delete_block(game_state *state, int point)
 {
-	int x,y,z;
+	int x,y,z,i;
 	x = point_getx(point);
 	y = point_gety(point);
 	z = point_getz(point);
@@ -82,50 +82,39 @@ static void delete_block(game_state *state, int point)
 		return;
 
 	// point to destroy
-	int targets[7];
-	targets[0] = point_create(x,y,z);
-	targets[1] = point_create(x+1,y,z);
-	targets[2] = point_create(x-1,y,z);
-	targets[3] = point_create(x,y+1,z);
-	targets[4] = point_create(x,y-1,z);
-	targets[5] = point_create(x,y,z+1);
-	targets[6] = point_create(x,y,z-1);
 	int chunks[7];
-	int chunk_count = 0;
-	for(int i = 0; i<state->block_count; i++)
+	chunks[0] = bListGetBlock(state, point_create(x,y,z));
+	chunks[1] = bListGetBlock(state, point_create(x+1,y,z));
+	chunks[2] = bListGetBlock(state, point_create(x-1,y,z));
+	chunks[3] = bListGetBlock(state, point_create(x,y+1,z));
+	chunks[4] = bListGetBlock(state, point_create(x,y-1,z));
+	chunks[5] = bListGetBlock(state, point_create(x,y,z+1));
+	chunks[6] = bListGetBlock(state, point_create(x,y,z-1));
+
+	state->block_list[chunks[0]] |= (1<<31);
+	bit_clear(state,x,y,z);
+
+	int chunkey[MAX_BLOCKS/CHUNK_SIZE+1];
+	for (i = 0; i<7; i++)
 	{
-		for(int w = 0; w<7; w++)
-		{
-			if (targets[w] == state->block_list[i])
-			{
-				if (w == 0)
-				{
-					state->block_list[i] |= (1<<31);
-					bit_clear(state,x,y,z);
-				}
-				int in_array = 0;
-				int chunk = i/CHUNK_SIZE;
-				for(int q = 0; q<chunk_count; q++)
-				{
-					if (chunks[q] == chunk)
-					{
-						in_array = 1;
-						break;
-					}
-				}
-				if (!in_array)
-					chunks[chunk_count++] = chunk;
-			}
-		}
-	}
-	for (int i = 0; i<chunk_count; i++)
-	{
-		model_destroy(state->level_model[chunks[i]]);
-		level_model_build_part(state,chunks[i]*CHUNK_SIZE);
-		model_destroy(state->grass_model[chunks[i]]);
-		grass_model_build_part(state,chunks[i]*CHUNK_SIZE);
+		if (chunks[i] >= 0)
+			chunkey[chunks[i]/CHUNK_SIZE] = 1;
 	}
 
+	int chunk;
+	for (i = 0; i<7; i++)
+	{
+		chunk = chunks[i];
+		int chunk_index = chunk/=CHUNK_SIZE;
+		if (chunk != -1 && chunkey[chunk_index])
+		{
+			chunkey[chunk_index] = 0;
+			model_destroy(state->level_model[chunk_index]);
+			level_model_build_part(state,chunk_index*CHUNK_SIZE);
+			model_destroy(state->grass_model[chunk_index]);
+			grass_model_build_part(state,chunk_index*CHUNK_SIZE);
+		}
+	}
 }
 
 static void motion_add(game_state *state, int entity, float dir, float speed)

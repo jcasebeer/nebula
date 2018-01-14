@@ -139,6 +139,8 @@ void level_gen(game_state *state)
 		}
 	}
 
+	quickSort(state->block_list,state->block_count);
+
 	// find suitable collision-free place to spawn player
 	while(block_at(state,xstart,ystart,zstart) || block_at(state,xstart,ystart,zstart+1))
 		zstart++;

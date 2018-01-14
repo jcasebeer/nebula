@@ -303,9 +303,9 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	float yto = state->camy+ydir;
 	float zbob = state->camz+state->vheight+sin(state->view_bob)*2;
 	float zto = zbob+zdir;
-/*	
+	
 	// calculate difference between viewing angle and sun direction
-	float sunx = 0.707107;
+	/*float sunx = 0.707107;
 	float suny = 0.0;
 	float sunz = 0.707107;
 
@@ -343,9 +343,9 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightfv(GL_LIGHT0, GL_AMBIENT, (float [4]){0.f,0.f,0.f,1.f});
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.f);
-	float polyLight = 512;//lerp(512.f,1024.f,am);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,1.f/(polyLight*polyLight));
+	float polyLight = 1024.f;
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.f/polyLight);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
 
 	GLfloat light_pos[4];
 	light_pos[0] = state->camx;
@@ -371,8 +371,15 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	ProjectLights(state);
 	glEnable(GL_TEXTURE_2D);
-	
 	glBindTexture(GL_TEXTURE_2D,textures->shadow_1024);
+
+	glFogf(GL_FOG_START,0.f);
+	glFogf(GL_FOG_END,8192.f);
+	glFogi(GL_FOG_MODE,GL_LINEAR);
+	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
+	glFogfv(GL_FOG_COLOR,state->levelFogColor);
+	glEnable(GL_FOG);
+
 	level_model_draw(state);
 
 	glBindTexture(GL_TEXTURE_2D,0);
@@ -387,15 +394,17 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glDisable(GL_LIGHT7);
 	glDisable(GL_LIGHTING);
 	// light pop
-	glPopMatrix();
+	//glPopMatrix();
 
-	glPushMatrix();
+	//glPushMatrix();
+
 	glFogf(GL_FOG_START,0.f);
 	glFogf(GL_FOG_END,256.f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
 	glFogfv(GL_FOG_COLOR,state->levelFogColor);
-	glEnable(GL_FOG);
+	//glEnable(GL_FOG);
+	
 	glDisable(GL_CULL_FACE);
 	
 	glColor3f(state->levelGrassColor[0],state->levelGrassColor[1],state->levelGrassColor[2]);

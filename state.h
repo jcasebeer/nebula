@@ -84,7 +84,7 @@ typedef struct game_state
 	pLight lights[ENTITY_MAX];
 
 	/* level data */
-	#define LEVEL_SIZE 512
+	#define LEVEL_SIZE 256
 	#define MAX_BLOCKS 500000
 	#define BLOCK_SIZE 32
 	#define CHUNK_SIZE 250

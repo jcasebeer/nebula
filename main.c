@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
 			frames = 0;
 			second_counter = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency();
 		}
-		//SDL_Delay(1);
+		SDL_Delay(1);
 		// limit framerate
 		timespent = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency() - time;
 		while (timespent<sleeptime)

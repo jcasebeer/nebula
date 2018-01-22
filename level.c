@@ -36,7 +36,9 @@ void level_gen(game_state *state)
 	int color = irandom(COLORCOUNT); */
 
     float hue = -30.f+random(180.f);
-    float sat = random(0.7);
+    float sat = random(0.5);
+   // float hue = random(360.f);
+    //float sat = random(1.f);
 	hsv_to_rgb(hue,sat,1.0,state->levelColor);
 	hsv_to_rgb(hue,0.1,0.9,state->levelGrassColor);
 	hue-=180.f;
@@ -236,4 +238,15 @@ int delete_queue_remove(game_state *state)
 int delete_queue_is_empty(game_state *state)
 {
 	return (state->dq_front == state->dq_end);
+}
+
+int delete_queue_has(game_state *state, int block)
+{
+	for(int i = state->dq_front; i!=state->dq_end; i++)
+	{
+		i = i % DELETE_QUEUE_SIZE;
+		if (state->delete_queue[i] == block)
+			return 1;
+	}
+	return 0;
 }

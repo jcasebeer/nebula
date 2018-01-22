@@ -20,7 +20,7 @@ typedef struct
 typedef struct game_state
 {
 	p_state pstate;
-	#define ENTITY_MAX 1024 // max number of entitys
+	#define ENTITY_MAX 256 // max number of entitys
 	/* running total number of entitys*/
 	int entity_count;
 
@@ -149,6 +149,7 @@ int light_create(game_state *state, v3 position, float radius);
 void delete_queue_enter(game_state *state, int point);
 int delete_queue_remove(game_state *state);
 int delete_queue_is_empty(game_state *state);
+int delete_queue_has(game_state *state, int block);
 int block_at(game_state *state,int x, int y, int z);
 void block_create(game_state *state, int x, int y, int z);
 int block_at_bounded(game_state *state, int x, int y, int z);

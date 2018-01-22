@@ -315,10 +315,11 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	suny -= ydir/m;
 	sunz -= zdir/m;
 
-	m = (sqrtf(sunx*sunx + suny*suny + sunz*sunz)/2.f)*0.1;
+	m = (sqrtf(sunx*sunx + suny*suny + sunz*sunz)/2.f)*0.4;
 
 	glClearColor(m,m,m,1.f);*/
 	glClearColor(0.f,0.f,0.f,1.f);
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	draw_position_camera(
@@ -343,7 +344,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLightfv(GL_LIGHT0, GL_AMBIENT, (float [4]){0.f,0.f,0.f,1.f});
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
-	float polyLight = 1024.f;
+	float polyLight = 512.f;
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.f/polyLight);
 	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
 
@@ -357,7 +358,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_POLYGON_STIPPLE);
-	drawSphere(state->camx + 32, state->camy, zbob + 32, 4, 12);
+	drawSphere(state->camx + 64, state->camy, zbob + 64, 4, 12);
 	glEnable(GL_DEPTH_TEST);
 	glPolygonStipple(Stipple1);
 	//drawLightBalls(state);
@@ -374,7 +375,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glBindTexture(GL_TEXTURE_2D,textures->shadow_1024);
 
 	glFogf(GL_FOG_START,0.f);
-	glFogf(GL_FOG_END,8192.f);
+	glFogf(GL_FOG_END,4096.f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
 	glFogfv(GL_FOG_COLOR,state->levelFogColor);

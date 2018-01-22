@@ -498,7 +498,11 @@ static void bullet_step(game_state *state, int entity)
 			p->x -= v->x;
 			p->y -= v->y;
 			p->z -= v->z;
-			delete_queue_enter(state,point_create(x,y,z));
+			int block = point_create(x,y,z);
+			//if (!delete_queue_has(state,block))
+			//{
+				delete_queue_enter(state,block);
+			//}
 			entity_kill(state,entity);
 			return;
 		}

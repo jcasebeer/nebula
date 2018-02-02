@@ -34,7 +34,7 @@ v3 v3_create(float x, float y, float z)
 }
 
 //  quickSort
-//
+//	(the most beautiful piece of code i've ever seen)
 //  This public-domain C implementation by Darel Rex Finley.
 //
 //  * This function assumes it is called with valid parameters.
@@ -95,6 +95,44 @@ int bListGetBlock(game_state *state, int block)
 	}
 	return -1;
 }
+
+int iclamp(int x, int l, int r)
+{
+	if (x < l)
+		return l;
+	if (x > r)
+		return r;
+	return x;
+}
+
+int getClosestBlockIndex(game_state *state, int block)
+{
+	int l = 0;
+	int r = state->block_count - 1;
+	int m, bl;
+	m = (l+r)/2;
+	while (l <= r)
+	{
+		m = (l+r)/2;
+		// we only care about the bottom 30 bits
+		bl = state->block_list[m] & 0x3FFFFFFF;
+		if (bl == block)
+		{
+			return m;
+		}
+		if (bl < block)
+			l = m + 1;
+		else
+			r = m - 1;
+	}
+	return m;
+}
+
+int getClosestBlock(game_state *state, int block)
+{
+	return state->block_list[getClosestBlockIndex(state,block)];
+}
+
 
 // thank you! https://www.programmingalgorithms.com/algorithm/hsv-to-rgb
 void hsv_to_rgb(float hue,float sat, float val, float *out)
@@ -356,6 +394,14 @@ int idist2d(int x1, int y1, int x2, int y2)
 	int xdiff = x1 - x2;
 	int ydiff = y1 - y2;
 	return (isqrt(xdiff*xdiff+ydiff*ydiff));
+}
+
+int idist3d(int x1, int y1, int z1, int x2, int y2, int z2)
+{
+	int xdiff = x1 - x2;
+	int ydiff = y1 - y2;
+	int zdiff = z1 - z2;
+	return (isqrt(xdiff*xdiff+ydiff*ydiff+zdiff*zdiff));
 }
 
 v3 dirToVector(float dir, float zdir, float m)

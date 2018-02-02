@@ -157,6 +157,7 @@ static void grapple_step(game_state *state)
 			entity_component_remove(state,state->grapple,c_grounded);
 			sprite->image_speed = 0.25;
 			state->grapple_dist = distance(pos,ppos);
+			state->grapple_swinging = 1;
 		}
 
 		float zadd = clamp((pos->z+32.f - ppos->z)/1000.f,0.f,2.f);
@@ -190,13 +191,21 @@ static void grapple_step(game_state *state)
 				dnormal.z = ppos->z - pos->z;
 				dnormal = noz(dnormal);
 
-				v3 old_ppos = {ppos->x, ppos->y,ppos->z};
+				v3 old_ppos = {
+					ppos->x,
+					ppos->y,
+					ppos->z
+				};
 
 				ppos->x = pos->x+dnormal.x*state->grapple_dist;
 				ppos->y = pos->y+dnormal.y*state->grapple_dist;
 				ppos->z = pos->z+dnormal.z*state->grapple_dist;
 
-				v3 nv = {ppos->x - old_ppos.x,ppos->y - old_ppos.y,ppos->z - old_ppos.z};
+				v3 nv = {
+					ppos->x - old_ppos.x,
+					ppos->y - old_ppos.y,
+					ppos->z - old_ppos.z
+				};
 
 				while(level_collide(state,ppos->x,ppos->y,ppos->z,state->bbox[state->player]))
 				{
@@ -204,10 +213,13 @@ static void grapple_step(game_state *state)
 					ppos->y += dnormal.y;
 					ppos->z += dnormal.z;
 				}
-			pvel->x += nv.x;
-			pvel->y += nv.y;
-			pvel->z += nv.z;
-		}		
+
+				pvel->x += nv.x;
+				pvel->y += nv.y;
+				pvel->z += nv.z;
+		}
+
+		motion_add(state,state->player,state->camdir,0.3);		
 	}
 	else
 	{
@@ -397,9 +409,9 @@ static int grapple_create(game_state *state, v3 position, v3 velocity)
 	state->velocity[ent] = velocity;
 
 	v3i *bbox = &(state->bbox[ent]);
-	bbox->x = 8;
-	bbox->y = 8;
-	bbox->z = 8;
+	bbox->x = 4;
+	bbox->y = 4;
+	bbox->z = 4;
 
 	state->lights[ent].radius = 8.f;
 	state->lights[ent].attenuation = 256.f;
@@ -725,8 +737,10 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 	v3i bbox = state->bbox[state->player];
 	float *vmax = &(state->velocity_max[state->player]);
 	float *fric = &(state->friction[state->player]);
-
-	
+	if (state->grapple==-1)
+		state->grapple_swinging = 0;
+	if (!state->grapple_swinging)
+	{
 		if (key_down(SDL_SCANCODE_W))
 			motion_add(state,state->player,state->camdir,spd);
 		if (key_down(SDL_SCANCODE_S))
@@ -735,9 +749,8 @@ void player_step(game_state *state, const Uint8 *key_state,Uint8 *prev_key_state
 			motion_add(state,state->player,state->camdir+90.f,spd);
 		if (key_down(SDL_SCANCODE_A))
 			motion_add(state,state->player,state->camdir-90.f,spd);
-
-	
-
+	}	
+		
 	if (key_pressed(SDL_SCANCODE_TAB) && !state->pstate.grapple_out && state->pstate.weapons[state->pstate.weapon].active)
 	{
 		gun_pickup_create(state,pos->x,pos->y,pos->z+state->vheight,dirToVector(state->camdir,state->camzdir,4.f),state->pstate.weapons[state->pstate.weapon]);

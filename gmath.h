@@ -24,11 +24,13 @@ void darken(float color[4], float result[4]);
 void seed_rng(unsigned int seed);
 void time_seed_rng();
 int idist2d(int x1, int y1, int x2, int y2);
+int idist3d(int x1, int y1, int z1, int x2, int y2, int z2);
 float random(float range);
 int irandom(int range);
 int choose3(int x1, int x2, int x3);
 float sign(float x);
 float clamp(float x, float l, float r);
+int iclamp(int x, int l, int r);
 float roundf(float x);
 float frac(float x);
 float lerp(float a, float b, float f);
@@ -37,5 +39,6 @@ void itoa(int num, char *buff);
 void hsv_to_rgb(float hue,float sat, float val, float *out);
 void quickSort(int *arr, int elements);
 int bListGetBlock(game_state *state, int block);
-
+int getClosestBlockIndex(game_state *state, int block);
+int getClosestBlock(game_state *state, int block);
 #endif

@@ -62,4 +62,5 @@ void level_model_draw(game_state *state);
 void load_screen_draw(int time);
 void draw_hud(game_state *state, SDL_Window *window, texture_data *textures);
 void drawSphere(float x, float y, float z, float r, int sides);
+void draw_closest_block_pos(game_state *state);
 #endif

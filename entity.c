@@ -34,6 +34,7 @@ void game_state_clear(game_state *state)
 	state->fov = 120.f;
 	state->fov_target = 120.f;
 	state->frust_length = 0.f;
+	state->grapple_swinging = 0;
 }
 
 void game_state_destroy(game_state *state)

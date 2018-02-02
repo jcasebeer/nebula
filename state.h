@@ -43,6 +43,7 @@ typedef struct game_state
 	int player;
 	int grapple;
 	int grapple_life;
+	int grapple_swinging;
 	int grapple_state;
 	float grapple_dist;
 	float vheight;
@@ -132,10 +133,10 @@ void entity_component_remove(game_state *state, int id, component_flag flag);
 
 // get array of entitys with a certain component
 int *get_ec_set(game_state *state, component_flag component);
-void ec_set_swap(game_state *state,component_flag flag, int i, int w);
+void ec_set_swap(game_state *state, component_flag flag, int i, int w);
 
 // use to iterate over set of entitys
-int iterate_ec_set(int *set,int id);
+int iterate_ec_set(int *set, int id);
 
 /****** LEVEL STUFF **************/
 void level_gen(game_state *state);
@@ -150,13 +151,13 @@ void delete_queue_enter(game_state *state, int point);
 int delete_queue_remove(game_state *state);
 int delete_queue_is_empty(game_state *state);
 int delete_queue_has(game_state *state, int block);
-int block_at(game_state *state,int x, int y, int z);
+int block_at(game_state *state, int x, int y, int z);
 void block_create(game_state *state, int x, int y, int z);
 int block_at_bounded(game_state *state, int x, int y, int z);
-int block_get_lit(game_state *state,int x, int y, int z);
+int block_get_lit(game_state *state, int x, int y, int z);
 
 /***** gameplay stuff *********/
-void game_simulate(game_state *state,const Uint8 *key_state, Uint8 *prev_key_state);
+void game_simulate(game_state *state, const Uint8 *key_state, Uint8 *prev_key_state);
 gun gen_gun();
 v3 v3_create(float x, float y, float z);
 

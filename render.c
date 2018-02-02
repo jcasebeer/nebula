@@ -331,6 +331,8 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
         zto
 	);
 
+	//draw_closest_block_pos(state);
+
 	// draw level model
 	glPointSize(1);
 	glShadeModel(GL_SMOOTH);
@@ -821,10 +823,37 @@ void level_model_destroy(game_state *state)
 
 void level_model_draw(game_state *state)
 {
+	/************************************************************************************/
+	/*
+	v3 p = state->position[state->player];
+	int playerBlock = point_create(
+		((int)p.x)>>5 &1023,
+		((int)p.y)>>5 &1023,
+		((((int)p.z)>>5)-1)&1023
+	);
+	model_draw(state->level_model[getClosestBlockIndex(state,playerBlock)/CHUNK_SIZE]);
+	*/
+	/***************************************************************************************/
 	for(int i = 0; i<MAX_BLOCKS/CHUNK_SIZE; i++)
 	{
 		model_draw(state->level_model[i]);
 	}
+}
+
+void draw_closest_block_pos(game_state *state)
+{
+	v3 p = state->position[state->player];
+	int playerBlock = point_create(
+		((int)p.x)>>5 &1023,
+		((int)p.y)>>5 &1023,
+		((((int)p.z)>>5)-1)&1023
+	);
+
+	int block = getClosestBlock(state,playerBlock);
+	float x = (float) point_getx(block)*32.f;
+	float y = (float) point_gety(block)*32.f;
+	float z = (float) point_getz(block)*32.f;
+	drawSphere(x,y,z,64,8);
 }
 
 void gvertex(float x, float y, float z, float uvx, float uvy, int tex_id)

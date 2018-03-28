@@ -12,6 +12,7 @@
 sound_data *SOUND;
 SDL_Window *window;
 load_state LOAD_STATE;
+game_state *state;
 
 int main(int argc, char *argv[])
 {
@@ -98,7 +99,7 @@ int main(int argc, char *argv[])
 	textures->grass = texture_load("tex/grass.png",1024,1024);
 
 	// create our game_state
-	game_state *state = game_state_create(SOUND);
+	state = game_state_create(SOUND);
 	//p_state *pstate = p_state_create();
 	// seed rng
 	//seed_rng(0);

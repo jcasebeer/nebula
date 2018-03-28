@@ -335,15 +335,19 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	// draw level model
 	glPointSize(1);
-	glShadeModel(GL_SMOOTH);
+	//#ifdef NO_SHADER
+	//	glShadeModel(GL_FLAT);
+	//#else
+		glShadeModel(GL_SMOOTH);
+	//#endif
 	glEnable(GL_CULL_FACE);
 	glLineWidth(1);
 
 	// light push
 	glPushMatrix();
 	
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,comp);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, (float [4]){0.f,0.f,0.f,1.f});
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,(float [4]){0.9f,0.9f,0.9f,1.f});
+	glLightfv(GL_LIGHT0, GL_AMBIENT, (float [4]){0.9f,0.9f,0.9f,1.f});
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, state->levelColor);
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
 	float polyLight = 512.f;
@@ -367,7 +371,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	glDisable(GL_POLYGON_STIPPLE);
 	glPolygonStipple(Stipple0);
-	glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
 
 	//draw level model
 	glEnable(GL_LIGHT0);
@@ -377,10 +381,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glBindTexture(GL_TEXTURE_2D,textures->shadow_1024);
 
 	glFogf(GL_FOG_START,0.f);
-	glFogf(GL_FOG_END,4096.f);
+	glFogf(GL_FOG_END,1024.f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
-	glFogfv(GL_FOG_COLOR,state->levelFogColor);
+	glFogfv(GL_FOG_COLOR,(float [4]){0.f,0.f,0.f,0.f});
 	glEnable(GL_FOG);
 
 	level_model_draw(state);
@@ -395,7 +399,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glDisable(GL_LIGHT5);
 	glDisable(GL_LIGHT6);
 	glDisable(GL_LIGHT7);
-	glDisable(GL_LIGHTING);
+	//glDisable(GL_LIGHTING);
 	// light pop
 	//glPopMatrix();
 
@@ -426,7 +430,6 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	model_draw(state->dust_model);
 	glPopMatrix();
 	glColor3f(1.f,1.f,1.f);
-	
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_FOG);
 	glPopMatrix();
@@ -579,9 +582,10 @@ static int offset(int amount)
 	return irandom(amount) - (amount >> 1);
 }
 
-static void vertex(int x, int y, int z, float xnorm, float ynorm, float znorm, float uv_x, float uv_y, float norm_offs, int tex_id)
+static void vertex(int x, int y, int z, float xnorm, float ynorm, float znorm, float uv_x, float uv_y, float norm_offs, int tex_id, float light)
 {
 	seed_rng(x*y-z);
+	glColor3f(light,light,light);
 	glTexCoord2f((uv_x+tex_id_x(tex_id))/16.f,(uv_y+tex_id_y(tex_id))/16.f);
 	glNormal3f(xnorm,ynorm,znorm);
 	glVertex3i(x+offset(6),y+offset(6),z+offset(6));
@@ -613,11 +617,21 @@ static void block_up(int x1, int y1, int z1, float uv, int tex_id)
 	y2=y1+BLOCK_SIZE;
 	z2=z1;
 
+	int xl,yl,zl;
+	xl = x1>>5;
+	yl = y1>>5;
+	zl = z1>>5;
+
+	float forward = block_at(state,xl,yl-1,zl)*0.5;
+	float left = block_at(state,xl-1,yl,zl)*0.5;
+	float right = block_at(state,xl+1,yl,zl)*0.5;
+	float back = block_at(state,xl,yl+1,zl)*0.5;
+
 	glBegin(GL_TRIANGLE_FAN);
-		vertex(x1,y1,z2,0.f,0.f,1.f,uv*0.5,    uv*0.5,1.f,tex_id);
-		vertex(x2,y1,z2,0.f,0.f,1.f,uv*0.5,    uv*0.5+0.5,    1.f,tex_id);
-		vertex(x2,y2,z2,0.f,0.f,1.f,uv*0.5+0.5,uv*0.5+0.5,    1.f,tex_id);
-		vertex(x1,y2,z2,0.f,0.f,1.f,uv*0.5+0.5,uv*0.5,1.f,tex_id);
+		vertex(x1,y1,z2,0.f,0.f,1.f,uv*0.5,    uv*0.5,1.f,tex_id,1.f - (forward + left));
+		vertex(x2,y1,z2,0.f,0.f,1.f,uv*0.5,    uv*0.5+0.5,1.f,tex_id,1.f - (forward + right));
+		vertex(x2,y2,z2,0.f,0.f,1.f,uv*0.5+0.5,uv*0.5+0.5,1.f,tex_id,1.f - (back + right));
+		vertex(x1,y2,z2,0.f,0.f,1.f,uv*0.5+0.5,uv*0.5,1.f,tex_id,1.f - (back + left));
 	glEnd();
 }
 	
@@ -629,11 +643,21 @@ static void block_down(int x1, int y1, int z1, float uv, int tex_id)
 	y2=y1+BLOCK_SIZE;
 	z2=z1;
 
+	int xl,yl,zl;
+	xl = x1>>5;
+	yl = y1>>5;
+	zl = z1>>5;
+
+	float forward = block_at(state,xl,yl-1,zl-1)*0.5;
+	float left = block_at(state,xl-1,yl,zl-1)*0.5;
+	float right = block_at(state,xl+1,yl,zl-1)*0.5;
+	float back = block_at(state,xl,yl+1,zl-1)*0.5;
+
 	glBegin(GL_TRIANGLE_FAN);
-		vertex(x2,y2,z2,0.f,0.f,-1.f,uv*0.5+0.5,uv*0.5    ,1.f,tex_id);
-		vertex(x2,y1,z2,0.f,0.f,-1.f,uv*0.5,    uv*0.5    ,1.f,tex_id);
-		vertex(x1,y1,z2,0.f,0.f,-1.f,uv*0.5,    uv*0.5+0.5,1.f,tex_id);
-		vertex(x1,y2,z2,0.f,0.f,-1.f,uv*0.5+0.5,uv*0.5+0.5,1.f,tex_id);
+		vertex(x2,y2,z2,0.f,0.f,-1.f,uv*0.5+0.5,uv*0.5    ,1.f,tex_id, 1.f - (back + right));
+		vertex(x2,y1,z2,0.f,0.f,-1.f,uv*0.5,    uv*0.5    ,1.f,tex_id, 1.f - (forward + right));
+		vertex(x1,y1,z2,0.f,0.f,-1.f,uv*0.5,    uv*0.5+0.5,1.f,tex_id, 1.f - (forward + left));
+		vertex(x1,y2,z2,0.f,0.f,-1.f,uv*0.5+0.5,uv*0.5+0.5,1.f,tex_id, 1.f - (back + left));
 	glEnd();
 }
 
@@ -644,11 +668,22 @@ static void block_left(int x1, int y1, int z1, float uv, int tex_id)
 	y2=y1+BLOCK_SIZE;
 	z2=z1-BLOCK_SIZE;
 
+	int xl,yl,zl;
+	xl = x1>>5;
+	yl = y1>>5;
+	zl = z1>>5;
+
+	float forward = block_at(state,xl-1,yl-1,zl-1)*0.5;
+	float up =    block_at(state,xl-1,yl,zl)*0.5;
+	float down =   block_at(state,xl-1,yl,zl-2)*0.5;
+	float back =    block_at(state,xl-1,yl+1,zl-1)*0.5;
+
+
 	glBegin(GL_TRIANGLE_FAN);
-		vertex(x1,y1,z2,-1.f,0.f,0.f,uv*0.5+0.5,uv*0.5+0.5,0.5f,tex_id);
-		vertex(x1,y1,z1,-1.f,0.f,0.f,uv*0.5+0.5,uv*0.5    ,0.5f,tex_id);
-		vertex(x1,y2,z1,-1.f,0.f,0.f,uv*0.5,	uv*0.5    ,0.5f,tex_id);
-		vertex(x1,y2,z2,-1.f,0.f,0.f,uv*0.5,	uv*0.5+0.5,0.5f,tex_id);
+		vertex(x1,y1,z2,-1.f,0.f,0.f,uv*0.5+0.5,uv*0.5+0.5,0.5f,tex_id, 1.f - down - forward);
+		vertex(x1,y1,z1,-1.f,0.f,0.f,uv*0.5+0.5,uv*0.5    ,0.5f,tex_id, 1.f - up - forward);
+		vertex(x1,y2,z1,-1.f,0.f,0.f,uv*0.5,	uv*0.5    ,0.5f,tex_id, 1.f - up - back);
+		vertex(x1,y2,z2,-1.f,0.f,0.f,uv*0.5,	uv*0.5+0.5,0.5f,tex_id, 1.f - down - back);
 	glEnd();
 }
 
@@ -659,11 +694,21 @@ static void block_right(int x1, int y1, int z1, float uv, int tex_id)
 	y2=y1+BLOCK_SIZE;
 	z2=z1-BLOCK_SIZE;
 
+	int xl,yl,zl;
+	xl = x1>>5;
+	yl = y1>>5;
+	zl = z1>>5;
+
+	float forward = block_at(state,xl+1,yl-1,zl-1)*0.5;
+	float up =    block_at(state,xl+1,yl,zl)*0.5;
+	float down =   block_at(state,xl+1,yl,zl-2)*0.5;
+	float back =    block_at(state,xl+1,yl+1,zl-1)*0.5;
+
 	glBegin(GL_TRIANGLE_FAN);
-		vertex(x2,y2,z2,1.f,0.f,0.f,uv*0.5+0.5,uv*0.5+0.5,0.5f,tex_id);
-		vertex(x2,y2,z1,1.f,0.f,0.f,uv*0.5+0.5,uv*0.5,0.5f,tex_id);
-		vertex(x2,y1,z1,1.f,0.f,0.f,uv*0.5,uv*0.5,0.5f,tex_id);
-		vertex(x2,y1,z2,1.f,0.f,0.f,uv*0.5,uv*0.5+0.5,0.5f,tex_id);
+		vertex(x2,y2,z2,1.f,0.f,0.f,uv*0.5+0.5,uv*0.5+0.5,0.5f,tex_id, 1.f - down - back);
+		vertex(x2,y2,z1,1.f,0.f,0.f,uv*0.5+0.5,uv*0.5,0.5f,tex_id, 1.f - up - back);
+		vertex(x2,y1,z1,1.f,0.f,0.f,uv*0.5,uv*0.5,0.5f,tex_id, 1.f - up - forward);
+		vertex(x2,y1,z2,1.f,0.f,0.f,uv*0.5,uv*0.5+0.5,0.5f,tex_id, 1.f - down - forward);
 	glEnd();
 }
 
@@ -696,12 +741,22 @@ static void block_forward(int x1, int y1, int z1, int diag, int top, int bottom,
 	       	blx = 0.0; bly = 1.0;	brx = 0.5; bry = 1.0;	
 	    }	
 	}
+
+	int xl,yl,zl;
+	xl = x1>>5;
+	yl = y1>>5;
+	zl = z1>>5;
+
+	float left = block_at(state,xl-1  ,yl-1,  zl-1)*0.5;
+	float up =      block_at(state,xl,yl-1, zl  )*0.5;
+	float down =    block_at(state,xl,yl-1, zl-2)*0.5;
+	float right =   block_at(state,xl+1,yl-1, zl-1)*0.5;
 	
 	glBegin(GL_TRIANGLE_FAN);
-		vertex(x1,y1,z2,0.f,-1.f,0.f,blx,bly,0.f,tex_id);
-	    vertex(x2,y1,z2,0.f,-1.f,0.f,brx,bry,0.f,tex_id);
-	    vertex(x2,y1,z1,0.f,-1.f,0.f,trx,try,0.f,tex_id);
-	    vertex(x1,y1,z1,0.f,-1.f,0.f,tlx,tly,0.f,tex_id);
+		vertex(x1,y1,z2,0.f,-1.f,0.f,blx,bly,0.f,tex_id, 1.f - down - left);
+	    vertex(x2,y1,z2,0.f,-1.f,0.f,brx,bry,0.f,tex_id, 1.f - down - right);
+	    vertex(x2,y1,z1,0.f,-1.f,0.f,trx,try,0.f,tex_id, 1.f - up - right);
+	    vertex(x1,y1,z1,0.f,-1.f,0.f,tlx,tly,0.f,tex_id, 1.f - up - left);
 	glEnd();
 }
 
@@ -735,12 +790,22 @@ static void block_back(int x1, int y1, int z1, int diag, int top, int bottom, in
 	    }	
 	}
 
+	int xl,yl,zl;
+	xl = x1>>5;
+	yl = y1>>5;
+	zl = z1>>5;
+
+	float left = block_at(state,xl-1  ,yl+1,  zl-1)*0.5;
+	float up =      block_at(state,xl,yl+1, zl  )*0.5;
+	float down =    block_at(state,xl,yl+1, zl-2)*0.5;
+	float right =   block_at(state,xl+1,yl+1, zl-1)*0.5;
+
 	glBegin(GL_TRIANGLE_FAN);
 
-		vertex(x2,y2,z1,0.f,1.f,0.f,trx,try,0.f,tex_id);
-	    vertex(x2,y2,z2,0.f,1.f,0.f,brx,bry,0.f,tex_id);
-	    vertex(x1,y2,z2,0.f,1.f,0.f,blx,bly,0.f,tex_id);
-	    vertex(x1,y2,z1,0.f,1.f,0.f,tlx,tly,0.f,tex_id);
+		vertex(x2,y2,z1,0.f,1.f,0.f,trx,try,0.f,tex_id, 1.f - up - right);
+	    vertex(x2,y2,z2,0.f,1.f,0.f,brx,bry,0.f,tex_id, 1.f - down - right);
+	    vertex(x1,y2,z2,0.f,1.f,0.f,blx,bly,0.f,tex_id, 1.f - down - left);
+	    vertex(x1,y2,z1,0.f,1.f,0.f,tlx,tly,0.f,tex_id, 1.f - up - left);
 	glEnd();
 }
 

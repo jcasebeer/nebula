@@ -338,7 +338,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	//#ifdef NO_SHADER
 	//	glShadeModel(GL_FLAT);
 	//#else
-		glShadeModel(GL_SMOOTH);
+	glShadeModel(GL_SMOOTH);
 	//#endif
 	glEnable(GL_CULL_FACE);
 	glLineWidth(1);
@@ -346,21 +346,21 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	// light push
 	glPushMatrix();
 	
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,(float [4]){0.9f,0.9f,0.9f,1.f});
-	glLightfv(GL_LIGHT0, GL_AMBIENT, (float [4]){0.9f,0.9f,0.9f,1.f});
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, state->levelColor);
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
-	float polyLight = 512.f;
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.f/polyLight);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
+//	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,(float [4]){0.9f,0.9f,0.9f,1.f});
+//	glLightfv(GL_LIGHT0, GL_AMBIENT, (float [4]){0.9f,0.9f,0.9f,1.f});
+//	glLightfv(GL_LIGHT0, GL_DIFFUSE, state->levelColor);
+//	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.f);
+////	float polyLight = 512.f;
+//	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.f/polyLight);
+//	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.f);
 
-	GLfloat light_pos[4];
-	light_pos[0] = state->camx;
-	light_pos[1] = state->camy;
-	light_pos[2] = state->camz;
-	light_pos[3] = 1.f;
-	glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
-	glLightfv(GL_LIGHT0,GL_SPECULAR,(float [4]){0.f,0.f,0.f,0.f});
+	//GLfloat light_pos[4];
+	//light_pos[0] = state->camx;
+	//light_pos[1] = state->camy;
+	//light_pos[2] = state->camz;
+	//light_pos[3] = 1.f;
+//	glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
+//	glLightfv(GL_LIGHT0,GL_SPECULAR,(float [4]){0.f,0.f,0.f,0.f});
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_POLYGON_STIPPLE);
@@ -374,31 +374,31 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	//glEnable(GL_LIGHTING);
 
 	//draw level model
-	glEnable(GL_LIGHT0);
+	//glEnable(GL_LIGHT0);
 
-	ProjectLights(state);
+//	ProjectLights(state);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textures->shadow_1024);
 
 	glFogf(GL_FOG_START,0.f);
-	glFogf(GL_FOG_END,1024.f);
+	glFogf(GL_FOG_END,768.f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
-	glFogfv(GL_FOG_COLOR,(float [4]){0.f,0.f,0.f,0.f});
+	glFogfv(GL_FOG_COLOR,(float [4]){0.f,0.f,0.f,0.f}/*state->levelFogColor*/);
 	glEnable(GL_FOG);
 
 	level_model_draw(state);
 
 	glBindTexture(GL_TEXTURE_2D,0);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHT0);
-	glDisable(GL_LIGHT1);
-	glDisable(GL_LIGHT2);
-	glDisable(GL_LIGHT3);
-	glDisable(GL_LIGHT4);
-	glDisable(GL_LIGHT5);
-	glDisable(GL_LIGHT6);
-	glDisable(GL_LIGHT7);
+//	glDisable(GL_TEXTURE_2D);
+//	glDisable(GL_LIGHT0);
+//	glDisable(GL_LIGHT1);
+//	glDisable(GL_LIGHT2);
+//	glDisable(GL_LIGHT3);
+//	glDisable(GL_LIGHT4);
+//	glDisable(GL_LIGHT5);
+//	glDisable(GL_LIGHT6);
+//	glDisable(GL_LIGHT7);
 	//glDisable(GL_LIGHTING);
 	// light pop
 	//glPopMatrix();
@@ -406,7 +406,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	//glPushMatrix();
 
 	glFogf(GL_FOG_START,0.f);
-	glFogf(GL_FOG_END,256.f);
+	glFogf(GL_FOG_END,384.f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
 	glFogfv(GL_FOG_COLOR,state->levelFogColor);

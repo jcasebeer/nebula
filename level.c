@@ -16,7 +16,7 @@ void bit_clear(game_state *state, int x, int y, int z)
 	state->block_grid[i>>5] = state->block_grid[i>>5] & ~(1 << i%32);
 }
 
-static int bit_get(game_state *state, int x, int y, int z)
+inline int bit_get(game_state *state, int x, int y, int z)
 {
 	int i = ((x*LEVEL_SIZE)+y)*LEVEL_SIZE+z;
 	return (state->block_grid[i>>5] >> (i%32)) & 1;
@@ -45,7 +45,7 @@ void level_gen(game_state *state)
 	hsv_to_rgb(hue,sat/2.f,0.30,state->levelFogColor);
 
 
-	int blocks = LEVEL_SIZE * BLOCK_SIZE * 4;
+	int blocks = MAX_BLOCKS/8;
 	int x,y,z;
 	int i;
 
@@ -84,7 +84,7 @@ void level_gen(game_state *state)
 		x+=choose3(1,0,-1);
 		y+=choose3(1,0,-1);
 		z+=choose3(1,0,-1);
-		while (x>=LEVEL_SIZE || x < 0 || y>=LEVEL_SIZE || y < 0 || z>=LEVEL_SIZE || z < 0)
+		while (x>=LEVEL_SIZE-1 || x < 1 || y>=LEVEL_SIZE-1 || y < 1 || z>=LEVEL_SIZE-1 || z < 1)
 		{
 			int point = state->block_list[irandom(state->block_count)];
 			x = point_getx(point);

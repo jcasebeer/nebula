@@ -54,22 +54,32 @@ static void add_velocity(game_state *state, int entity, float xsp, float ysp, fl
 	v->z = (v->z) + zsp;
 }
 
-static int level_collide(game_state *state, float xx, float yy, float zz, v3i bbox)
+static inline int level_collide(game_state *state, float xx, float yy, float zz, v3i bbox)
 {
 	int x = (int)xx;
 	int y = (int)yy;
 	int z = (int)zz;
+	int xpbbox = (x+bbox.x)>>5;
+	int xmbbox = (x-bbox.x)>>5;
+	int ypbbox = (y+bbox.y)>>5;
+	int ymbbox = (y-bbox.y)>>5;
+	int zpbbox = (z+bbox.z)>>5;
+	int zmbbox = (z-bbox.z)>>5;
 
 	return (
-		block_at(state,(x-bbox.x)>>5,(y-bbox.y)>>5,(z-bbox.z)>>5) ||
-		block_at(state,(x-bbox.x)>>5,(y+bbox.y)>>5,(z-bbox.z)>>5) ||
-		block_at(state,(x-bbox.x)>>5,(y-bbox.y)>>5,(z+bbox.z)>>5) ||
-		block_at(state,(x-bbox.x)>>5,(y+bbox.y)>>5,(z+bbox.z)>>5) ||
-		block_at(state,(x+bbox.x)>>5,(y-bbox.y)>>5,(z-bbox.z)>>5) ||
-		block_at(state,(x+bbox.x)>>5,(y+bbox.y)>>5,(z-bbox.z)>>5) ||
-		block_at(state,(x+bbox.x)>>5,(y-bbox.y)>>5,(z+bbox.z)>>5) ||
-		block_at(state,(x+bbox.x)>>5,(y+bbox.y)>>5,(z+bbox.z)>>5)
+		(xmbbox>0 && xpbbox<LEVEL_SIZE &&
+		ymbbox>0 && ypbbox<LEVEL_SIZE &&
+		zmbbox>0 && zpbbox<LEVEL_SIZE )?
+		(bit_get(state,xmbbox,ymbbox,zmbbox) ||
+		bit_get(state,xmbbox,ypbbox,zmbbox) ||
+		bit_get(state,xmbbox,ymbbox,zpbbox) ||
+		bit_get(state,xmbbox,ypbbox,zpbbox) ||
+		bit_get(state,xpbbox,ymbbox,zmbbox) ||
+		bit_get(state,xpbbox,ypbbox,zmbbox) ||
+		bit_get(state,xpbbox,ymbbox,zpbbox) ||
+		bit_get(state,xpbbox,ypbbox,zpbbox)):0
 	);
+	
 }
 
 static void delete_block(game_state *state, int point)

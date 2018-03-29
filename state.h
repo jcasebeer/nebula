@@ -86,10 +86,10 @@ typedef struct game_state
 
 	/* level data */
 	#define LEVEL_SIZE 256
-	#define MAX_BLOCKS 500000
+	#define MAX_BLOCKS 524288
 	#define BLOCK_SIZE 32
-	#define CHUNK_SIZE 250
-	#define DELETE_QUEUE_SIZE 250
+	#define CHUNK_SIZE 256
+	#define DELETE_QUEUE_SIZE 256
 
 	int block_destroyer;
 
@@ -146,6 +146,7 @@ int point_gety(int block);
 int point_getz(int block);
 int point_create(int x, int y, int z);
 void bit_clear(game_state *state, int x, int y, int z);
+inline int bit_get(game_state *state, int x, int y, int z);
 int light_create(game_state *state, v3 position, float radius);
 void delete_queue_enter(game_state *state, int point);
 int delete_queue_remove(game_state *state);

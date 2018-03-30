@@ -364,6 +364,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_POLYGON_STIPPLE);
+	glColor3f(1.0,0.7,0.7);
 	drawSphere(state->camx + 64, state->camy, zbob + 64, 4, 12);
 	glEnable(GL_DEPTH_TEST);
 	glPolygonStipple(Stipple1);
@@ -747,16 +748,16 @@ static void block_forward(int x1, int y1, int z1, int diag, int top, int bottom,
 	yl = y1>>5;
 	zl = z1>>5;
 
-	float left = block_at(state,xl-1  ,yl-1,  zl-1)*0.5;
-	float up =      block_at(state,xl,yl-1, zl  )*0.5;
-	float down =    block_at(state,xl,yl-1, zl-2)*0.5;
-	float right =   block_at(state,xl+1,yl-1, zl-1)*0.5;
+	float left = block_at(state,xl-1  ,yl-1,  zl-1)*0.375;
+	float up =      block_at(state,xl,yl-1, zl  )*0.375;
+	float down =    block_at(state,xl,yl-1, zl-2)*0.375;
+	float right =   block_at(state,xl+1,yl-1, zl-1)*0.375;
 	
 	glBegin(GL_TRIANGLE_FAN);
-		vertex(x1,y1,z2,0.f,-1.f,0.f,blx,bly,0.f,tex_id, 1.f - down - left);
-	    vertex(x2,y1,z2,0.f,-1.f,0.f,brx,bry,0.f,tex_id, 1.f - down - right);
-	    vertex(x2,y1,z1,0.f,-1.f,0.f,trx,try,0.f,tex_id, 1.f - up - right);
-	    vertex(x1,y1,z1,0.f,-1.f,0.f,tlx,tly,0.f,tex_id, 1.f - up - left);
+		vertex(x1,y1,z2,0.f,-1.f,0.f,blx,bly,0.f,tex_id, 0.75f - down - left);
+	    vertex(x2,y1,z2,0.f,-1.f,0.f,brx,bry,0.f,tex_id, 0.75f - down - right);
+	    vertex(x2,y1,z1,0.f,-1.f,0.f,trx,try,0.f,tex_id, 0.75f - up - right);
+	    vertex(x1,y1,z1,0.f,-1.f,0.f,tlx,tly,0.f,tex_id, 0.75f - up - left);
 	glEnd();
 }
 
@@ -795,17 +796,16 @@ static void block_back(int x1, int y1, int z1, int diag, int top, int bottom, in
 	yl = y1>>5;
 	zl = z1>>5;
 
-	float left = block_at(state,xl-1  ,yl+1,  zl-1)*0.5;
-	float up =      block_at(state,xl,yl+1, zl  )*0.5;
-	float down =    block_at(state,xl,yl+1, zl-2)*0.5;
-	float right =   block_at(state,xl+1,yl+1, zl-1)*0.5;
+	float left = block_at(state,xl-1  ,yl+1,  zl-1)*0.375;
+	float up =      block_at(state,xl,yl+1, zl  )*0.375;
+	float down =    block_at(state,xl,yl+1, zl-2)*0.375;
+	float right =   block_at(state,xl+1,yl+1, zl-1)*0.375;
 
 	glBegin(GL_TRIANGLE_FAN);
-
-		vertex(x2,y2,z1,0.f,1.f,0.f,trx,try,0.f,tex_id, 1.f - up - right);
-	    vertex(x2,y2,z2,0.f,1.f,0.f,brx,bry,0.f,tex_id, 1.f - down - right);
-	    vertex(x1,y2,z2,0.f,1.f,0.f,blx,bly,0.f,tex_id, 1.f - down - left);
-	    vertex(x1,y2,z1,0.f,1.f,0.f,tlx,tly,0.f,tex_id, 1.f - up - left);
+		vertex(x2,y2,z1,0.f,1.f,0.f,trx,try,0.f,tex_id, 0.75f - up - right);
+	    vertex(x2,y2,z2,0.f,1.f,0.f,brx,bry,0.f,tex_id, 0.75f - down - right);
+	    vertex(x1,y2,z2,0.f,1.f,0.f,blx,bly,0.f,tex_id, 0.75f - down - left);
+	    vertex(x1,y2,z1,0.f,1.f,0.f,tlx,tly,0.f,tex_id, 0.75f - up - left);
 	glEnd();
 }
 

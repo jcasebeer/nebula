@@ -382,10 +382,10 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glBindTexture(GL_TEXTURE_2D,textures->shadow_1024);
 
 	glFogf(GL_FOG_START,0.f);
-	glFogf(GL_FOG_END,768.f);
+	glFogf(GL_FOG_END,512.f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
-	glFogfv(GL_FOG_COLOR,(float [4]){0.f,0.f,0.f,0.f}/*state->levelFogColor*/);
+	glFogfv(GL_FOG_COLOR,(float [4]){0.f,0.f,0.f,1.f}/*state->levelFogColor*/);
 	glEnable(GL_FOG);
 
 	level_model_draw(state);
@@ -407,7 +407,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	//glPushMatrix();
 
 	glFogf(GL_FOG_START,0.f);
-	glFogf(GL_FOG_END,384.f);
+	glFogf(GL_FOG_END,256.f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
 	glFogfv(GL_FOG_COLOR,state->levelFogColor);

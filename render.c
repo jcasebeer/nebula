@@ -382,7 +382,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glBindTexture(GL_TEXTURE_2D,textures->shadow_1024);
 
 	glFogf(GL_FOG_START,0.f);
-	glFogf(GL_FOG_END,512.f);
+	glFogf(GL_FOG_END,1024.f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
 	glFogfv(GL_FOG_COLOR,(float [4]){0.f,0.f,0.f,1.f}/*state->levelFogColor*/);
@@ -407,7 +407,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	//glPushMatrix();
 
 	glFogf(GL_FOG_START,0.f);
-	glFogf(GL_FOG_END,256.f);
+	glFogf(GL_FOG_END,512.f);
 	glFogi(GL_FOG_MODE,GL_LINEAR);
 	glFogi(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
 	glFogfv(GL_FOG_COLOR,state->levelFogColor);
@@ -598,7 +598,7 @@ static void nvertex(float x, float y, float z, float xnorm, float ynorm, float z
 	float NORMAL_OFFSET = random(10.f);
 	xnorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
 	ynorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
-	znorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
+	znorm += random(NORMAL_OFF SET) - NORMAL_OFFSET/2.f;
 	float m = sqrt(xnorm*xnorm + ynorm*ynorm +znorm*znorm);
 	if (m!=0.f)
 		m = 1.f/m;

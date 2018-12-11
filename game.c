@@ -54,32 +54,31 @@ static void add_velocity(game_state *state, int entity, float xsp, float ysp, fl
 	v->z = (v->z) + zsp;
 }
 
+
 static inline int level_collide(game_state *state, float xx, float yy, float zz, v3i bbox)
 {
-	int x = (int)xx;
-	int y = (int)yy;
-	int z = (int)zz;
-	int xpbbox = (x+bbox.x)>>5;
-	int xmbbox = (x-bbox.x)>>5;
-	int ypbbox = (y+bbox.y)>>5;
-	int ymbbox = (y-bbox.y)>>5;
-	int zpbbox = (z+bbox.z)>>5;
-	int zmbbox = (z-bbox.z)>>5;
+    int x = (int)xx;
+    int y = (int)yy;
+    int z = (int)zz;
+    int xpbbox = (x+bbox.x)>>5;
+    int xmbbox = (x-bbox.x)>>5;
+    int ypbbox = (y+bbox.y)>>5;
+    int ymbbox = (y-bbox.y)>>5;
+    int zpbbox = (z+bbox.z)>>5;
+    int zmbbox = (z-bbox.z)>>5;
 
-	return (
-		(xmbbox>0 && xpbbox<LEVEL_SIZE &&
-		ymbbox>0 && ypbbox<LEVEL_SIZE &&
-		zmbbox>0 && zpbbox<LEVEL_SIZE )?
-		(bit_get(state,xmbbox,ymbbox,zmbbox) ||
-		bit_get(state,xmbbox,ypbbox,zmbbox) ||
-		bit_get(state,xmbbox,ymbbox,zpbbox) ||
-		bit_get(state,xmbbox,ypbbox,zpbbox) ||
-		bit_get(state,xpbbox,ymbbox,zmbbox) ||
-		bit_get(state,xpbbox,ypbbox,zmbbox) ||
-		bit_get(state,xpbbox,ymbbox,zpbbox) ||
-		bit_get(state,xpbbox,ypbbox,zpbbox)):0
-	);
-	
+
+    return( (
+            block_at(state,xmbbox,ymbbox,zmbbox)|| 
+            block_at(state,xmbbox,ypbbox,zmbbox)||
+            block_at(state,xmbbox,ymbbox,zpbbox)||
+            block_at(state,xmbbox,ypbbox,zpbbox) ||
+            block_at(state,xpbbox,ymbbox,zmbbox) ||
+            block_at(state,xpbbox,ypbbox,zmbbox) ||
+            block_at(state,xpbbox,ymbbox,zpbbox) ||
+            block_at(state,xpbbox,ypbbox,zpbbox)
+            )
+    );
 }
 
 static void delete_block(game_state *state, int point)
@@ -115,14 +114,12 @@ static void delete_block(game_state *state, int point)
 	for (i = 0; i<7; i++)
 	{
 		chunk = chunks[i];
-		int chunk_index = chunk/=CHUNK_SIZE;
+		int chunk_index = chunk/CHUNK_SIZE;
 		if (chunk != -1 && chunkey[chunk_index])
 		{
 			chunkey[chunk_index] = 0;
-			model_destroy(state->level_model[chunk_index]);
-			level_model_build_part(state,chunk_index*CHUNK_SIZE);
-			model_destroy(state->grass_model[chunk_index]);
-			grass_model_build_part(state,chunk_index*CHUNK_SIZE);
+			state->level_model[chunk_index]= level_model_build_part(state,chunk_index*CHUNK_SIZE, state->level_model[chunk_index]);
+			state->grass_model[chunk_index] = grass_model_build_part(state,chunk_index*CHUNK_SIZE, state->grass_model[chunk_index]);
 		}
 	}
 }
@@ -1090,7 +1087,7 @@ void game_simulate(game_state *state, const Uint8 *key_state, Uint8 *prev_key_st
 	else
 		state->cam_shake = 0.f;
 
-	if (state->frust_length < (32000.f))
+	if (state->frust_length < (1024.f))
 		state->frust_length += 32.f;
 
 	if (!delete_queue_is_empty(state))

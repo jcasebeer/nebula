@@ -3,6 +3,8 @@
 #include "render.h"
 #include "state.h"
 #include "gmath.h"
+static const int UBOUND = LEVEL_SIZE;
+static const int LBOUND = 0;
 
 static void bit_set(game_state *state, int x, int y, int z)
 {
@@ -54,7 +56,7 @@ void level_gen(game_state *state)
 	int block_grid_size = LEVEL_SIZE*LEVEL_SIZE*LEVEL_SIZE/BLOCK_SIZE;
 	for(i=0;i<block_grid_size;i++)
 	{
-		*(gptr+i) = 0;
+		*(gptr++) = 0;
 	}
 
 	state->block_count = 0;
@@ -73,7 +75,6 @@ void level_gen(game_state *state)
 	ystart = y;
 	zstart = z; 
 	load_screen_draw(15);
-
 	while(blocks>0)
 	{
 		if (!bit_get(state,x,y,z))
@@ -84,7 +85,7 @@ void level_gen(game_state *state)
 		x+=choose3(1,0,-1);
 		y+=choose3(1,0,-1);
 		z+=choose3(1,0,-1);
-		while (x>=LEVEL_SIZE-1 || x < 1 || y>=LEVEL_SIZE-1 || y < 1 || z>=LEVEL_SIZE-1 || z < 1)
+		while (x>=UBOUND || x < LBOUND || y>=UBOUND || y < LBOUND || z>=UBOUND || z < LBOUND)
 		{
 			int point = state->block_list[irandom(state->block_count)];
 			x = point_getx(point);
@@ -125,7 +126,7 @@ void level_gen(game_state *state)
 		}
 	}
 	
-	for(w=0; w<2; w++)
+	for(w=0; w<0; w++)
 	{
 		load_screen_draw(15);
 		blocks = state->block_count;
@@ -205,17 +206,17 @@ int point_create(int x, int y, int z)
 
 int block_at(game_state *state,int x, int y, int z)
 {
-	return (x<LEVEL_SIZE && x>=0 && y<LEVEL_SIZE && y>=0 && z<LEVEL_SIZE && z>=0 && bit_get(state,x,y,z));
+	return (x<UBOUND && x>=LBOUND &&  y<UBOUND && y>=LBOUND && z<UBOUND &&  z>=LBOUND && bit_get(state,x,y,z));
 }
 
 int block_at_bounded(game_state *state, int x, int y, int z)
 {
-	return (x>=LEVEL_SIZE || x<0 || y>=LEVEL_SIZE || y<0 || z>=LEVEL_SIZE || z<0 || bit_get(state,x,y,z));
+	return (x>=UBOUND || x<LBOUND || y>=UBOUND || y<LBOUND || z>=UBOUND || z<LBOUND ||  bit_get(state,x,y,z));
 }
 
 void block_create(game_state *state, int x, int y, int z)
 {
-	if (state->block_count >= MAX_BLOCKS || x>=LEVEL_SIZE || x<0 || y>=LEVEL_SIZE || y<0 || z>=LEVEL_SIZE || z<0)
+	if (state->block_count >= MAX_BLOCKS || x>UBOUND || x<LBOUND ||  y>UBOUND || y<LBOUND || z>UBOUND || z<LBOUND)
 		return;
 	//state->block_grid[x][y][z] = 1;//state->block_count;
 	bit_set(state,x,y,z);

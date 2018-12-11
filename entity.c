@@ -5,10 +5,10 @@
 // create game state object
 game_state *game_state_create()
 {
-	game_state *state = malloc(sizeof(game_state));
-	game_state_clear(state);
+	static game_state state;
+	game_state_clear(&state);
 	printf("size in mb of game_state object: %f\n",(float)sizeof(game_state)/1000000.);
-	return state;
+	return &state;
 }
 
 void game_state_clear(game_state *state)
@@ -39,7 +39,7 @@ void game_state_clear(game_state *state)
 
 void game_state_destroy(game_state *state)
 {
-	free(state);
+    //noop
 }
 
 void game_state_print(game_state *state)

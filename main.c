@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 	int width = 960;
-	int height = 720;
+	int height = 480;
 	int fullscreen = 0;
 
 	// turn on double buffering and set opengl version
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 		#ifdef NO_SHADER
 		game_render(state,window,textures);
 		#else
-		game_render_pp(state,window,textures,surf);
+		surf = game_render_pp(state,window,textures,surf);
 		#endif
 
 		draw_hud(state,window,textures);
@@ -199,11 +199,11 @@ int main(int argc, char *argv[])
 
 		if (state->next_level)
 		{
-			SDL_GL_SetSwapInterval(0);
+//			SDL_GL_SetSwapInterval(0);
 			memset(&LOAD_STATE,0,sizeof(LOAD_STATE));
 			level_next(state,1);
 			state->next_level = 0;
-			SDL_GL_SetSwapInterval(1);
+//			SDL_GL_SetSwapInterval(1);
 		}
 
 		// opengl error reporting
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
 			frames = 0;
 			second_counter = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency();
 		}
-		SDL_Delay(1);
+//		SDL_Delay(1);
 		// limit framerate
 		timespent = SDL_GetPerformanceCounter()*timer_res/SDL_GetPerformanceFrequency() - time;
 		while (timespent<sleeptime)

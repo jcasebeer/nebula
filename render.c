@@ -98,6 +98,10 @@ surface_data *surface_data_create(int width, int height, float gamma)
 
   	glGetProgramiv(surf->post_shader, GL_VALIDATE_STATUS, &result);
   	printf("Shader validation: %d\n", (int)result);
+    static GLchar programLog[1024*1024];
+    int logSize;
+    glGetProgramInfoLog(surf->post_shader, 1024*1024, &logSize, programLog); 
+    printf("Program Log (%d bytes):\n%s\n", logSize, programLog);
 
   	surf->a_vcoord = glGetAttribLocation(surf->post_shader,"v_coord");
   	surf->u_fbo_texture = glGetUniformLocation(surf->post_shader,"fbo_texture");
@@ -126,7 +130,7 @@ void surface_data_destroy(surface_data *surf)
 	free(surf);
 }
 
-void game_render_pp(game_state *state, SDL_Window *window, texture_data *textures, surface_data *surf)
+surface_data *game_render_pp(game_state *state, SDL_Window *window, texture_data *textures, surface_data *surf)
 {
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
@@ -134,16 +138,11 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	// resize fbo
 	if (width != surf->width || height != surf->height)
 	{
-		surf->width = width;
-		surf->height = height;
-		glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
-		glBindTexture(GL_TEXTURE_2D,0);
-
-		glBindRenderbuffer(GL_RENDERBUFFER,surf->rbo_depth);
-		glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT16,width,height);
-		glBindRenderbuffer(GL_RENDERBUFFER,0);
-	}
+        float gamma = surf->gamma;
+        surface_data_destroy(surf);
+        surf = surface_data_create(width, height, gamma);
+        
+    }
 	glBindFramebuffer(GL_FRAMEBUFFER,surf->fbo);
 	game_render(state,window,textures);
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
@@ -156,7 +155,7 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glEnable(GL_FRAMEBUFFER_SRGB);
+	//glEnable(GL_FRAMEBUFFER_SRGB);
 	glUseProgram(surf->post_shader);
 	//glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,surf->fbo_texture);
@@ -181,8 +180,9 @@ void game_render_pp(game_state *state, SDL_Window *window, texture_data *texture
 	glBindBuffer(GL_ARRAY_BUFFER,0);
 	glBindTexture(GL_TEXTURE_2D,0);
 	glUseProgram(0);
-	glDisable(GL_FRAMEBUFFER_SRGB);
+	//glDisable(GL_FRAMEBUFFER_SRGB);
 	//glDisable(GL_TEXTURE_2D);
+    return surf;
 }
 
 #endif
@@ -266,6 +266,8 @@ const GLubyte Stipple1[128] = {
 		0xCC, 0xCC, 0xCC, 0xCC,
 		0xCC, 0xCC, 0xCC, 0xCC 
 };
+
+void draw_bbuffer(int x, int y, int width, int height);
 void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 {
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -285,7 +287,7 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glLoadIdentity();
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
-	glViewport(0,0,width,height);
+	glViewport(0,0,width>>1,height>>1);
 	draw_set_frustum(state->fov,(float)width/height,1.f,state->frust_length);
 
 	// point camera
@@ -476,20 +478,50 @@ void game_render(game_state *state, SDL_Window *window, texture_data *textures)
 	glDisable(GL_TEXTURE_2D);
 	
 	//glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-}
-
-void draw_hud(game_state *state, SDL_Window *window, texture_data *textures)
-{
-	int width, height;
-	SDL_GetWindowSize(window, &width, &height);
+    //
+    GLuint bb = getBackBuffer(width>>1, height>>1);
+    glBindTexture(GL_TEXTURE_2D, bb);
+    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width>>1, height>>1); 
+    glViewport(0,0,width,height); 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0,width,height,0,-1,1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, bb); 
+    draw_bbuffer((int)0, (int)0, (int)width, (int)height);
+}
+
+void draw_bbuffer(int x, int y, int width, int height)
+{
+    
+    glBegin(GL_TRIANGLE_FAN);
+    glTexCoord2f(1.f,1.f);
+    glVertex3f(x+width,y,0);
+    glTexCoord2f(0.f,1.f);
+    glVertex3f(x,y,0);
+    glTexCoord2f(0.f,0.f);
+    glVertex3f(x,y+height,0);
+    glTexCoord2f(1.f,0.f);
+    glVertex3f(x+width,y+height,0);
+    glEnd();
+
+}
+void draw_hud(game_state *state, SDL_Window *window, texture_data *textures)
+{
+	int width, height;
+	SDL_GetWindowSize(window, &width, &height);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0,width,height,0,-1,1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glEnable(GL_TEXTURE_2D);
 
 	glEnable(GL_ALPHA_TEST);
-	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textures->sprites);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -598,7 +630,7 @@ static void nvertex(float x, float y, float z, float xnorm, float ynorm, float z
 	float NORMAL_OFFSET = random(10.f);
 	xnorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
 	ynorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
-	znorm += random(NORMAL_OFF SET) - NORMAL_OFFSET/2.f;
+	znorm += random(NORMAL_OFFSET) - NORMAL_OFFSET/2.f;
 	float m = sqrt(xnorm*xnorm + ynorm*ynorm +znorm*znorm);
 	if (m!=0.f)
 		m = 1.f/m;
@@ -821,9 +853,10 @@ int block_get_lit(game_state *state,int x, int y, int z)
 	return 1;
 }
 
-GLuint level_model_build_part(game_state *state,int start)
+GLuint level_model_build_part(game_state *state,int start, GLuint list)
 {
-	GLuint list = glGenLists(1);
+    if (list == 0)
+        list = glGenLists(1);
 	glNewList(list,GL_COMPILE);
 	int x,y,z,xb,yb,zb,lit,tex_id;
 	// save rng state
@@ -874,7 +907,7 @@ void level_model_build(game_state *state)
 {
 	for(int i = 0; i<MAX_BLOCKS/CHUNK_SIZE; i++)
 	{
-		state->level_model[i] = level_model_build_part(state,i*CHUNK_SIZE);
+		state->level_model[i] = level_model_build_part(state,i*CHUNK_SIZE, state->level_model[i]);
 	}
 }
 
@@ -929,13 +962,14 @@ void gvertex(float x, float y, float z, float uvx, float uvy, int tex_id)
 	glVertex3f(x,y,z);
 }
 
-GLuint grass_model_build_part(game_state *state,int start)
+GLuint grass_model_build_part(game_state *state,int start, GLuint list)
 {
-	GLuint list = glGenLists(1);
-	glNewList(list,GL_COMPILE);
+    if (list == 0)
+        list = glGenLists(1);
+    
 	unsigned int seed = SEED;
 	int x,y,z,xb,yb,zb,range,tex_id;
-	
+    glNewList(list,GL_COMPILE);
 	for(int i = start; i<start+CHUNK_SIZE;i++)
 	{
 		if (!(state->block_list[i]>>31 & 1))
@@ -989,7 +1023,7 @@ void grass_model_build(game_state *state)
 {
 	for(int i = 0; i<MAX_BLOCKS/CHUNK_SIZE; i++)
 	{
-		state->grass_model[i] = grass_model_build_part(state,i*CHUNK_SIZE);
+		state->grass_model[i] = grass_model_build_part(state,i*CHUNK_SIZE, state->grass_model[i]);
 	}
 }
 
@@ -1063,6 +1097,32 @@ GLuint texture_load(const char *file, int width, int height)
     glBindTexture(GL_TEXTURE_2D,0);
     free(data);
     return tid;
+}
+
+GLuint getBackBuffer(int width, int height)
+{
+    static GLuint id = 0;
+    static GLubyte *data = NULL;
+    static int size = 0;
+    if (id == 0)
+        glGenTextures(1, &id);
+    if (size != width*height)
+    {
+        size = width*height;
+        data =NULL; //realloc(data, width*height*3*sizeof(GLubyte));
+        glBindTexture(GL_TEXTURE_2D, id);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D,0);   
+    }
+
+    return id;
 }
 
 GLuint texture_load_mipmapped(const char *file, int width, int height)
@@ -1181,6 +1241,8 @@ void draw_text(float xstart, float ystart, float size, const char *text)
 		c++;
 	}
 }
+
+
 
 void draw_player_gun(game_state *state)
 {
@@ -1333,31 +1395,36 @@ void draw_sprite(game_state *state, int entity)
 
 void drawSphere(float x, float y, float z, float r, int sides) 
 {
-	int i, j;
-	for(i = 0; i <= sides; i++) 
-	{
-		float lat0 = PI * (-0.5 + (float) (i - 1) / sides);
-		float z0  = sin(lat0)*r;
-		float zr0 =  cos(lat0)*r;
+    static GLuint list = 0;
+    if (list == 0)
+    {
+        int i, j;
+        for(i = 0; i <= sides; i++) 
+        {
+            float lat0 = PI * (-0.5 + (float) (i - 1) / sides);
+            float z0  = sin(lat0)*r;
+            float zr0 =  cos(lat0)*r;
 
-		float lat1 = PI * (-0.5 + (float) i / sides);
-		float z1 = sin(lat1)*r;
-		float zr1 = cos(lat1)*r;
-		glPushMatrix();
-			glTranslatef(x,y,z);
-				glBegin(GL_QUAD_STRIP);
-				for(j = 0; j <= sides; j++) 
-				{
-					float lng = 2 * PI * (float) (j - 1) / sides;
-					float x = cos(lng);
-					float y = sin(lng);
+            float lat1 = PI * (-0.5 + (float) i / sides);
+            float z1 = sin(lat1)*r;
+            float zr1 = cos(lat1)*r;
+            glPushMatrix();
+            glTranslatef(x,y,z);
+            glBegin(GL_QUAD_STRIP);
+            for(j = 0; j <= sides; j++) 
+            {
+                float lng = 2 * PI * (float) (j - 1) / sides;
+                float x = cos(lng);
+                float y = sin(lng);
 
-					glVertex3f(x * zr0, y * zr0, z0);
-					glVertex3f(x * zr1, y * zr1, z1);
-				}
-				glEnd();
-		glPopMatrix();
-	}
+                glVertex3f(x * zr0, y * zr0, z0);
+                glVertex3f(x * zr1, y * zr1, z1);
+            }
+            glEnd();
+            glPopMatrix();
+        }
+    }
+	
 }
 
 static void drawLightBall(game_state *state, int ent)

@@ -20,7 +20,7 @@ typedef struct
 typedef struct game_state
 {
 	p_state pstate;
-	#define ENTITY_MAX 256 // max number of entitys
+	#define ENTITY_MAX 1024 // max number of entitys
 	/* running total number of entitys*/
 	int entity_count;
 
@@ -86,7 +86,7 @@ typedef struct game_state
 
 	/* level data */
 	#define LEVEL_SIZE 256
-	#define MAX_BLOCKS 524288
+	#define MAX_BLOCKS 25600
 	#define BLOCK_SIZE 32
 	#define CHUNK_SIZE 256
 	#define DELETE_QUEUE_SIZE 256

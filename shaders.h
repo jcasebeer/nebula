@@ -29,10 +29,10 @@ const char *post_shader_f = ""
 	"float r = c.r*256.0;\n"
 	"float g = c.g*256.0;\n"
 	"float b = c.b*256.0;\n"
-	"gl_FragColor = vec4(floor(r/32.0)/8.0,floor(g/16.0)/16.0,floor(b/32.0)/8.0,1.0);\n"
+	"gl_FragColor = vec4(floor(r/32.0)/8.0,floor(g/32.0)/8.0,floor(b/16.0)/16.0,1.0);\n"
 //	"else\n"
 	//"	gl_FragColor = vec4(c,1.0);\n"
-	"gl_FragColor.rgb = pow(gl_FragColor.rgb,vec3(gamma));\n"
+//	"gl_FragColor.rgb = (gl_FragColor.rgb,vec3(gamma));\n"
 	"}\n";
 
 /*const char *post_shader_f = ""
